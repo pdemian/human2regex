@@ -70,8 +70,8 @@ h6 {
 
 #mainNav {
     position: absolute;
-    border-bottom: 1px solid #e9ecef;
-    background-color: #fff;
+	border-bottom: 1px solid transparent;
+    background-color: #232323;
     font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
@@ -102,10 +102,6 @@ h6 {
 }
 
 @media only screen and (min-width: 992px) {
-    #mainNav {
-        border-bottom: 1px solid transparent;
-        background: 0 0;
-    }
     #mainNav .navbar-brand {
         padding: 10px 20px;
         color: #fff;
