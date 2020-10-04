@@ -1,0 +1,9 @@
+{
+	"page": {
+		"title": "Error 401 - Unauthorized",
+		"description": "Unauthorized"
+	},
+	"error-code": "401",
+	"error-subheading": "Unauthorized",
+	"error-string": "Authentication required."
+}

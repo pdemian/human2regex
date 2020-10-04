@@ -1,0 +1,35 @@
+{
+  "name": "human2regex",
+  "version": "0.0.1",
+  "description": "Humanized Regular Expressions",
+  "main": "build.js",
+  "devDependencies": {
+    "@types/clean-css": "^4.2.1",
+    "@types/fs-extra": "^9.0.1",
+    "@types/html-minifier": "^3.5.3",
+    "@types/mustache": "^4.0.1",
+    "@types/uglify-js": "^3.9.2",
+    "fs-extra": "^9.0.0",
+    "html-minifier": "^4.0.0",
+    "mustache": "^4.0.1"
+  },
+  "scripts": {
+    "build": "tsc && node build.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "regex"
+  ],
+  "author": "Patrick Demian",
+  "license": "MIT",
+  "dependencies": {
+    "@types/jquery": "^3.5.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pdemian/human2regex.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pdemian/human2regex/issues"
+  }
+}

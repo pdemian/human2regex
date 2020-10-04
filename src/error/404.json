@@ -1,0 +1,9 @@
+{
+	"page": {
+		"title": "Error 404 - Not Found",
+		"description": "Not Found"
+	},
+	"error-code": "404",
+	"error-subheading": "Not Found",
+	"error-string": "The resource could not be found."
+}

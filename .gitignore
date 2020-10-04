@@ -1,0 +1,6 @@
+# Node build artifacts
+node_modules/
+npm-debug.log
+src/build.js
+src/config.js
+src/script.js
