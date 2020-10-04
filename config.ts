@@ -3,8 +3,8 @@
 export const config = {
 	prod: true,
 	deploy: false,
-	dst: "../build/",
-    src: "../src/",
+	dst: "./build/",
+    src: "./src/",
     compression_config: {
 		html: {
 			collapseWhitespace: true, 
