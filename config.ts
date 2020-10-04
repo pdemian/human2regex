@@ -3,7 +3,7 @@
 export const config = {
 	prod: true,
 	deploy: false,
-	dst: "./build/",
+	dst: "./docs/",
     src: "./src/",
     compression_config: {
 		html: {
