@@ -5,7 +5,7 @@ import { readFileSync, copyFileSync, writeFileSync, existsSync, mkdirSync } from
 import { emptyDirSync } from 'fs-extra';
 import { minify } from 'html-minifier';
 import { basename } from 'path';
-import { minify as uglify } from 'uglify-js';
+import { minify as uglify } from 'uglify-es';
 import clean_css from 'clean-css';
 import { glob } from 'glob';
 import { config } from './config';
@@ -73,7 +73,7 @@ function build() {
 	const error_files = glob.sync(join(config.src, 'error', '*.json'));
 
 	// get partials
-	let partials = {
+	const partials = {
 		header: read_file(join(config.src, '/header.mustache')),
 		footer: read_file(join(config.src, '/footer.mustache'))
 	};

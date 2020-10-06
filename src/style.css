@@ -77,7 +77,7 @@ h6 {
 
 #mainNav .navbar-brand {
     font-weight: 800;
-    color: #343a40;
+    color: #fff;
 }
 
 #mainNav .navbar-toggler {
@@ -191,7 +191,7 @@ footer {
     right: 0;
     left: 0;
     padding: 20px 0 20px;
-    background-color: #54595e;
+    background-color: #232323;
     color: #fff;
 }
 
