@@ -56,16 +56,16 @@ const keywords = {
 };
 
 const escape_sequences = {
-    'a': '\a',
-    'b': '\b',
-    'e': '\e',
-    'f': '\f',
-    'n': '\n',
-    'r': '\r',
-    't': '\t',
-    '"': '"',
-    '\'': '\'',
-    '\\': '\\',
+    "a": "\a",
+    "b": "\b",
+    "e": "\e",
+    "f": "\f",
+    "n": "\n",
+    "r": "\r",
+    "t": "\t",
+    "'": "'",
+    "\"": '"',
+    "\\": "\\",
 };
 
 export class TokenizerOptions {
@@ -77,35 +77,37 @@ const escape_sequence_hex_regex = new RegExp(/[0-9A-Fa-f]/g);
 function escape_sequence_gather_hex(input: string, i : number, max: number) : string {
     let hex = "";
     for(i++; i < input.length && max-- > 0; i++) {
-        if(escape_sequence_hex_regex.test(input[i])) hex += input[i];
+        if(escape_sequence_hex_regex.test(input[i])) {
+            hex += input[i];
+        }
     }
     return hex;
 }
 
 function escape_sequence_mapper(input: string, i : number) : { code: string, read: number, error?: Error } {
-    if(escape_sequences[input[i]] != undefined) {
+    if(escape_sequences[input[i]]) {
         return { code: escape_sequences[input[i]], read: 1 };
     }
     //variable hex code
-    else if(input[i] == 'x') {
+    else if(input[i] === "x") {
         const hex = escape_sequence_gather_hex(input, ++i, 4);
 
         return { code:  String.fromCharCode(parseInt(hex, 16)), read: hex.length + 1 };
     }
     //4 hex unicode
-    else if(input[i] == 'u') {
+    else if(input[i] === "u") {
         const unicode = escape_sequence_gather_hex(input, ++i, 4);
-        if(unicode.length != 4) {
+        if(unicode.length !== 4) {
             return { code: "", read: unicode.length + 1, error: new Error("Bad escape sequence")};
         }
         else {
             return { code: String.fromCharCode(parseInt(unicode, 16)), read: 5 };
         }
     }
-    else if(input[i] == 'U') {
+    else if(input[i] === "U") {
         const unicode = escape_sequence_gather_hex(input, ++i, 8);
 
-        if(unicode.length != 8) {
+        if(unicode.length !== 8) {
             return { code: "", read: unicode.length + 1, error: new Error("Bad escape sequence")};
         }
         else {
@@ -137,8 +139,8 @@ export function tokenize(input: string, options: TokenizerOptions) : { tokens: T
     let line = 1;
     let position = 1;
     
-    let tokens : Token[] = [];
-    let errors : TokenError[] = [];
+    const tokens : Token[] = [];
+    const errors : TokenError[] = [];
 
     for(let i = 0; i < input.length; i++, position++) {
         // 4 spaces = 1 tab. That is final. Debate over
@@ -161,7 +163,7 @@ export function tokenize(input: string, options: TokenizerOptions) : { tokens: T
         // comments
         else if(input.startsWith("//", i)) {
             for(i++, position++; i < input.length; i++, position++) {
-                if(input[i] == '\n') {
+                if(input[i] === "\n") {
                     tokens.push(new Token(TokenType.END_OF_STATEMENT, line, position));
                     break;
                 }
@@ -171,18 +173,18 @@ export function tokenize(input: string, options: TokenizerOptions) : { tokens: T
         } 
         else if(input.startsWith("/*", i)) {
             for(i++, position++; i < input.length-1; i++, position++) {
-                if(input[i] == '*' && input[i+1] == '/') {
+                if(input[i] === "*" && input[i+1] === "/") {
                     tokens.push(new Token(TokenType.END_OF_STATEMENT, line, position));
                     i++;
                     position++;
                     break;
                 }
-                if(input[i] == '\n') {
+                if(input[i] === "\n") {
                     line++;
                     position = 0;
                 }
             }
-            if(i == input.length-1) {
+            if(i === input.length-1) {
                 errors.push(new TokenError("Unexpected EOF", line, position));
             }
             else {
@@ -199,9 +201,9 @@ export function tokenize(input: string, options: TokenizerOptions) : { tokens: T
         else {
             switch(input[i]) {
                 // comment
-                case '#':
+                case "#":
                     for(i++, position++; i < input.length; i++, position++) {
-                        if(input[i] == '\n') {
+                        if(input[i] === "\n") {
                             tokens.push(new Token(TokenType.END_OF_STATEMENT, line, position));
                             line++;
                             position = 0;
@@ -212,69 +214,70 @@ export function tokenize(input: string, options: TokenizerOptions) : { tokens: T
                 // quote
                 case '"':
                 case '\"':
-                    // build up a word between quotes
-                    const quote_begin = { line: line, position: position };
-                    const quote_char = input[i];
-                    let found_ending = false;
+                    {
+                        // build up a word between quotes
+                        const quote_begin = { line: line, position: position };
+                        const quote_char = input[i];
+                        let found_ending = false;
 
-                    let quote = "";
+                        let quote = "";
 
-                    do {
-                        i++;
-                        position++;
-                        if(input[i] == '\\') {
+                        do {
                             i++;
                             position++;
-                            const sequence = escape_sequence_mapper(input, i);
+                            if(input[i] === "\\") {
+                                i++;
+                                position++;
+                                const sequence = escape_sequence_mapper(input, i);
 
-                            if(sequence.error != undefined) {
-                                errors.push(new TokenError(sequence.error.message, line, position));
+                                if(sequence.error) {
+                                    errors.push(new TokenError(sequence.error.message, line, position));
+                                }
+
+                                position += sequence.read;
+                                i += sequence.read;
+                                quote += sequence.code;
+
                             }
+                            else if(input[i] === quote_char) {
+                                found_ending = true;
+                                break;
+                            }
+                            else if(input[i] === "\n") {
+                                line++;
+                                position = 0;
+                                break;
+                            }
+                            else {
+                                quote += input[i];
+                            }
+                        } while(i < input.length);
 
-                            position += sequence.read;
-                            i += sequence.read;
-                            quote += sequence.code;
-
-                        }
-                        else if(input[i] == quote_char) {
-                            found_ending = true;
-                            break;
-                        }
-                        else if(input[i] == '\n') {
-                            line++;
-                            position = 0;
-                            break;
+                        if(found_ending) {
+                            tokens.push(new Token(TokenType.QUOTE, line, position, quote));
                         }
                         else {
-                            quote += input[i];
+                            //we reached the end of the line or the end of the file
+                            errors.push(new TokenError(`Unexpected end of quote. Quote began at ${quote_begin.line}:${quote_begin.position}`, line, position));
+                            line++;
+                            position = 0;
                         }
-                    } while(i < input.length);
-
-                    if(found_ending) {
-                        tokens.push(new Token(TokenType.QUOTE, line, position, quote));
+                        break;
                     }
-                    else {
-                        //we reached the end of the line or the end of the file
-                        errors.push(new TokenError(`Unexpected end of quote. Quote began at ${quote_begin.line}:${quote_begin.position}`, line, position));
-                        line++;
-                        position = 0;
-                    }
-                    break;
-
                 // between (ex: 0...3 or 0-3)
-                case '-':
+                case "-":
                     tokens.push(new Token(TokenType.BETWEEN, line, position));
                     break;
-                case '\n':
+                case "\n":
                     tokens.push(new Token(TokenType.END_OF_STATEMENT, line, position));
                     break;
-                case '\r':
+                case "\r":
                     // ignore
                     break;
-                case '\t':
+                case "\t":
                     tokens.push(new Token(TokenType.INDENT, line, position));
                     break;
-                case ' ':
+                case " ":
                     break;
                 default:
                     // is digit? build up a number
@@ -299,7 +302,7 @@ export function tokenize(input: string, options: TokenizerOptions) : { tokens: T
 
                         const keyword_text = text.toLowerCase();
 
-                        if(keywords[keyword_text] != undefined) {
+                        if(keywords[keyword_text]) {
                             tokens.push(new Token(keywords[keyword_text], line, position));
                         }
                         else {

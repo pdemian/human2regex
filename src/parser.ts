@@ -6,6 +6,6 @@ export class ParserOptions {
 
 }
 
-export function parse(tokens: Token[]) {
-    return undefined;
+export function parse(tokens: Token[]) : null {
+    return null;
 }
