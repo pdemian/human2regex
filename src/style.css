@@ -263,8 +263,8 @@ footer {
 }
 
 /* accessibility */
-a {
-	color: #00497A;
+a:hover {
+    color: #208bff;
 }
 
 .navbar-light .navbar-nav .nav-link {
