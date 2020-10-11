@@ -69,7 +69,7 @@ const escape_sequences = {
 };
 
 export class TokenizerOptions {
-    public convert_spaces_to_tabs: boolean = false;
+    public convert_spaces_to_tabs: boolean = true;
 }
 
 const escape_sequence_hex_regex = new RegExp(/[0-9A-Fa-f]/g);
@@ -120,18 +120,21 @@ function escape_sequence_mapper(input: string, i : number) : { code: string, rea
     }
 }
 
-function is_digit(input: string) : boolean {
+const test_chars = "09azAZ";
+
+function is_digit(input: string, i: number) : boolean {
     //return /[0-9]/g.test(input);
-    const value = input.charCodeAt(0);
-    return value >= 48 && value <= 57;
+    const value = input.charCodeAt(i);
+    return value >= test_chars.charCodeAt(0) && value <= test_chars.charCodeAt(1);
 }
 
-function is_char(input: string) : boolean {
+function is_char(input: string, i: number) : boolean {
     //return input.toUpperCase() != input.toLowerCase();
     //return /[a-zA-Z]/g.test(input);
 
-    const value = input.charCodeAt(0);
-    return ((value >= 65 && value <= 90) || (value >= 97 && value <= 122));
+    const value = input.charCodeAt(i);
+    return ((value >= test_chars.charCodeAt(2) && value <= test_chars.charCodeAt(3)) || 
+            (value >= test_chars.charCodeAt(4) && value <= test_chars.charCodeAt(5)));
 }
 
 /* Basic Tokenizer */
@@ -174,7 +177,6 @@ export function tokenize(input: string, options: TokenizerOptions) : { tokens: T
         else if(input.startsWith("/*", i)) {
             for(i++, position++; i < input.length-1; i++, position++) {
                 if(input[i] === "*" && input[i+1] === "/") {
-                    tokens.push(new Token(TokenType.END_OF_STATEMENT, line, position));
                     i++;
                     position++;
                     break;
@@ -268,6 +270,10 @@ export function tokenize(input: string, options: TokenizerOptions) : { tokens: T
                 case "-":
                     tokens.push(new Token(TokenType.BETWEEN, line, position));
                     break;
+                case "+":
+                    tokens.push(new Token(TokenType.KEYWORD_OR, line, position));
+                    tokens.push(new Token(TokenType.KEYWORD_MORE, line, position));
+                    break;
                 case "\n":
                     tokens.push(new Token(TokenType.END_OF_STATEMENT, line, position));
                     break;
@@ -281,24 +287,22 @@ export function tokenize(input: string, options: TokenizerOptions) : { tokens: T
                     break;
                 default:
                     // is digit? build up a number
-                    if(is_digit(input[i])) {
+                    if(is_digit(input, i)) {
                         let digits = input[i];
                         
-                        do {
-                            i++; position++;
-                            digits += input[i];
-                        } while(i+1 < input.length && is_digit(input[i+1]));
+                        for(; i+1 < input.length && is_digit(input, i+1); i++, position++) {
+                            digits += input[i+1];
+                        }
 
                         tokens.push(new Token(TokenType.NUMBER, line, position, digits));
                     }
                     // is char? build up a word
-                    else if(is_char(input[i])) {
+                    else if(is_char(input, i)) {
                         let text = input[i];
 
-                        do {
-                            i++; position++;
-                            text += input[i];
-                        } while(i+1 < input.length && is_char(input[i+1]));
+                        for(; i+1 < input.length && is_char(input, i+1); i++, position++) {
+                            text += input[i+1];
+                        }
 
                         const keyword_text = text.toLowerCase();
 
@@ -348,7 +352,7 @@ export function tokenize(input: string, options: TokenizerOptions) : { tokens: T
                         }
                     }
                     else {
-                        errors.push(new TokenError(`Unknown character in text: ${input.charCodeAt(i)}`, line, position));
+                        errors.push(new TokenError(`Unknown character in text: "${input[i]}" (${input.charCodeAt(i)})`, line, position));
                     }
                     break;
             }

@@ -12,6 +12,10 @@ $(function() {
 */
 
 const opts = new TokenizerOptions();
-const res = tokenize("match 1+ thing from thingy", opts);
+const result = tokenize("match /* 9+ */ 1+ optionally 1..3 0-zero then //comment match", opts);
 
-console.log(res);
+for(const r of result.tokens) {
+    console.log(r.to_string());
+}
+
+console.log(result.errors);

@@ -52,13 +52,23 @@ export class TokenError extends Error {
         super(message);
     }
 
-    public to_string() {
+    public to_string(): string {
         return `${this.line}:${this.position} ${this.message}`;
     }
 }
 
 export class Token {
-    constructor(public type: TokenType, public line: number, public position: number, public token_string?: string) {
-        
+    constructor(public type: TokenType, public line: number, public position: number, public token_string?: string) { 
+        /* nothing required */
+    }
+
+    public to_string(): string {
+        let str = `${this.line}:${this.position} ${TokenType[this.type]}`;
+
+        if (this.token_string) {
+            str += ` "${this.token_string}"`;
+        }
+
+        return str;
     }
 }
