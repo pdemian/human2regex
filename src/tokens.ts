@@ -4,6 +4,7 @@ export enum TokenType {
     BETWEEN,
     QUOTE,
     NUMBER,
+    PARTIAL_KEYWORD,
     KEYWORD_BETWEEN,
     KEYWORD_OPTIONAL,
     KEYWORD_MATCH,
@@ -35,8 +36,7 @@ export enum TokenType {
     KEYWORD_NOT,
     KEYWORD_TAB,
     KEYWORD_LINEFEED,
-    KEYWORD_CARRIAGE,
-    KEYWORD_RETURN,
+    KEYWORD_CARRIAGE_RETURN,
     KEYWORD_GROUP,
     KEYWORD_BY,
     KEYWORD_ARTICLE,
@@ -44,7 +44,11 @@ export enum TokenType {
     KEYWORD_INCLUSIVE,
     KEYWORD_EXCLUSIVE,
     KEYWORD_FROM,
-    KEYWORD_TO
+    KEYWORD_TO,
+    KEYWORD_CREATE,
+    KEYWORD_CALLED,
+    KEYWORD_REPEAT,
+    KEYWORD_NEWLINE
 }
 
 export class TokenError extends Error {
@@ -58,6 +62,7 @@ export class TokenError extends Error {
 }
 
 export class Token {
+    /* TODO: end line and position? */
     constructor(public type: TokenType, public line: number, public position: number, public token_string?: string) { 
         /* nothing required */
     }

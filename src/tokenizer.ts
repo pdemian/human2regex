@@ -5,12 +5,16 @@
 import { Token, TokenType, TokenError } from "./tokens";
 
 const keywords = {
+
+    /* Full Keywords */
     "optional": TokenType.KEYWORD_OPTIONAL,
     "optionally": TokenType.KEYWORD_OPTIONAL,
     "match": TokenType.KEYWORD_MATCH,
+    "matches": TokenType.KEYWORD_MATCH,
     "then": TokenType.KEYWORD_THEN,
     "any": TokenType.KEYWORD_ANY, 
     "anything": TokenType.KEYWORD_ANY,
+    "anythings": TokenType.KEYWORD_ANY,
     "of": TokenType.KEYWORD_OF,
     "or": TokenType.KEYWORD_OR,
     "and": TokenType.KEYWORD_AND,
@@ -19,9 +23,15 @@ const keywords = {
     "character": TokenType.KEYWORD_CHAR_SPECIFIER, 
     "whitespace": TokenType.KEYWORD_WHITESPACE_SPECIFIER,
     "number": TokenType.KEYWORD_NUMBER_SPECIFIER, 
+    "words": TokenType.KEYWODE_WORD_SPECIFIER,
+    "digits": TokenType.KEYWORD_DIGIT_SPECIFIER,
+    "characters": TokenType.KEYWORD_CHAR_SPECIFIER, 
+    "whitespaces": TokenType.KEYWORD_WHITESPACE_SPECIFIER,
+    "numbers": TokenType.KEYWORD_NUMBER_SPECIFIER, 
     "multiple": TokenType.KEYWORD_MULTIPLE, 
     "as": TokenType.KEYWORD_AS,
     "if": TokenType.KEYWORD_IF,
+    "start": TokenType.KEYWORD_STARTS,
     "starts": TokenType.KEYWORD_STARTS,
     "with": TokenType.KEYWORD_WITH,
     "ends": TokenType.KEYWORD_ENDS,
@@ -39,8 +49,6 @@ const keywords = {
     "between": TokenType.KEYWORD_BETWEEN, 
     "tab": TokenType.KEYWORD_TAB,
     "linefeed": TokenType.KEYWORD_LINEFEED,
-    "carriage": TokenType.KEYWORD_CARRIAGE,
-    "return": TokenType.KEYWORD_RETURN,
     "group": TokenType.KEYWORD_GROUP,
     "by": TokenType.KEYWORD_BY,
     "an": TokenType.KEYWORD_ARTICLE,
@@ -52,7 +60,58 @@ const keywords = {
     "exclusive": TokenType.KEYWORD_EXCLUSIVE,
     "exclusively": TokenType.KEYWORD_EXCLUSIVE,
     "from": TokenType.KEYWORD_FROM, 
-    "to": TokenType.KEYWORD_TO
+    "to": TokenType.KEYWORD_TO,
+    "create": TokenType.KEYWORD_CREATE,
+    "creates": TokenType.KEYWORD_CREATE,
+    "called": TokenType.KEYWORD_CALLED,
+    "repeat": TokenType.KEYWORD_REPEAT,
+    "repeats": TokenType.KEYWORD_REPEAT,
+    "newline": TokenType.KEYWORD_NEWLINE,
+
+    /* Partial keywords */
+    "thing": TokenType.PARTIAL_KEYWORD,
+    "things": TokenType.PARTIAL_KEYWORD,
+    "white": TokenType.PARTIAL_KEYWORD,
+    "space": TokenType.PARTIAL_KEYWORD,
+    "spaces": TokenType.PARTIAL_KEYWORD,
+    "other": TokenType.PARTIAL_KEYWORD,
+    "wise": TokenType.PARTIAL_KEYWORD,
+    "multi": TokenType.PARTIAL_KEYWORD,
+    "new": TokenType.PARTIAL_KEYWORD,
+    "line": TokenType.PARTIAL_KEYWORD,
+    "feed": TokenType.PARTIAL_KEYWORD,
+    "carriage": TokenType.PARTIAL_KEYWORD,
+    "return": TokenType.PARTIAL_KEYWORD,
+};
+
+const numbers = {
+    "zero": "0",
+    "one": "1",
+    "two": "2",
+    "three": "3",
+    "four": "4",
+    "five": "5",
+    "six": "6",
+    "seven": "7",
+    "eight": "8",
+    "nine": "9",
+    "ten": "10"
+}
+
+interface token_transformation {
+    [key: string]: { preceeding_token: string, transforms_to: TokenType }[]
+}
+
+const token_transformations : token_transformation  = {
+    "thing":   [{ preceeding_token: "any",      transforms_to: TokenType.KEYWORD_ANY }],
+    "things":  [{ preceeding_token: "any",      transforms_to: TokenType.KEYWORD_ANY }],
+    "space":   [{ preceeding_token: "white",    transforms_to: TokenType.KEYWORD_WHITESPACE_SPECIFIER }],
+    "spaces":  [{ preceeding_token: "white",    transforms_to: TokenType.KEYWORD_WHITESPACE_SPECIFIER }],
+    "wise":    [{ preceeding_token: "other",    transforms_to: TokenType.KEYWORD_ELSE }],
+    "line":    [{ preceeding_token: "multi",    transforms_to: TokenType.KEYWORD_MULTILINE },
+                { preceeding_token: "new",      transforms_to: TokenType.KEYWORD_NEWLINE }],
+    "feed":    [{ preceeding_token: "line",     transforms_to: TokenType.KEYWORD_LINEFEED }],
+    "return":  [{ preceeding_token: "carriage", transforms_to: TokenType.KEYWORD_CARRIAGE_RETURN }],
 };
 
 const escape_sequences = {
@@ -67,10 +126,6 @@ const escape_sequences = {
     "\"": '"',
     "\\": "\\",
 };
-
-export class TokenizerOptions {
-    public convert_spaces_to_tabs: boolean = true;
-}
 
 const escape_sequence_hex_regex = new RegExp(/[0-9A-Fa-f]/g);
 
@@ -120,31 +175,73 @@ function escape_sequence_mapper(input: string, i : number) : { code: string, rea
     }
 }
 
-const test_chars = "09azAZ";
+const test_char_0 = "0".charCodeAt(0);
+const test_char_9 = "9".charCodeAt(0);
+const test_char_a = "a".charCodeAt(0);
+const test_char_z = "z".charCodeAt(0);
+const test_char_A = "A".charCodeAt(0);
+const test_char_Z = "Z".charCodeAt(0);
 
 function is_digit(input: string, i: number) : boolean {
-    //return /[0-9]/g.test(input);
     const value = input.charCodeAt(i);
-    return value >= test_chars.charCodeAt(0) && value <= test_chars.charCodeAt(1);
+    return value >= test_char_0 && value <= test_char_9;
 }
 
 function is_char(input: string, i: number) : boolean {
-    //return input.toUpperCase() != input.toLowerCase();
-    //return /[a-zA-Z]/g.test(input);
-
     const value = input.charCodeAt(i);
-    return ((value >= test_chars.charCodeAt(2) && value <= test_chars.charCodeAt(3)) || 
-            (value >= test_chars.charCodeAt(4) && value <= test_chars.charCodeAt(5)));
+    return ((value >= test_char_a && value <= test_char_z) || 
+            (value >= test_char_A && value <= test_char_Z));
+}
+
+function transform_tokens(tokens: Token[], errors: TokenError[]) : void {
+    for(let i = 0; i < tokens.length; i++) {
+        //check past tokens: if it matches the preceeding tokens, we transform it. 
+
+        if(tokens[i].type === TokenType.PARTIAL_KEYWORD && token_transformations[tokens[i].token_string as string]) {
+            
+            const transform = token_transformations[tokens[i].token_string as string];
+            
+            for(let j = 0; j < transform.length; j++) {
+                if(i-1 >= 0 && transform[j].preceeding_token === tokens[i-1].token_string) {
+                    // use the i-1 token because it has the start line and position
+    
+                    tokens[i-1].type = transform[j].transforms_to;
+                    (tokens[i-1].token_string as string) += " " + tokens[i].token_string as string;
+                    tokens.splice(i, 1); // remove this token
+                    i--; // move token counter back because we removed the token
+                    break;
+                }
+            }
+        }
+        /* else ignore */
+    }
+
+    // do we still have partial tokens? those are errors then
+    for(let i = 0; i < tokens.length; i++) {
+        if(tokens[i].type === TokenType.PARTIAL_KEYWORD) {
+            errors.push(new TokenError(`Unknown keyword "${tokens[i].token_string}"`, tokens[i].line, tokens[i].position));
+        }
+    }
+}
+
+export class TokenizerOptions {
+    public convert_spaces_to_tabs: boolean = true;
+}
+
+export interface TokenizeResult {
+    tokens: Token[],
+    errors: TokenError[]
 }
 
 /* Basic Tokenizer */
-export function tokenize(input: string, options: TokenizerOptions) : { tokens: Token[], errors: TokenError[] } {
+export function tokenize(input: string, options: TokenizerOptions) : TokenizeResult {
     let line = 1;
     let position = 1;
     
     const tokens : Token[] = [];
     const errors : TokenError[] = [];
 
+    // gather tokens
     for(let i = 0; i < input.length; i++, position++) {
         // 4 spaces = 1 tab. That is final. Debate over
         if(options.convert_spaces_to_tabs && input.startsWith("    ", i)) {
@@ -276,6 +373,8 @@ export function tokenize(input: string, options: TokenizerOptions) : { tokens: T
                     break;
                 case "\n":
                     tokens.push(new Token(TokenType.END_OF_STATEMENT, line, position));
+                    line++;
+                    position = 0;
                     break;
                 case "\r":
                     // ignore
@@ -284,20 +383,25 @@ export function tokenize(input: string, options: TokenizerOptions) : { tokens: T
                     tokens.push(new Token(TokenType.INDENT, line, position));
                     break;
                 case " ":
+                    // ignore
                     break;
                 default:
                     // is digit? build up a number
                     if(is_digit(input, i)) {
+                        const digit_begin = position;
+
                         let digits = input[i];
                         
                         for(; i+1 < input.length && is_digit(input, i+1); i++, position++) {
                             digits += input[i+1];
                         }
 
-                        tokens.push(new Token(TokenType.NUMBER, line, position, digits));
+                        tokens.push(new Token(TokenType.NUMBER, line, digit_begin, digits));
                     }
                     // is char? build up a word
                     else if(is_char(input, i)) {
+                        const word_begin = position;
+
                         let text = input[i];
 
                         for(; i+1 < input.length && is_char(input, i+1); i++, position++) {
@@ -306,49 +410,16 @@ export function tokenize(input: string, options: TokenizerOptions) : { tokens: T
 
                         const keyword_text = text.toLowerCase();
 
+                        // keyword (ex. "match")
                         if(keywords[keyword_text]) {
-                            tokens.push(new Token(keywords[keyword_text], line, position));
+                            tokens.push(new Token(keywords[keyword_text], line, word_begin, keyword_text));
+                        }
+                        // text number (ex. "one")
+                        else if(numbers[keyword_text]) {
+                            tokens.push(new Token(TokenType.NUMBER, line, word_begin, keyword_text));
                         }
                         else {
-                            switch(keyword_text) {
-                                case "none":
-                                case "zero":
-                                    tokens.push(new Token(TokenType.NUMBER, line, position, "0")); 
-                                    break;
-                                case "one": 
-                                    tokens.push(new Token(TokenType.NUMBER, line, position, "1")); 
-                                    break;
-                                case "two": 
-                                    tokens.push(new Token(TokenType.NUMBER, line, position, "2")); 
-                                    break;
-                                case "three": 
-                                    tokens.push(new Token(TokenType.NUMBER, line, position, "3")); 
-                                    break;
-                                case "four": 
-                                    tokens.push(new Token(TokenType.NUMBER, line, position, "4")); 
-                                    break;
-                                case "five": 
-                                    tokens.push(new Token(TokenType.NUMBER, line, position, "5")); 
-                                    break;
-                                case "six": 
-                                    tokens.push(new Token(TokenType.NUMBER, line, position, "6")); 
-                                    break;
-                                case "seven": 
-                                    tokens.push(new Token(TokenType.NUMBER, line, position, "7")); 
-                                    break;
-                                case "eight": 
-                                    tokens.push(new Token(TokenType.NUMBER, line, position, "8")); 
-                                    break;
-                                case "nine": 
-                                    tokens.push(new Token(TokenType.NUMBER, line, position, "9")); 
-                                    break;
-                                case "ten": 
-                                    tokens.push(new Token(TokenType.NUMBER, line, position, "10")); 
-                                    break;
-                                default:
-                                    errors.push(new TokenError(`Unknown keyword ${text}`, line, position));
-                                    break;
-                            }
+                            errors.push(new TokenError(`Unknown keyword "${text}"`, line, word_begin));
                         }
                     }
                     else {
@@ -358,6 +429,9 @@ export function tokenize(input: string, options: TokenizerOptions) : { tokens: T
             }
         }
     }
+
+    // transform tokens
+    transform_tokens(tokens, errors);
 
     return { tokens: tokens, errors: errors };
 }
