@@ -96,22 +96,22 @@ const numbers = {
     "eight": "8",
     "nine": "9",
     "ten": "10"
-}
+};
 
 interface token_transformation {
     [key: string]: { preceeding_token: string, transforms_to: TokenType }[]
 }
 
 const token_transformations : token_transformation  = {
-    "thing":   [{ preceeding_token: "any",      transforms_to: TokenType.KEYWORD_ANY }],
-    "things":  [{ preceeding_token: "any",      transforms_to: TokenType.KEYWORD_ANY }],
-    "space":   [{ preceeding_token: "white",    transforms_to: TokenType.KEYWORD_WHITESPACE_SPECIFIER }],
-    "spaces":  [{ preceeding_token: "white",    transforms_to: TokenType.KEYWORD_WHITESPACE_SPECIFIER }],
-    "wise":    [{ preceeding_token: "other",    transforms_to: TokenType.KEYWORD_ELSE }],
-    "line":    [{ preceeding_token: "multi",    transforms_to: TokenType.KEYWORD_MULTILINE },
-                { preceeding_token: "new",      transforms_to: TokenType.KEYWORD_NEWLINE }],
-    "feed":    [{ preceeding_token: "line",     transforms_to: TokenType.KEYWORD_LINEFEED }],
-    "return":  [{ preceeding_token: "carriage", transforms_to: TokenType.KEYWORD_CARRIAGE_RETURN }],
+    "thing":   [ { preceeding_token: "any",      transforms_to: TokenType.KEYWORD_ANY } ],
+    "things":  [ { preceeding_token: "any",      transforms_to: TokenType.KEYWORD_ANY } ],
+    "space":   [ { preceeding_token: "white",    transforms_to: TokenType.KEYWORD_WHITESPACE_SPECIFIER } ],
+    "spaces":  [ { preceeding_token: "white",    transforms_to: TokenType.KEYWORD_WHITESPACE_SPECIFIER } ],
+    "wise":    [ { preceeding_token: "other",    transforms_to: TokenType.KEYWORD_ELSE } ],
+    "line":    [ { preceeding_token: "multi",    transforms_to: TokenType.KEYWORD_MULTILINE },
+                 { preceeding_token: "new",      transforms_to: TokenType.KEYWORD_NEWLINE } ],
+    "feed":    [ { preceeding_token: "line",     transforms_to: TokenType.KEYWORD_LINEFEED } ],
+    "return":  [ { preceeding_token: "carriage", transforms_to: TokenType.KEYWORD_CARRIAGE_RETURN } ],
 };
 
 const escape_sequences = {
@@ -245,18 +245,18 @@ export function tokenize(input: string, options: TokenizerOptions) : TokenizeRes
     for(let i = 0; i < input.length; i++, position++) {
         // 4 spaces = 1 tab. That is final. Debate over
         if(options.convert_spaces_to_tabs && input.startsWith("    ", i)) {
-            tokens.push(new Token(TokenType.INDENT, line, position));
+            tokens.push(new Token(TokenType.INDENT, line, position, 4));
             i += 3;
             position += 3;
         } 
         // between (ex: 0...3 or 0-3)
         else if(input.startsWith("...", i)) {
-            tokens.push(new Token(TokenType.BETWEEN, line, position));
+            tokens.push(new Token(TokenType.BETWEEN, line, position, 3));
             i += 2;
             position += 2;
         } 
         else if(input.startsWith("..", i)) {
-            tokens.push(new Token(TokenType.BETWEEN, line, position));
+            tokens.push(new Token(TokenType.BETWEEN, line, position, 3));
             i++;
             position++;
         } 
@@ -264,7 +264,7 @@ export function tokenize(input: string, options: TokenizerOptions) : TokenizeRes
         else if(input.startsWith("//", i)) {
             for(i++, position++; i < input.length; i++, position++) {
                 if(input[i] === "\n") {
-                    tokens.push(new Token(TokenType.END_OF_STATEMENT, line, position));
+                    tokens.push(new Token(TokenType.END_OF_STATEMENT, line, position, 0));
                     break;
                 }
             }
@@ -292,7 +292,7 @@ export function tokenize(input: string, options: TokenizerOptions) : TokenizeRes
             }
         }
         else if (input.startsWith("\r\n", i)) {
-            tokens.push(new Token(TokenType.END_OF_STATEMENT, line, position));
+            tokens.push(new Token(TokenType.END_OF_STATEMENT, line, position, 0));
             i++;
             line++;
             position = 0;
@@ -303,7 +303,7 @@ export function tokenize(input: string, options: TokenizerOptions) : TokenizeRes
                 case "#":
                     for(i++, position++; i < input.length; i++, position++) {
                         if(input[i] === "\n") {
-                            tokens.push(new Token(TokenType.END_OF_STATEMENT, line, position));
+                            tokens.push(new Token(TokenType.END_OF_STATEMENT, line, position, 0));
                             line++;
                             position = 0;
                             break;
@@ -353,7 +353,7 @@ export function tokenize(input: string, options: TokenizerOptions) : TokenizeRes
                         } while(i < input.length);
 
                         if(found_ending) {
-                            tokens.push(new Token(TokenType.QUOTE, line, position, quote));
+                            tokens.push(new Token(TokenType.QUOTE, line, position, quote.length+2, quote));
                         }
                         else {
                             //we reached the end of the line or the end of the file
@@ -365,14 +365,14 @@ export function tokenize(input: string, options: TokenizerOptions) : TokenizeRes
                     }
                 // between (ex: 0...3 or 0-3)
                 case "-":
-                    tokens.push(new Token(TokenType.BETWEEN, line, position));
+                    tokens.push(new Token(TokenType.BETWEEN, line, position, 1));
                     break;
                 case "+":
-                    tokens.push(new Token(TokenType.KEYWORD_OR, line, position));
-                    tokens.push(new Token(TokenType.KEYWORD_MORE, line, position));
+                    tokens.push(new Token(TokenType.KEYWORD_OR, line, position, 1));
+                    tokens.push(new Token(TokenType.KEYWORD_MORE, line, position, 0));
                     break;
                 case "\n":
-                    tokens.push(new Token(TokenType.END_OF_STATEMENT, line, position));
+                    tokens.push(new Token(TokenType.END_OF_STATEMENT, line, position, 0));
                     line++;
                     position = 0;
                     break;
@@ -380,7 +380,7 @@ export function tokenize(input: string, options: TokenizerOptions) : TokenizeRes
                     // ignore
                     break;
                 case "\t":
-                    tokens.push(new Token(TokenType.INDENT, line, position));
+                    tokens.push(new Token(TokenType.INDENT, line, position, 1));
                     break;
                 case " ":
                     // ignore
@@ -396,7 +396,7 @@ export function tokenize(input: string, options: TokenizerOptions) : TokenizeRes
                             digits += input[i+1];
                         }
 
-                        tokens.push(new Token(TokenType.NUMBER, line, digit_begin, digits));
+                        tokens.push(new Token(TokenType.NUMBER, line, digit_begin, position-digit_begin+1, digits));
                     }
                     // is char? build up a word
                     else if(is_char(input, i)) {
@@ -412,11 +412,11 @@ export function tokenize(input: string, options: TokenizerOptions) : TokenizeRes
 
                         // keyword (ex. "match")
                         if(keywords[keyword_text]) {
-                            tokens.push(new Token(keywords[keyword_text], line, word_begin, keyword_text));
+                            tokens.push(new Token(keywords[keyword_text], line, word_begin, position-word_begin+1, keyword_text));
                         }
                         // text number (ex. "one")
                         else if(numbers[keyword_text]) {
-                            tokens.push(new Token(TokenType.NUMBER, line, word_begin, keyword_text));
+                            tokens.push(new Token(TokenType.NUMBER, line, word_begin, position-word_begin+1, keyword_text));
                         }
                         else {
                             errors.push(new TokenError(`Unknown keyword "${text}"`, line, word_begin));

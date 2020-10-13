@@ -62,8 +62,7 @@ export class TokenError extends Error {
 }
 
 export class Token {
-    /* TODO: end line and position? */
-    constructor(public type: TokenType, public line: number, public position: number, public token_string?: string) { 
+    constructor(public type: TokenType, public line: number, public position: number, public length: number, public token_string?: string) { 
         /* nothing required */
     }
 
@@ -73,6 +72,8 @@ export class Token {
         if (this.token_string) {
             str += ` "${this.token_string}"`;
         }
+
+        str += ` (size: ${this.length})`;
 
         return str;
     }
