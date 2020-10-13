@@ -67,6 +67,8 @@ const keywords = {
     "repeat": TokenType.KEYWORD_REPEAT,
     "repeats": TokenType.KEYWORD_REPEAT,
     "newline": TokenType.KEYWORD_NEWLINE,
+    "none": TokenType.KEYWORD_NONE, 
+    "neither": TokenType.KEYWORD_NEITHER,
 
     /* Partial keywords */
     "thing": TokenType.PARTIAL_KEYWORD,
@@ -82,6 +84,9 @@ const keywords = {
     "feed": TokenType.PARTIAL_KEYWORD,
     "carriage": TokenType.PARTIAL_KEYWORD,
     "return": TokenType.PARTIAL_KEYWORD,
+    "case": TokenType.PARTIAL_KEYWORD,
+    "insensitive": TokenType.PARTIAL_KEYWORD,
+    "sensitive": TokenType.PARTIAL_KEYWORD
 };
 
 const numbers = {
@@ -103,15 +108,17 @@ interface token_transformation {
 }
 
 const token_transformations : token_transformation  = {
-    "thing":   [ { preceeding_token: "any",      transforms_to: TokenType.KEYWORD_ANY } ],
-    "things":  [ { preceeding_token: "any",      transforms_to: TokenType.KEYWORD_ANY } ],
-    "space":   [ { preceeding_token: "white",    transforms_to: TokenType.KEYWORD_WHITESPACE_SPECIFIER } ],
-    "spaces":  [ { preceeding_token: "white",    transforms_to: TokenType.KEYWORD_WHITESPACE_SPECIFIER } ],
-    "wise":    [ { preceeding_token: "other",    transforms_to: TokenType.KEYWORD_ELSE } ],
-    "line":    [ { preceeding_token: "multi",    transforms_to: TokenType.KEYWORD_MULTILINE },
-                 { preceeding_token: "new",      transforms_to: TokenType.KEYWORD_NEWLINE } ],
-    "feed":    [ { preceeding_token: "line",     transforms_to: TokenType.KEYWORD_LINEFEED } ],
-    "return":  [ { preceeding_token: "carriage", transforms_to: TokenType.KEYWORD_CARRIAGE_RETURN } ],
+    "thing":       [ { preceeding_token: "any",      transforms_to: TokenType.KEYWORD_ANY } ],
+    "things":      [ { preceeding_token: "any",      transforms_to: TokenType.KEYWORD_ANY } ],
+    "space":       [ { preceeding_token: "white",    transforms_to: TokenType.KEYWORD_WHITESPACE_SPECIFIER } ],
+    "spaces":      [ { preceeding_token: "white",    transforms_to: TokenType.KEYWORD_WHITESPACE_SPECIFIER } ],
+    "wise":        [ { preceeding_token: "other",    transforms_to: TokenType.KEYWORD_ELSE } ],
+    "line":        [ { preceeding_token: "multi",    transforms_to: TokenType.KEYWORD_MULTILINE },
+                    { preceeding_token: "new",      transforms_to: TokenType.KEYWORD_NEWLINE } ],
+    "feed":        [ { preceeding_token: "line",     transforms_to: TokenType.KEYWORD_LINEFEED } ],
+    "return":      [ { preceeding_token: "carriage", transforms_to: TokenType.KEYWORD_CARRIAGE_RETURN } ],
+    "sensitive":   [ { preceeding_token: "case",     transforms_to: TokenType.KEYWORD_CASE_SENSITIVE } ],
+    "insensitive": [ { preceeding_token: "case",     transforms_to: TokenType.KEYWORD_CASE_INSENSITIVE } ],
 };
 
 const escape_sequences = {

@@ -13,6 +13,8 @@ export enum TokenType {
     KEYWORD_OR,
     KEYWORD_ANY,
     KEYWORD_OF,
+    KEYWORD_NONE,
+    KEYWORD_NEITHER,
     KEYWODE_WORD_SPECIFIER,
     KEYWORD_DIGIT_SPECIFIER,
     KEYWORD_CHAR_SPECIFIER,
@@ -48,7 +50,9 @@ export enum TokenType {
     KEYWORD_CREATE,
     KEYWORD_CALLED,
     KEYWORD_REPEAT,
-    KEYWORD_NEWLINE
+    KEYWORD_NEWLINE,
+    KEYWORD_CASE_SENSITIVE,
+    KEYWORD_CASE_INSENSITIVE
 }
 
 export class TokenError extends Error {
@@ -57,7 +61,7 @@ export class TokenError extends Error {
     }
 
     public to_string(): string {
-        return `${this.line}:${this.position} ${this.message}`;
+        return `Token Error: ${this.line}:${this.position} ${this.message}`;
     }
 }
 
