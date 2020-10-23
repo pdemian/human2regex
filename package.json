@@ -36,7 +36,9 @@
   ],
   "author": "Patrick Demian",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "chevrotain": "^7.0.2"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pdemian/human2regex.git"

@@ -2,8 +2,8 @@
 
 import "./style.css";
 
-import { TokenizerOptions, tokenize } from "./tokenizer";
-import { ParserOptions, parse } from "./parser";
+import { Human2RegexLexer } from './tokenizer';
+import { Human2RegexParser } from './parser';
 
 /*
 $(function() {
@@ -11,8 +11,7 @@ $(function() {
 });
 */
 
-const opts = new TokenizerOptions();
-const result = tokenize(`
+const result = Human2RegexLexer.tokenize(`
 // H2R supports // # and /**/ as comments
 // A group is only captured if given a name. 
 // You can use "and", "or", "not" to specify "[]" regex
@@ -51,10 +50,10 @@ create an optional group
 	# fragment, again, we don't care, so ignore everything afterwards
 	match "#"
 	match 0+ any thing
-`, opts);
+`);
 
 for(const r of result.tokens) {
-    console.log(r.to_string());
+    console.log(r);
 }
 
 console.log(result.errors);

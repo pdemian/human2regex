@@ -11,17 +11,17 @@ const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const WebpackBeforeBuildPlugin = require("before-build-webpack");
 
 const config = {
-	prod: true,
-	dst: "./docs/",
+    prod: true,
+    dst: "./docs/",
     src: "./src/",
     compression_config: {
-		html: {
-			collapseWhitespace: true, 
-			minifyCSS: true, 
-			minifyJS: true, 
-			removeComments: true, 
-			removeEmptyAttributes: true, 
-			removeRedundantAttributes: true
+        html: {
+            collapseWhitespace: true, 
+            minifyCSS: true, 
+            minifyJS: true, 
+            removeComments: true, 
+            removeEmptyAttributes: true, 
+            removeRedundantAttributes: true
         },
     }
 };
@@ -33,36 +33,36 @@ function build_mustache() {
     
     compress_html = (input) =>  config.prod ? minify(input, config.compression_config.html) : input;
 
-	// get views
-	const main_files = glob.sync(path.join(config.src, "main", "*.json"));
-	const error_files = glob.sync(path.join(config.src, "error", "*.json"));
+    // get views
+    const main_files = glob.sync(path.join(config.src, "main", "*.json"));
+    const error_files = glob.sync(path.join(config.src, "error", "*.json"));
 
-	// get partials
-	const partials = {
-		header: readFileSync(path.join(config.src, "/header.mustache"), "utf8"),
-		footer: readFileSync(path.join(config.src, "/footer.mustache"), "utf8")
-	};
+    // get partials
+    const partials = {
+        header: readFileSync(path.join(config.src, "/header.mustache"), "utf8"),
+        footer: readFileSync(path.join(config.src, "/footer.mustache"), "utf8")
+    };
 
-	// build main mustache files
-	for(const item of main_files) {
-		const filename = path.basename(item, ".json");
-		const view = read_json_file(item);
-		const to = path.join(config.dst, filename + ".html");
-		const template = readFileSync(path.join(config.src, filename + ".mustache"), "utf8");
+    // build main mustache files
+    for(const item of main_files) {
+        const filename = path.basename(item, ".json");
+        const view = read_json_file(item);
+        const to = path.join(config.dst, filename + ".html");
+        const template = readFileSync(path.join(config.src, filename + ".mustache"), "utf8");
 
-		writeFileSync(to, compress_html(render(template, view, partials)));
-	}
+        writeFileSync(to, compress_html(render(template, view, partials)));
+    }
 
     const error_template = readFileSync(path.join(config.src, "/error.mustache"), "utf8");
 
-	// build error mustache files	
-	for(const item of error_files) {
-		const filename = path.basename(item, ".json");
-		const view = read_json_file(item);
-		const to = path.join(config.dst, filename + ".html");
-		
-		writeFileSync(to, compress_html(render(error_template, view, partials)));
-	}
+    // build error mustache files    
+    for(const item of error_files) {
+        const filename = path.basename(item, ".json");
+        const view = read_json_file(item);
+        const to = path.join(config.dst, filename + ".html");
+        
+        writeFileSync(to, compress_html(render(error_template, view, partials)));
+    }
 }
 
 module.exports = {
@@ -97,7 +97,7 @@ module.exports = {
         }),
     ],
     resolve: {
-        extensions: [ ".ts" ]
+        extensions: [ ".ts", ".js" ]
     },
     output: {
         filename: "bundle.min.js",
