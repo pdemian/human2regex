@@ -9,7 +9,7 @@ export class Human2RegexParser extends CstParser {
 
         const $ = this;
 
-        const Count = $.RULE("Count", () => {
+        const Number = $.RULE("Number", () => {
             $.OR([
                 { ALT: () => $.CONSUME(T.One) },
                 { ALT: () => $.CONSUME(T.Two) },
@@ -22,13 +22,49 @@ export class Human2RegexParser extends CstParser {
                 { ALT: () => $.CONSUME(T.Nine) },
                 { ALT: () => $.CONSUME(T.Ten) },
                 { ALT: () => $.CONSUME(T.Zero) },
+                { ALT: () => $.CONSUME(T.NumberLiteral) },
             ]);
         });
 
-        const MatchStatement = $.RULE("MatchStatement", () => {
-            $.OPTION(() => {
-                $.CONSUME(T.Optional);
-            });
+        // 1, 1..2, between 1 and/to 2 inclusively/exclusively
+        const Count = $.RULE("Count", () => {
+            $.OR([
+                { ALT: () => { 
+                    $.OPTION(() => $.CONSUME(T.Exactly));
+                    $.SUBRULE(Number);
+                }},
+                { ALT: () => { 
+                    $.OPTION(() => $.CONSUME(T.From));
+                    $.SUBRULE(Number);
+                    $.OR([
+                        { ALT: () => $.CONSUME(T.OrMore) },
+                        { ALT: () => { 
+                            $.CONSUME(T.To); 
+                            $.SUBRULE(Number); 
+                        }}
+                    ]);
+                }},
+
+                { ALT: () => {
+                    $.CONSUME(T.Between);
+                    $.SUBRULE(Number);
+                    $.OR([
+                        { ALT: () => $.CONSUME(T.To) },
+                        { ALT: () => $.CONSUME(T.And) }
+                    ]);
+                    $.SUBRULE(Number);
+                    $.OPTION(() => {
+                        $.OR([
+                            { ALT: () => $.CONSUME(T.Inclusive) },
+                            { ALT: () => $.CONSUME(T.Exclusive) }
+                        ]);
+                    });
+                }}
+            ]);
+        });
+
+        const MatchStatement = $.RULE("Match Statement", () => {
+            $.OPTION(() => $.CONSUME(T.Optional));
             $.CONSUME(T.Match);
             $.OPTION(() => {
                 $.SUBRULE(Count);
@@ -41,7 +77,7 @@ export class Human2RegexParser extends CstParser {
             });
         });
 
-        const UsingStatement = $.RULE("UsingStatement", () => {
+        const UsingStatement = $.RULE("Using Statement", () => {
             $.CONSUME(T.Using);
             $.AT_LEAST_ONE_SEP({
                 SEP: T.And,
@@ -57,6 +93,13 @@ export class Human2RegexParser extends CstParser {
                     ]);
                 }
             });
+        });
+
+        const Statement = $.RULE("Statement", () => {
+            $.OR([
+                { ALT: () => $.SUBRULE(MatchStatement) },
+                { ALT: () => $.SUBRULE(UsingStatement) }
+            ]);
             $.OPTION(() => $.CONSUME(T.EndOfLine));
         });
 

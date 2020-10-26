@@ -9,6 +9,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const WebpackBeforeBuildPlugin = require("before-build-webpack");
+const TerserPlugin = require("terser-webpack-plugin");
 
 const config = {
     prod: true,
@@ -82,7 +83,8 @@ module.exports = {
         ]
     },
     optimization: {
-        minimizer: [ new OptimizeCSSAssetsPlugin({}) ]
+		minimize: config.prod,
+        minimizer: [ new TerserPlugin({cache: true, parallel: true}), new OptimizeCSSAssetsPlugin({}) ]
     },
     plugins: [
         new CopyPlugin({
@@ -101,6 +103,6 @@ module.exports = {
     },
     output: {
         filename: "bundle.min.js",
-        path: path.resolve("docs")
+        path: path.resolve(config.dst)
     }
 };
