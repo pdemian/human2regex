@@ -2,8 +2,7 @@
 
 import "./style.css";
 
-import { Human2RegexLexer } from './tokenizer';
-import { Human2RegexParser } from './parser';
+import { Human2RegexLexer } from "./tokenizer";
 
 /*
 $(function() {
@@ -11,7 +10,9 @@ $(function() {
 });
 */
 
-const result = Human2RegexLexer.tokenize(`
+const lexer = new Human2RegexLexer();
+
+const result = lexer.tokenize(`
 // H2R supports // # and /**/ as comments
 // A group is only captured if given a name. 
 // You can use "and", "or", "not" to specify "[]" regex
@@ -52,8 +53,16 @@ create an optional group
 	match 0+ any thing
 `);
 
+//let str = "";
+
+//for(const r of result.tokens) {
+//    str += r.tokenType === Newline ? "\n" : r.image + " ";
+//}
+
+//console.log(str);
+
 for(const r of result.tokens) {
-    console.log(r);
+	console.log(r);
 }
 
 console.log(result.errors);

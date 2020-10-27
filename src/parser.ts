@@ -1,7 +1,7 @@
 /*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
 
 import { CstParser } from "chevrotain";
-import * as T from "./tokenizer";
+import * as T from "./tokens";
 
 export class Human2RegexParser extends CstParser {
     constructor() {
