@@ -1,6 +1,6 @@
 /*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
 
-import { Lexer, IToken, createTokenInstance, ILexingResult } from "chevrotain";
+import { Lexer, IToken, createTokenInstance, ILexingResult, ILexingError } from "chevrotain";
 import { last, findLastIndex } from "./utilities";
 import { Indent, Outdent, EndOfLine, AllTokens } from "./tokens";
 
@@ -48,10 +48,20 @@ export class Human2RegexLexer {
         this.lexer = new Lexer(AllTokens, { ensureOptimizations: true });
     }
 
+    private lex_error(token: IToken) : ILexingError {
+        return { 
+            offset: token.startOffset,
+            line: token.startLine ?? NaN,
+            column: token.startColumn ?? NaN,
+            length: token.endOffset ?? NaN - token.startOffset,
+            message: "Unexpected indentation found"
+        };
+    }
+
     public tokenize(text: string) : ILexingResult {
         const lexResult = this.lexer.tokenize(text);
 
-        if (lexResult.tokens.length == 0) {
+        if (lexResult.tokens.length === 0) {
             return lexResult;
         }
 
@@ -66,6 +76,8 @@ export class Human2RegexLexer {
         let hadIndents = false;
 
         for (let i = 0; i < lexResult.tokens.length; i++) {
+
+            // EoL? check for indents next (by setting startOfLine = true)
             if (lexResult.tokens[i].tokenType === EndOfLine) {
                 startOfLine = true;
                 tokens.push(lexResult.tokens[i]);
@@ -77,20 +89,22 @@ export class Human2RegexLexer {
                 const start_token = lexResult.tokens[i];
                 let length = lexResult.tokens[i].image.length;
 
-                while (lexResult.tokens[i+1].tokenType === Indent) {
+                // grab all the indents (and their length)
+                while (lexResult.tokens.length > i && lexResult.tokens[i+1].tokenType === Indent) {
                     currIndentLevel++;
                     i++;
                     length += lexResult.tokens[i].image.length;
                 }
 
-                if (!startOfLine || (currIndentLevel > last(indentStack) + 1)) {
-                    lexResult.errors.push({ 
-                        offset: start_token.startOffset,
-                        line: start_token.startLine ?? NaN,
-                        column: start_token.startColumn ?? NaN,
-                        length: length,
-                        message: "Unexpected indentation found"
-                    });
+                start_token.endOffset = start_token.startOffset + length;
+
+                // are we an empty line? 
+                if (lexResult.tokens.length > i && lexResult.tokens[i+1].tokenType === EndOfLine) {
+                    // Ignore all indents AND newline
+                    // continue;
+                }
+                else if (!startOfLine || (currIndentLevel > last(indentStack) + 1)) {
+                    lexResult.errors.push(this.lex_error(start_token));
                 }
                 else if (currIndentLevel > last(indentStack)) {
                     indentStack.push(currIndentLevel);
@@ -100,13 +114,7 @@ export class Human2RegexLexer {
                     const index = findLastIndex(indentStack, currIndentLevel);
 
                     if (index < 0) {
-                        lexResult.errors.push({ 
-                            offset: start_token.startOffset,
-                            line: start_token.startLine ?? NaN,
-                            column: start_token.startColumn ?? NaN,
-                            length: length,
-                            message: "Unexpected indentation found"
-                        });
+                        lexResult.errors.push(this.lex_error(start_token));
                     }
                     else {
                         const numberOfDedents = indentStack.length - index - 1;
@@ -119,12 +127,14 @@ export class Human2RegexLexer {
                 }
                 else {
                     // same indent level: don't care
+                    // continue;
                 }
             }
             else {
                 if(startOfLine && !hadIndents) {
                     const tok = lexResult.tokens[i];
 
+                    //add remaining Outdents
                     while (indentStack.length > 1) {
                         indentStack.pop();
                         tokens.push(createTokenInstance(Outdent, "", tok.startOffset, tok.startOffset, tok.startLine ?? NaN, NaN, tok.startColumn ?? NaN, NaN));
