@@ -19,15 +19,22 @@ export class Human2RegexLexerOptions {
 export class Human2RegexLexer {
     private static already_init = false;
 
-    private lexer : Lexer;
+    private lexer!: Lexer;
+    private options!: Human2RegexLexerOptions;
 
-    constructor(private options: Human2RegexLexerOptions = new Human2RegexLexerOptions()) {
+    constructor(options: Human2RegexLexerOptions = new Human2RegexLexerOptions()) {
         if (Human2RegexLexer.already_init) {
             throw new Error("Only 1 instance of Human2RegexLexer allowed");
         }
 
         Human2RegexLexer.already_init = true;
 
+        this.set_options(options);
+    }
+
+    public set_options(options: Human2RegexLexerOptions) : void {
+        this.options = options;
+        
         let indent_regex: RegExp | null = null;
 
         if (this.options.type === IndentType.Tabs) {
@@ -66,9 +73,7 @@ export class Human2RegexLexer {
         }
 
         // create Outdents
-
         const tokens: IToken[] = [];
-
         const indentStack = [ 0 ];
 
         let currIndentLevel = 0;
@@ -79,9 +84,15 @@ export class Human2RegexLexer {
 
             // EoL? check for indents next (by setting startOfLine = true)
             if (lexResult.tokens[i].tokenType === EndOfLine) {
-                startOfLine = true;
-                tokens.push(lexResult.tokens[i]);
+                if(tokens.length === 0 || tokens[tokens.length-1].tokenType === EndOfLine) {
+                    // Ignore multiple EOLs and ignore first EOL
+                }
+                else {
+                    startOfLine = true;
+                    tokens.push(lexResult.tokens[i]);
+                }
             }
+            // start with 1 indent. Append all other indents 
             else if (lexResult.tokens[i].tokenType === Indent) {
                 hadIndents = true;
                 currIndentLevel = 1; 
@@ -97,6 +108,9 @@ export class Human2RegexLexer {
                 }
 
                 start_token.endOffset = start_token.startOffset + length;
+                start_token.endColumn = lexResult.tokens[i].endColumn;
+                // must be the same line
+                //start_token.endLine = lexResult.tokens[i].endLine;
 
                 // are we an empty line? 
                 if (lexResult.tokens.length > i && lexResult.tokens[i+1].tokenType === EndOfLine) {
@@ -158,7 +172,6 @@ export class Human2RegexLexer {
             indentStack.pop();
             tokens.push(createTokenInstance(Outdent, "", tok.endOffset ?? NaN, tok.endOffset ?? NaN, tok.startLine ?? NaN, NaN, tok.startColumn ?? NaN, NaN));
         }
-    
 
         lexResult.tokens = tokens;
         return lexResult;

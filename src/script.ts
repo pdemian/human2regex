@@ -3,6 +3,8 @@
 import "./style.css";
 
 import { Human2RegexLexer } from "./tokenizer";
+import { Human2RegexParser } from "./parser";
+
 
 /*
 $(function() {
@@ -11,6 +13,7 @@ $(function() {
 */
 
 const lexer = new Human2RegexLexer();
+const parser = new Human2RegexParser();
 
 const result = lexer.tokenize(`
 // H2R supports // # and /**/ as comments
@@ -53,16 +56,22 @@ create an optional group
 	match 0+ any thing
 `);
 
-//let str = "";
-
-//for(const r of result.tokens) {
-//    str += r.tokenType === Newline ? "\n" : r.image + " ";
-//}
-
-//console.log(str);
-
 for(const r of result.tokens) {
-	console.log(r);
+	console.log(`[${r.tokenType.name}]: ${r.image}`);
 }
 
 console.log(result.errors);
+
+parser.input = result.tokens;
+const regex = parser.nodes.regex;
+
+console.log(regex);
+console.log(parser.errors);
+
+
+//interpreter.visit(regex);
+
+//parser.getBaseCstVisitorConstructor();
+
+
+
