@@ -18,10 +18,10 @@ export const Then = createToken({name: "Then", pattern: /then/i });
 export const Anything = createToken({name: "Anything", pattern: /(any thing|any|anything)(s)?/i});
 export const Or = createToken({name: "Or", pattern: /or/i});
 export const And = createToken({name: "And", pattern: /and|,/i});
-export const Word = createToken({name: "Word Specifier", pattern: /word(s)?/i});
-export const Digit = createToken({name: "Digit Specifier", pattern: /digit(s)?/i});
-export const Character = createToken({name: "Character Specifier", pattern: /character(s)?/i});
-export const Whitespace = createToken({name: "Whitespace Specifier", pattern: /(white space|whitespace)(s)?/i});
+export const Word = createToken({name: "WordSpecifier", pattern: /word(s)?/i});
+export const Digit = createToken({name: "DigitSpecifier", pattern: /digit(s)?/i});
+export const Character = createToken({name: "CharacterSpecifier", pattern: /character(s)?/i});
+export const Whitespace = createToken({name: "WhitespaceSpecifier", pattern: /(white space|whitespace)(s)?/i});
 export const Number = createToken({name: "NumberSpecifier", pattern: /number(s)?/i});
 export const Using = createToken({name: "Using", pattern: /using/i});
 export const Global = createToken({name: "Global", pattern: /global/i});
@@ -44,10 +44,10 @@ export const Create = createToken({name: "Create", pattern: /create(s)?/i});
 export const Called = createToken({name: "Called", pattern: /name(d)?|call(ed)?/i});
 export const Repeat = createToken({name: "Repeat", pattern: /repeat(s|ing)?/i});
 export const Newline = createToken({name: "Newline", pattern: /(new line|newline)/i});
-export const CarriageReturn = createToken({name: "Carriage Return", pattern: /carriage return/i});
-export const CaseInsensitive = createToken({name: "Case Insensitive", pattern: /case insensitive/i});
-export const CaseSensitive = createToken({name: "Case Sensitive", pattern: /case sensitive/i});
-export const OrMore = createToken({name: "Or More", pattern: /\+/ });
+export const CarriageReturn = createToken({name: "CarriageReturn", pattern: /carriage return/i});
+export const CaseInsensitive = createToken({name: "CaseInsensitive", pattern: /case insensitive/i});
+export const CaseSensitive = createToken({name: "CaseSensitive", pattern: /case sensitive/i});
+export const OrMore = createToken({name: "OrMore", pattern: /\+/ });
 
 /*
 //Not being used currently
@@ -72,12 +72,12 @@ export const By = createToken({name: "By", pattern: /by/i});
 
 export const EndOfLine = createToken({name: "EOL", pattern: /\n/ });
 export const WS = createToken({name: "Whitespace", pattern: /\s+/, group: Lexer.SKIPPED });
-export const SingleLineComment = createToken({name: "Single-Line Comment", pattern: /(#|\/\/).*/, group: Lexer.SKIPPED });
-export const MultilineComment = createToken({name: "Multi-Line Comment", pattern: /\/\*(.*)\*\//, line_breaks: true, group: Lexer.SKIPPED });
+export const SingleLineComment = createToken({name: "SingleLineComment", pattern: /(#|\/\/).*/, group: Lexer.SKIPPED });
+export const MultilineComment = createToken({name: "MultiLineComment", pattern: /\/\*(.*)\*\//, line_breaks: true, group: Lexer.SKIPPED });
 
 export const Identifier = createToken({name: "Identifier", pattern: /[a-z]\w*/i });
-export const NumberLiteral = createToken({name: "Number Literal", pattern: /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/ });
-export const StringLiteral = createToken({name: "String Literal", pattern: /"(?:[^\\"]|\\(?:[bfnrtv"\\/]|u[0-9a-f]{4}|U[0-9a-f]{8}))*"/i });
+export const NumberLiteral = createToken({name: "NumberLiteral", pattern: /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/ });
+export const StringLiteral = createToken({name: "StringLiteral", pattern: /"(?:[^\\"]|\\(?:[bfnrtv"\\/]|u[0-9a-f]{4}|U[0-9a-f]{8}))*"/i });
 
 export const Indent = createToken({name: "Indent"});
 export const Outdent = createToken({name: "Outdent"});

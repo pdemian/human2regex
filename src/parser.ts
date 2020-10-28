@@ -15,7 +15,7 @@ export class Human2RegexParser extends CstParser {
     public nodes: { [key: string]: (idxInCallingRule?: number, ...args: unknown[]) => CstNode } = {};
 
     constructor(private options: Human2RegexParserOptions = new Human2RegexParserOptions()) {
-        super(T.AllTokens, { recoveryEnabled: true, maxLookahead: 4});
+        super(T.AllTokens, { recoveryEnabled: true, maxLookahead: 2});
 
         if (Human2RegexParser.already_init) {
             throw new Error("Only 1 instance of Human2RegexParser allowed");
@@ -25,7 +25,7 @@ export class Human2RegexParser extends CstParser {
         
         const $ = this;
 
-        this.nodes.NumberSubStatement = $.RULE("Number Sub-Statement", () => {
+        this.nodes.NumberSubStatement = $.RULE("NumberSubStatement", () => {
             $.OR([
                 { ALT: () => $.CONSUME(T.One) },
                 { ALT: () => $.CONSUME(T.Two) },
@@ -43,48 +43,49 @@ export class Human2RegexParser extends CstParser {
         });
 
         // 1, 1..2, between 1 and/to 2 inclusively/exclusively
-        this.nodes.CountSubStatement = $.RULE("Count Sub-Statement", () => {
+        this.nodes.CountSubStatement = $.RULE("CountSubStatement", () => {
             $.OR([
-                { ALT: () => { 
-                    $.OPTION(() => $.CONSUME(T.Exactly));
-                    $.SUBRULE(this.nodes.NumberSubStatement);
-                    $.OPTION(() => $.CONSUME(T.Times));
-                }},
-                { ALT: () => { 
-                    $.OPTION(() => $.CONSUME(T.From));
-                    $.SUBRULE(this.nodes.NumberSubStatement);
-                    $.OR([
-                        { ALT: () => $.CONSUME(T.OrMore) },
-                        { ALT: () => { 
-                            $.CONSUME(T.To); 
-                            $.SUBRULE(this.nodes.NumberSubStatement); 
-                        }}
-                    ]);
-                    $.OPTION(() => $.CONSUME(T.Times));
-                }},
-
                 { ALT: () => {
                     $.CONSUME(T.Between);
-                    $.SUBRULE(this.nodes.NumberSubStatement);
-                    $.OR([
-                        { ALT: () => $.CONSUME(T.To) },
+                    $.SUBRULE4(this.nodes.NumberSubStatement);
+                    $.OR3([
+                        { ALT: () => $.CONSUME2(T.To) },
                         { ALT: () => $.CONSUME(T.And) }
                     ]);
-                    $.SUBRULE(this.nodes.NumberSubStatement);
-                    $.OPTION(() => $.CONSUME(T.Times));
-                    $.OPTION(() => {
-                        $.OR([
+                    $.SUBRULE5(this.nodes.NumberSubStatement);
+                    $.OPTION4(() => $.CONSUME3(T.Times));
+                    $.OPTION5(() => {
+                        $.OR4([
                             { ALT: () => $.CONSUME(T.Inclusive) },
                             { ALT: () => $.CONSUME(T.Exclusive) }
                         ]);
                     });
-                }}
+                }},
+                
+                { ALT: () => { 
+                    $.OPTION2(() => $.CONSUME(T.From));
+                    $.SUBRULE2(this.nodes.NumberSubStatement);
+                    $.OR2([
+                        { ALT: () => $.CONSUME(T.OrMore) },
+                        { ALT: () => { 
+                            $.CONSUME(T.To); 
+                            $.SUBRULE3(this.nodes.NumberSubStatement); 
+                        }}
+                    ]);
+                    $.OPTION3(() => $.CONSUME2(T.Times));
+                }},
+
+                { ALT: () => { 
+                    $.OPTION(() => $.CONSUME(T.Exactly));
+                    $.SUBRULE(this.nodes.NumberSubStatement);
+                    $.OPTION6(() => $.CONSUME(T.Times));
+                }} 
             ]);
         });
 
-        this.nodes.MatchSubStatement = $.RULE("Match Sub-Statement", () => {
+        this.nodes.MatchSubStatement = $.RULE("MatchSubStatement", () => {
             $.OPTION(() => $.SUBRULE(this.nodes.CountSubStatement) );
-            $.OPTION(() => $.CONSUME(T.Not));
+            $.OPTION2(() => $.CONSUME(T.Not));
             $.AT_LEAST_ONE_SEP({
                 SEP: T.Or,
                 DEF: () => {
@@ -107,25 +108,25 @@ export class Human2RegexParser extends CstParser {
         });
 
         // optionally match "+" then 1+ words
-        this.nodes.MatchStatement = $.RULE("Match Statement", () => {
+        this.nodes.MatchStatement = $.RULE("MatchStatement", () => {
             $.OPTION(() => $.CONSUME(T.Optional));
             $.CONSUME(T.Match);
             $.SUBRULE(this.nodes.MatchSubStatement);
             $.MANY(() => {
                 $.OR([
-                    { ALT: () => $.CONSUME(T.And) },
                     { ALT: () => { 
-                        $.OPTION(() => $.CONSUME(T.And)); 
+                        $.OPTION2(() => $.CONSUME2(T.And)); 
                         $.CONSUME(T.Then); 
-                    }}
+                    }},
+                    { ALT: () => $.CONSUME(T.And) },
                 ]);
-                $.OPTION(() => $.CONSUME(T.Optional));
-                $.SUBRULE(this.nodes.MatchSubStatement);
+                $.OPTION3(() => $.CONSUME2(T.Optional));
+                $.SUBRULE2(this.nodes.MatchSubStatement);
             });
         });
 
         // using global matching
-        this.nodes.UsingStatement = $.RULE("Using Statement", () => {
+        this.nodes.UsingStatement = $.RULE("UsingStatement", () => {
             $.CONSUME(T.Using);
             $.AT_LEAST_ONE_SEP({
                 SEP: T.And,
@@ -142,27 +143,27 @@ export class Human2RegexParser extends CstParser {
             });
         });
 
-        this.nodes.GroupStatement = $.RULE("Group Statement", () => {
-            $.OPTION(() => $.CONSUME(T.Optional));
+        this.nodes.GroupStatement = $.RULE("GroupStatement", () => {
+            $.OPTION2(() => $.CONSUME(T.Optional));
             $.CONSUME(T.Create);
             $.CONSUME(T.A);
-            $.OPTION(() => $.CONSUME(T.Optional));
+            $.OPTION3(() => $.CONSUME2(T.Optional));
             $.CONSUME(T.Group);
             $.OPTION(() => {
                 $.CONSUME(T.Called);
                 $.CONSUME(T.StringLiteral);
             });
             $.CONSUME(T.Indent);
-            $.AT_LEAST_ONE(() => this.nodes.Statement);
+            $.AT_LEAST_ONE(this.nodes.Statement);
             $.CONSUME(T.Outdent);
         });
 
-        this.nodes.RepeatStatement = $.RULE("Repeat Statement", () => {
-            $.OPTION(() => $.CONSUME(T.Optional));
+        this.nodes.RepeatStatement = $.RULE("RepeatStatement", () => {
+            $.OPTION3(() => $.CONSUME(T.Optional));
             $.CONSUME(T.Repeat);
             $.OPTION(() => $.SUBRULE(this.nodes.CountSubStatement));
             $.CONSUME(T.Indent);
-            $.AT_LEAST_ONE(() => this.nodes.Statement);
+            $.AT_LEAST_ONE(this.nodes.Statement);
             $.CONSUME(T.Outdent);
         });
 
