@@ -78,7 +78,7 @@ export const SingleLineComment = createToken({name: "SingleLineComment", pattern
 export const MultilineComment = createToken({name: "MultiLineComment", pattern: /\/\*(.*)\*\//, line_breaks: true, group: Lexer.SKIPPED });
 
 export const Identifier = createToken({name: "Identifier", pattern: /[a-z]\w*/i });
-export const NumberLiteral = createToken({name: "NumberLiteral", pattern: /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/ });
+export const NumberLiteral = createToken({name: "NumberLiteral", pattern: /-?\d+/ });
 export const StringLiteral = createToken({name: "StringLiteral", pattern: /"(?:[^\\"]|\\(?:[bfnrtv"\\/]|u[0-9a-f]{4}|U[0-9a-f]{8}))*"/i });
 
 export const Indent = createToken({name: "Indent"});

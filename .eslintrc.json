@@ -43,7 +43,7 @@
 		"@typescript-eslint/naming-convention": [
 			"error",
             { "selector": "default", "format": [ "snake_case", "PascalCase" ] },
-            { "selector": "property", "format": [ "camelCase", "snake_case", "PascalCase" ] },
+            { "selector": "property", "format": [ "camelCase", "snake_case", "UPPER_CASE", "PascalCase" ] },
             { "selector": [ "function", "method"], "format": [ "camelCase", "UPPER_CASE" ] },
             { "selector": "typeLike", "format": [ "PascalCase" ] }
 		],
@@ -55,7 +55,7 @@
         "camelcase": "off",
 		"no-magic-numbers": [ 
 			"warn", 
-			{ "ignoreArrayIndexes": true, "ignore": [-1,0,1,2,3,4,5,6,7,8,9]}
+			{ "ignoreArrayIndexes": true, "ignore": [-1,0,1,2,3,4,5,6,7,8,9,10]}
 		],
         "curly": "warn",
         "no-loss-of-precision": "error",

@@ -12,8 +12,8 @@ $(function() {
 });
 */
 
-const lexer = new Human2RegexLexer(new Human2RegexLexerOptions(true));
-const parser = new Human2RegexParser(new Human2RegexParserOptions(true));
+const lexer = new Human2RegexLexer(new Human2RegexLexerOptions(false));
+const parser = new Human2RegexParser(new Human2RegexParserOptions(false));
 
 const result = lexer.tokenize(`
 // H2R supports // # and /**/ as comments
@@ -24,28 +24,28 @@ const result = lexer.tokenize(`
 // exact matching means use a ^ and $ to signify the start and end of the string
 
 using global and exact matching
-create an optional group called "protocol"
+create an optional group called protocol
 	match "http"
 	optionally match "s"
 	match "://"
-create a group called "subdomain"
+create a group called subdomain
 	repeat
 		match 1+ words
 		match "."
-create a group called "domain"
+create a group called domain
 	match 1+ words or "_" or "-"
 	match "."
 	match a word
 # port, but we don't care about it, so ignore it
 optionally match ":" then 0+ digits
-create an optional group called "path"
+create an optional group called path
 	repeat
 		match "/"
 		match 0+ words or "_" or "-"
 create an optional group
 	# we don't want to capture the '?', so don't name the group until afterwards
 	match "?"
-	create a group called "query"
+	create a group called query
 		repeat
 			match 1+ words or "_" or "-"
 			match "="
@@ -61,5 +61,5 @@ console.log(result.errors);
 
 parser.input = result.tokens;
 const regex = parser.parse();
-console.log(JSON.stringify(regex.children, undefined, 4));
+console.log(JSON.stringify(regex, undefined, 4));
 console.log(parser.errors);
