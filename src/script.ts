@@ -56,22 +56,13 @@ create an optional group
 	match 0+ any thing
 `);
 
-for(const r of result.tokens) {
-	console.log(`[${r.tokenType.name}]: ${r.image}`);
-}
 
 console.log(result.errors);
-
 parser.input = result.tokens;
-const regex = parser.nodes.regex;
-
+const regex = parser.parse();
 console.log(regex);
 console.log(parser.errors);
-
 
 //interpreter.visit(regex);
 
 //parser.getBaseCstVisitorConstructor();
-
-
-

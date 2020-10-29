@@ -14,8 +14,10 @@ export class Human2RegexParser extends CstParser {
 
     public nodes: { [key: string]: (idxInCallingRule?: number, ...args: unknown[]) => CstNode } = {};
 
+    public parse : (idxInCallingRule?: number, ...args: unknown[]) => CstNode;
+
     constructor(private options: Human2RegexParserOptions = new Human2RegexParserOptions()) {
-        super(T.AllTokens, { recoveryEnabled: true, maxLookahead: 2});
+        super(T.AllTokens, { recoveryEnabled: false, maxLookahead: 2});
 
         if (Human2RegexParser.already_init) {
             throw new Error("Only 1 instance of Human2RegexParser allowed");
@@ -89,6 +91,7 @@ export class Human2RegexParser extends CstParser {
             $.AT_LEAST_ONE_SEP({
                 SEP: T.Or,
                 DEF: () => {
+                    $.OPTION3(() => $.CONSUME(T.A));
                     $.OR([
                         { ALT: () => $.CONSUME(T.Anything) },
                         { ALT: () => $.CONSUME(T.StringLiteral) },
@@ -123,6 +126,7 @@ export class Human2RegexParser extends CstParser {
                 $.OPTION3(() => $.CONSUME2(T.Optional));
                 $.SUBRULE2(this.nodes.MatchSubStatement);
             });
+            $.CONSUME(T.EndOfLine);
         });
 
         // using global matching
@@ -141,6 +145,7 @@ export class Human2RegexParser extends CstParser {
                     $.OPTION(() => $.CONSUME(T.Matching));
                 }
             });
+            $.CONSUME(T.EndOfLine);
         });
 
         this.nodes.GroupStatement = $.RULE("GroupStatement", () => {
@@ -153,6 +158,7 @@ export class Human2RegexParser extends CstParser {
                 $.CONSUME(T.Called);
                 $.CONSUME(T.StringLiteral);
             });
+            $.CONSUME2(T.EndOfLine);
             $.CONSUME(T.Indent);
             $.AT_LEAST_ONE(this.nodes.Statement);
             $.CONSUME(T.Outdent);
@@ -162,6 +168,7 @@ export class Human2RegexParser extends CstParser {
             $.OPTION3(() => $.CONSUME(T.Optional));
             $.CONSUME(T.Repeat);
             $.OPTION(() => $.SUBRULE(this.nodes.CountSubStatement));
+            $.CONSUME3(T.EndOfLine);
             $.CONSUME(T.Indent);
             $.AT_LEAST_ONE(this.nodes.Statement);
             $.CONSUME(T.Outdent);
@@ -173,15 +180,16 @@ export class Human2RegexParser extends CstParser {
                 { ALT: () => $.SUBRULE(this.nodes.GroupStatement) },
                 { ALT: () => $.SUBRULE(this.nodes.RepeatStatement) }
             ]);
-            $.CONSUME(T.EndOfLine);
         });
 
         this.nodes.Regex = $.RULE("Regex", () => {
-            $.OPTION(() => $.SUBRULE(this.nodes.UsingStatement));
-            $.MANY(() => $.SUBRULE(this.nodes.Statement) );
+            $.MANY(() => $.SUBRULE(this.nodes.UsingStatement));
+            $.MANY2(() => $.SUBRULE(this.nodes.Statement) );
         });
 
         this.performSelfAnalysis();
+
+        this.parse = this.nodes.Regex;
     }
 
     //public set_options(options: Human2RegexParserOptions) : void {
