@@ -1,3 +1,5 @@
+/*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
+
 export function last<T>(array: T[]) : T {
     return array[array.length-1];
 }

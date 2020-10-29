@@ -1,3 +1,5 @@
+/*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
+
 import { createToken, Lexer } from "chevrotain";
 
 export const Zero = createToken({name: "Zero", pattern: /zero/i });

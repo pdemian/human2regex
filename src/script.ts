@@ -1,10 +1,10 @@
+/*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
 "use strict";
 
 import "./style.css";
 
-import { Human2RegexLexer } from "./tokenizer";
-import { Human2RegexParser } from "./parser";
-
+import { Human2RegexLexer, Human2RegexLexerOptions } from "./lexer";
+import { Human2RegexParser, Human2RegexParserOptions } from "./parser";
 
 /*
 $(function() {
@@ -12,8 +12,8 @@ $(function() {
 });
 */
 
-const lexer = new Human2RegexLexer();
-const parser = new Human2RegexParser();
+const lexer = new Human2RegexLexer(new Human2RegexLexerOptions(true));
+const parser = new Human2RegexParser(new Human2RegexParserOptions(true));
 
 const result = lexer.tokenize(`
 // H2R supports // # and /**/ as comments
@@ -58,11 +58,8 @@ create an optional group
 
 
 console.log(result.errors);
+
 parser.input = result.tokens;
 const regex = parser.parse();
-console.log(regex);
+console.log(JSON.stringify(regex.children, undefined, 4));
 console.log(parser.errors);
-
-//interpreter.visit(regex);
-
-//parser.getBaseCstVisitorConstructor();

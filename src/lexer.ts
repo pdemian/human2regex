@@ -11,7 +11,7 @@ export enum IndentType {
 }
 
 export class Human2RegexLexerOptions {
-    constructor(public type: IndentType = IndentType.Both, public spaces_per_tab: number = 4) {
+    constructor(public skip_validations = false, public type: IndentType = IndentType.Both, public spaces_per_tab: number = 4) {
         /* empty */
     }
 }
@@ -52,7 +52,7 @@ export class Human2RegexLexer {
 
         Indent.PATTERN = indent_regex;
 
-        this.lexer = new Lexer(AllTokens, { ensureOptimizations: true });
+        this.lexer = new Lexer(AllTokens, { ensureOptimizations: true, skipValidations: options.skip_validations });
     }
 
     private lex_error(token: IToken) : ILexingError {
