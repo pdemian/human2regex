@@ -1,7 +1,7 @@
 /*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
 "use strict";
 
-import "./style.css";
+import "./webpage/style.css";
 
 import { Human2RegexLexer, Human2RegexLexerOptions } from "./lexer";
 import { Human2RegexParser, Human2RegexParserOptions } from "./parser";

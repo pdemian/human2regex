@@ -1,9 +1,0 @@
-{
-	"page": {
-		"title": "Error 501 - Not Implemented",
-		"description": "Not Implemented"
-	},
-	"error-code": "501",
-	"error-subheading": "Not Implemented",
-	"error-string": "Unrecognized request method."
-}

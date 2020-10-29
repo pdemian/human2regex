@@ -1,6 +1,6 @@
 {
   "name": "human2regex",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Humanized Regular Expressions",
   "main": "bundle.min.js",
   "devDependencies": {
@@ -25,8 +25,7 @@
     "webpack-cli": "^3.3.12"
   },
   "scripts": {
-    "build": "webpack --config webpack.full.config.js",
-    "partial": "webpack --config webpack.partial.config.js",
+    "build": "webpack --config webpack.config.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

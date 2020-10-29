@@ -35,34 +35,22 @@ function build_mustache() {
     compress_html = (input) =>  config.prod ? minify(input, config.compression_config.html) : input;
 
     // get views
-    const main_files = glob.sync(path.join(config.src, "main", "*.json"));
-    const error_files = glob.sync(path.join(config.src, "error", "*.json"));
+    const files = glob.sync(path.join(config.src, "webpage", "*.json"));
 
     // get partials
     const partials = {
-        header: readFileSync(path.join(config.src, "/header.mustache"), "utf8"),
-        footer: readFileSync(path.join(config.src, "/footer.mustache"), "utf8")
+        header: readFileSync(path.join(config.src, "webpage", "header.mustache"), "utf8"),
+        footer: readFileSync(path.join(config.src, "webpage", "footer.mustache"), "utf8")
     };
 
     // build main mustache files
-    for(const item of main_files) {
+    for(const item of files) {
         const filename = path.basename(item, ".json");
         const view = read_json_file(item);
         const to = path.join(config.dst, filename + ".html");
-        const template = readFileSync(path.join(config.src, filename + ".mustache"), "utf8");
+        const template = readFileSync(path.join(config.src, "webpage", filename + ".mustache"), "utf8");
 
         writeFileSync(to, compress_html(render(template, view, partials)));
-    }
-
-    const error_template = readFileSync(path.join(config.src, "/error.mustache"), "utf8");
-
-    // build error mustache files    
-    for(const item of error_files) {
-        const filename = path.basename(item, ".json");
-        const view = read_json_file(item);
-        const to = path.join(config.dst, filename + ".html");
-        
-        writeFileSync(to, compress_html(render(error_template, view, partials)));
     }
 }
 
@@ -89,7 +77,7 @@ module.exports = {
     plugins: [
         new CopyPlugin({
             patterns: [
-                { from: config.src + "!(*.css|*.mustache|*.ts)", to: "", flatten: true}
+                { from: config.src + "webpage/" + "!(*.css|*.mustache|*.json)", to: "", flatten: true}
             ]
         }),
         new MiniCssExtractPlugin({ filename: "bundle.min.css" }),

@@ -1,9 +1,0 @@
-{
-	"page": {
-		"title": "Error 400 - Bad Request",
-		"description": "Bad Request"
-	},
-	"error-code": "400",
-	"error-subheading": "Bad Request",
-	"error-string": "The server cannot process the request."
-}
