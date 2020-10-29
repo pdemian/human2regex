@@ -1,3 +1,4 @@
 # Node build artifacts
 node_modules/
+coverage/
 npm-debug.log

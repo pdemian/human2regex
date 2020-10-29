@@ -29,10 +29,10 @@ export class Human2RegexLexer {
 
         Human2RegexLexer.already_init = true;
 
-        this.set_options(options);
+        this.setOptions(options);
     }
 
-    public set_options(options: Human2RegexLexerOptions) : void {
+    public setOptions(options: Human2RegexLexerOptions) : void {
         this.options = options;
         
         let indent_regex: RegExp | null = null;
@@ -55,7 +55,7 @@ export class Human2RegexLexer {
         this.lexer = new Lexer(AllTokens, { ensureOptimizations: true, skipValidations: options.skip_validations });
     }
 
-    private lex_error(token: IToken) : ILexingError {
+    private lexError(token: IToken) : ILexingError {
         return { 
             offset: token.startOffset,
             line: token.startLine ?? NaN,
@@ -66,75 +66,75 @@ export class Human2RegexLexer {
     }
 
     public tokenize(text: string) : ILexingResult {
-        const lexResult = this.lexer.tokenize(text);
+        const lex_result = this.lexer.tokenize(text);
 
-        if (lexResult.tokens.length === 0) {
-            return lexResult;
+        if (lex_result.tokens.length === 0) {
+            return lex_result;
         }
 
         // create Outdents
         const tokens: IToken[] = [];
-        const indentStack = [ 0 ];
+        const indent_stack = [ 0 ];
 
-        let currIndentLevel = 0;
-        let startOfLine = true;
-        let hadIndents = false;
+        let curr_indent_level = 0;
+        let start_of_line = true;
+        let had_indents = false;
 
-        for (let i = 0; i < lexResult.tokens.length; i++) {
+        for (let i = 0; i < lex_result.tokens.length; i++) {
 
             // EoL? check for indents next (by setting startOfLine = true)
-            if (lexResult.tokens[i].tokenType === EndOfLine) {
-                if(tokens.length === 0 || tokens[tokens.length-1].tokenType === EndOfLine) {
+            if (lex_result.tokens[i].tokenType === EndOfLine) {
+                if (tokens.length === 0 || tokens[tokens.length-1].tokenType === EndOfLine) {
                     // Ignore multiple EOLs and ignore first EOL
                 }
                 else {
-                    startOfLine = true;
-                    tokens.push(lexResult.tokens[i]);
+                    start_of_line = true;
+                    tokens.push(lex_result.tokens[i]);
                 }
             }
             // start with 1 indent. Append all other indents 
-            else if (lexResult.tokens[i].tokenType === Indent) {
-                hadIndents = true;
-                currIndentLevel = 1; 
+            else if (lex_result.tokens[i].tokenType === Indent) {
+                had_indents = true;
+                curr_indent_level = 1; 
 
-                const start_token = lexResult.tokens[i];
-                let length = lexResult.tokens[i].image.length;
+                const start_token = lex_result.tokens[i];
+                let length = lex_result.tokens[i].image.length;
 
                 // grab all the indents (and their length)
-                while (lexResult.tokens.length > i && lexResult.tokens[i+1].tokenType === Indent) {
-                    currIndentLevel++;
+                while (lex_result.tokens.length > i && lex_result.tokens[i+1].tokenType === Indent) {
+                    curr_indent_level++;
                     i++;
-                    length += lexResult.tokens[i].image.length;
+                    length += lex_result.tokens[i].image.length;
                 }
 
                 start_token.endOffset = start_token.startOffset + length;
-                start_token.endColumn = lexResult.tokens[i].endColumn;
+                start_token.endColumn = lex_result.tokens[i].endColumn;
                 // must be the same line
-                //start_token.endLine = lexResult.tokens[i].endLine;
+                //start_token.endLine = lex_result.tokens[i].endLine;
 
                 // are we an empty line? 
-                if (lexResult.tokens.length > i && lexResult.tokens[i+1].tokenType === EndOfLine) {
+                if (lex_result.tokens.length > i && lex_result.tokens[i+1].tokenType === EndOfLine) {
                     // Ignore all indents AND newline
                     // continue;
                 }
-                else if (!startOfLine || (currIndentLevel > last(indentStack) + 1)) {
-                    lexResult.errors.push(this.lex_error(start_token));
+                else if (!start_of_line || (curr_indent_level > last(indent_stack) + 1)) {
+                    lex_result.errors.push(this.lexError(start_token));
                 }
-                else if (currIndentLevel > last(indentStack)) {
-                    indentStack.push(currIndentLevel);
+                else if (curr_indent_level > last(indent_stack)) {
+                    indent_stack.push(curr_indent_level);
                     tokens.push(start_token);
                 }
-                else if (currIndentLevel < last(indentStack)) {
-                    const index = findLastIndex(indentStack, currIndentLevel);
+                else if (curr_indent_level < last(indent_stack)) {
+                    const index = findLastIndex(indent_stack, curr_indent_level);
 
                     if (index < 0) {
-                        lexResult.errors.push(this.lex_error(start_token));
+                        lex_result.errors.push(this.lexError(start_token));
                     }
                     else {
-                        const numberOfDedents = indentStack.length - index - 1;
+                        const number_of_dedents = indent_stack.length - index - 1;
                     
-                        for(let i = 0; i < numberOfDedents; i++) {
-                            indentStack.pop();
+                        for (let j = 0; j < number_of_dedents; j++) {
+                            indent_stack.pop();
                             tokens.push(createTokenInstance(Outdent, "", start_token.startOffset, start_token.startOffset + length, start_token.startLine ?? NaN, start_token.endLine ?? NaN, start_token.startColumn ?? NaN, (start_token.startColumn ?? NaN) + length));
                         }
                     }
@@ -145,35 +145,35 @@ export class Human2RegexLexer {
                 }
             }
             else {
-                if(startOfLine && !hadIndents) {
-                    const tok = lexResult.tokens[i];
+                if (start_of_line && !had_indents) {
+                    const tok = lex_result.tokens[i];
 
                     //add remaining Outdents
-                    while (indentStack.length > 1) {
-                        indentStack.pop();
+                    while (indent_stack.length > 1) {
+                        indent_stack.pop();
                         tokens.push(createTokenInstance(Outdent, "", tok.startOffset, tok.startOffset, tok.startLine ?? NaN, NaN, tok.startColumn ?? NaN, NaN));
                     }
                 }
-                startOfLine = false;
-                hadIndents = false;
-                tokens.push(lexResult.tokens[i]);
+                start_of_line = false;
+                had_indents = false;
+                tokens.push(lex_result.tokens[i]);
             }
         }
 
         const tok = last(tokens);
 
         // Do we have an EOL marker at the end?
-        if(tok.tokenType !== EndOfLine) {
+        if (tok.tokenType !== EndOfLine) {
             tokens.push(createTokenInstance(EndOfLine, "\n", tok.endOffset ?? NaN, tok.endOffset ?? NaN, tok.startLine ?? NaN, NaN, tok.startColumn ?? NaN, NaN)); 
         }
     
         //add remaining Outdents
-        while (indentStack.length > 1) {
-            indentStack.pop();
+        while (indent_stack.length > 1) {
+            indent_stack.pop();
             tokens.push(createTokenInstance(Outdent, "", tok.endOffset ?? NaN, tok.endOffset ?? NaN, tok.startLine ?? NaN, NaN, tok.startColumn ?? NaN, NaN));
         }
 
-        lexResult.tokens = tokens;
-        return lexResult;
+        lex_result.tokens = tokens;
+        return lex_result;
     }
 }

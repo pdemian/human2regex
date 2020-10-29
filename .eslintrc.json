@@ -10,7 +10,8 @@
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "ecmaVersion": 12,
-        "sourceType": "module"
+        "sourceType": "module",
+        "project": "./../tsconfig.json"
     },
     "plugins": [
         "@typescript-eslint"
@@ -18,7 +19,40 @@
     "rules": {
         "@typescript-eslint/no-this-alias": "off",
         "@typescript-eslint/no-inferrable-types": "off",
-		"@typescript-eslint/explicit-function-return-type": "off",
+		"@typescript-eslint/explicit-function-return-type": [
+            "warn",
+            { "allowExpressions": true }
+        ],
+		"@typescript-eslint/no-shadow": "error",
+		//"@typescript-eslint/prefer-readonly-parameter-types": "warn",
+		//"@typescript-eslint/prefer-readonly": "warn",
+		"@typescript-eslint/prefer-optional-chain": "error",
+		"@typescript-eslint/prefer-for-of": "error",
+		"@typescript-eslint/no-unnecessary-condition": "error",
+		"@typescript-eslint/no-throw-literal": "error",
+		"@typescript-eslint/consistent-type-assertions": "error",
+		"@typescript-eslint/brace-style": [
+            "error", 
+            "stroustrup"
+        ],
+		"@typescript-eslint/comma-spacing": [
+            "error", 
+            { "before": false, "after": true }
+        ],
+		"@typescript-eslint/keyword-spacing": "error",
+		"@typescript-eslint/naming-convention": [
+			"error",
+            { "selector": "default", "format": [ "snake_case", "PascalCase" ] },
+            { "selector": "property", "format": [ "camelCase", "snake_case", "PascalCase" ] },
+            { "selector": [ "function", "method"], "format": [ "camelCase", "UPPER_CASE" ] },
+            { "selector": "typeLike", "format": [ "PascalCase" ] }
+		],
+		"@typescript-eslint/quotes": [
+            "warn",
+            "double", 
+            { "avoidEscape": true }
+        ],
+        "camelcase": "off",
 		"no-magic-numbers": [ 
 			"warn", 
 			{ "ignoreArrayIndexes": true, "ignore": [-1,0,1,2,3,4,5,6,7,8,9]}
@@ -47,14 +81,8 @@
         ],
         "no-shadow": "off",
         "no-undefined": "error",
-        "brace-style": [
-            "error", 
-            "stroustrup"
-        ],
-        "comma-spacing": [
-            "error", 
-            { "before": false, "after": true }
-        ],
+		"brace-style": "off",
+		"comma-spacing": "off",
         "array-bracket-spacing": [
             "error", 
             "always"
@@ -63,6 +91,7 @@
             "error", 
             "last"
         ],
+		"keyword-spacing": "off",
         "func-style": [
             "error", 
             "declaration"
@@ -84,19 +113,11 @@
             "error",
             "always"
         ],
-        /*"indent": [
-            "error",
-            4
-        ],*/
         "linebreak-style": [
             "error",
             "windows"
         ],
-        "quotes": [
-            "warn",
-            "double", 
-            { "avoidEscape": true }
-        ],
+		"quotes": "off",
         "semi": [
             "error",
             "always"

@@ -3,8 +3,20 @@
 import { CstParser, CstNode, IOrAlt } from "chevrotain";
 import * as T from "./tokens";
 
+export enum RobotLanguage {
+    JS,
+    Perl,
+    DotNet,
+    Java
+}
+
+export enum HumanLanguage {
+    English,
+    /* Todo: Humans speak more than just english! */
+}
+
 export class Human2RegexParserOptions {
-    constructor(public skip_validations: boolean = false) {
+    constructor(public skip_validations: boolean = false, public robot_language: RobotLanguage = RobotLanguage.JS, public human_language: HumanLanguage = HumanLanguage.English) {
         /* empty */
     }
 }

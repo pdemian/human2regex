@@ -3,7 +3,7 @@
 const path = require("path");
 const { glob } = require("glob");
 const { render } = require("mustache");
-const { readFileSync, writeFileSync } = require("fs");
+const { readFileSync, writeFileSync, existsSync, mkdirSync } = require("fs");
 const { minify } = require("html-minifier");
 const CopyPlugin = require("copy-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
@@ -29,6 +29,10 @@ const config = {
 
 
 function build_mustache() {
+
+	if (!existsSync(config.dst)){
+		mkdirSync(config.dst);
+	}
 
     read_json_file = (filename) => JSON.parse(readFileSync(filename), "utf8");
     
