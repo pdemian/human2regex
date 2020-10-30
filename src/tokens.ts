@@ -49,7 +49,7 @@ export const Newline = createToken({name: "Newline", pattern: /(new line|newline
 export const CarriageReturn = createToken({name: "CarriageReturn", pattern: /carriage return/i});
 export const CaseInsensitive = createToken({name: "CaseInsensitive", pattern: /case insensitive/i});
 export const CaseSensitive = createToken({name: "CaseSensitive", pattern: /case sensitive/i});
-export const OrMore = createToken({name: "OrMore", pattern: /\+/ });
+export const OrMore = createToken({name: "OrMore", pattern: /\+|or more/i });
 
 /*
 //Not being used currently
@@ -101,7 +101,6 @@ export const AllTokens = [
     Match,
     Then,
     Anything,
-    Or,
     And,
     Word,
     Digit,
@@ -147,6 +146,7 @@ export const AllTokens = [
     CaseInsensitive,
     CaseSensitive,
     OrMore,
+    Or,
     To,
     EndOfLine,
     Indent,

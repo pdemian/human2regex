@@ -64,7 +64,44 @@ export class MatchSubStatementCST implements H2RCST {
     }
     
     public validate(language: RobotLanguage): Error[] {
-        throw new Error("Method not implemented.");
+        let errors: Error[] = [];
+
+        if (this.count !== null) {
+            errors = errors.concat(this.count.validate(language));
+        }
+
+        for (const value of this.values) {
+            if (value.type === MatchSubStatementType.Between) {
+                let from = value.from as string;
+                let to = value.to as string;
+
+                if ((from.startsWith("\\u") && from.length !== 6) ||
+                    (from.startsWith("\\U") && from.length !== 8) ||
+                    (from.startsWith("\\") && from.length !== 2) ||
+                    (from.length !== 1)) {
+                        errors.push(new Error("Between statement must begin with a single character"));
+                }
+                else if (from.startsWith("\\u") || from.startsWith("\\U") || from.startsWith("\\")) {
+                    from = JSON.parse(`"${regexEscape(from)}"`);
+                }
+
+                if ((to.startsWith("\\u") && to.length !== 6) ||
+                    (to.startsWith("\\U") && to.length !== 8) ||
+                    (to.startsWith("\\") && to.length !== 2) ||
+                    (to.length !== 1)) {
+                        errors.push(new Error("Between statement must end with a single character"));
+                }
+                else if (to.startsWith("\\u") || to.startsWith("\\U") || to.startsWith("\\")) {
+                    to = JSON.parse(`"${regexEscape(to)}"`);
+                }
+
+                if (from.charCodeAt(0) >= to.charCodeAt(0)) {
+                    errors.push(new Error("Between statement range invalid"));
+                }
+            }
+        }
+
+        return errors;
     }
 
     public toRegex(language: RobotLanguage): string {
@@ -112,7 +149,7 @@ export class MatchSubStatementCST implements H2RCST {
             }
         }
 
-        return str.join("|");
+        return "(?:" + str.join("|") + ")";
     }
 
 }
@@ -204,12 +241,20 @@ export class MatchStatementCST implements StatementCST {
     }
 
     public validate(language: RobotLanguage): Error[] {
-        throw new Error("Method not implemented.");
+        let errors: Error[] = [];
+
+        for (const match of this.matches) {
+            errors = errors.concat(match.statement.validate(language));
+        }
+
+        return errors;
     }
+
     public toRegex(language: RobotLanguage): string {
-        throw new Error("Method not implemented.");
+        return this.matches.map((x) => {
+            return x.statement.toRegex(language) + (x.optional ? "?" : "");
+        }).join("");
     }
-    
 }
 
 export class RepeatStatementCST implements StatementCST {
@@ -218,11 +263,47 @@ export class RepeatStatementCST implements StatementCST {
     }
 
     public validate(language: RobotLanguage): Error[] {
-        throw new Error("Method not implemented.");
+        let errors: Error[] = [];
+
+        if (this.count !== null) {
+            errors = errors.concat(this.count.validate(language));
+        }
+
+        for (const statement of this.statements) {
+            errors = errors.concat(statement.validate(language));
+        }
+
+        return errors;
     }
 
     public toRegex(language: RobotLanguage): string {
-        throw new Error("Method not implemented.");
+        let str = "(" + this.statements.map((x) => x.toRegex(language)).join("") + ")";
+
+        if (this.count !== null) {
+            if (this.count.from === 1 && this.count.to === null) {
+                if (this.count.opt === "+") {
+                    str += "+";
+                }
+                // if we only have a count of 1, we can ignore adding any extra text
+            }
+            else if (this.count.from === 0 && this.count.to === null) {
+                if (this.count.opt === "+") {
+                    str += "*";
+                }
+                else {
+                    // match 0 of anything? ok...
+                    str = "";
+                }
+            }
+            else {
+                str += this.count.toRegex(language);
+            }
+        }
+        else {
+            str += "*";
+        }
+
+        return str;
     }
 }
 
@@ -232,11 +313,35 @@ export class GroupStatementCST implements StatementCST {
     }
 
     public validate(language: RobotLanguage): Error[] {
-        throw new Error("Method not implemented.");
+        let errors : Error[] = [];
+        
+        if (language !== RobotLanguage.DotNet && language !== RobotLanguage.JS) {
+            errors.push(new Error("This language does not support named groups"));
+        }
+
+        for (const statement of this.statements) {
+            errors = errors.concat(statement.validate(language));
+        }
+
+        return errors;
     }
 
     public toRegex(language: RobotLanguage): string {
-        throw new Error("Method not implemented.");
+        let str = "(";
+
+        if (this.name !== null) {
+            str += `?<${this.name}>`;
+        }
+
+        str += this.statements.map((x) => x.toRegex(language)).join("");
+
+        str += ")";
+
+        if (this.optional) {
+            str += "?";
+        }
+
+        return str;
     }
 }
 
@@ -246,10 +351,19 @@ export class RegularExpressionCST implements H2RCST {
     }
 
     public validate(language: RobotLanguage): Error[] {
-        throw new Error("Method not implemented.");
+        let errors: Error[] = this.usings.validate(language);
+
+        for (const statement of this.statements) {
+            errors = errors.concat(statement.validate(language));
+        }
+
+        return errors;
     }
     public toRegex(language: RobotLanguage): string {
-        throw new Error("Method not implemented.");
+        const modifiers = this.usings.toRegex(language);
+        const regex = this.statements.map((x) => x.toRegex(language)).join("");
+
+        return modifiers.replace("{regex}", regex);
     }
     
 }

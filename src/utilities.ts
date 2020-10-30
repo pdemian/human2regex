@@ -37,5 +37,5 @@ export function removeQuotes(input: string): string {
 }
 
 export function regexEscape(input: string) : string {
-    return input.replace("\\", "\\\\").replace(/(\.\[\]\^\-\|\(\)\*\+\?\{\}\$)/, "\\$1");
+    return input.replace("\\", "\\\\").replace(/([=:\-\.\[\]\^\|\(\)\*\+\?\{\}\$])/, "\\$1");
 }
