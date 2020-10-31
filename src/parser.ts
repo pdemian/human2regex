@@ -1,6 +1,6 @@
 /*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
 
-import { EmbeddedActionsParser, IOrAlt,  } from "chevrotain";
+import { EmbeddedActionsParser, IOrAlt } from "chevrotain";
 import * as T from "./tokens";
 import { CountSubStatementCST, UsingFlags, MatchSubStatementType, MatchSubStatementValue, MatchSubStatementCST, UsingStatementCST, RegularExpressionCST, StatementCST, RepeatStatementCST, MatchStatementValue, MatchStatementCST, GroupStatementCST } from "./generator";
 
@@ -26,57 +26,57 @@ export class Human2RegexParser extends EmbeddedActionsParser {
         
         const $ = this;
 
-        let nss_rules : IOrAlt<unknown>[] | null = null;
+        let nss_rules : IOrAlt<number>[] | null = null;
         const NumberSubStatement = $.RULE("NumberSubStatement", () => {
             let value: number = 0;
 
-            $.OR(nss_rules || (nss_rules = [
+            value = $.OR(nss_rules || (nss_rules = [
                 { ALT: () => {
                     $.CONSUME(T.Zero); 
-                    value = 0; 
+                    return 0; 
                 }},
                 { ALT: () => {
                     $.CONSUME(T.One); 
-                    value = 1; 
+                    return 1; 
                 }},
                 { ALT: () => {
                     $.CONSUME(T.Two); 
-                    value = 2; 
+                    return 2; 
                 }},
                 { ALT: () => {
                     $.CONSUME(T.Three); 
-                    value = 3; 
+                    return 3; 
                 }},
                 { ALT: () => {
                     $.CONSUME(T.Four); 
-                    value = 4; 
+                    return 4; 
                 }},
                 { ALT: () => {
                     $.CONSUME(T.Five); 
-                    value = 5; 
+                    return 5; 
                 }},
                 { ALT: () => {
                     $.CONSUME(T.Six); 
-                    value = 6; 
+                    return 6; 
                 }},
                 { ALT: () => {
                     $.CONSUME(T.Seven); 
-                    value = 7; 
+                    return 7; 
                 }},
                 { ALT: () => {
                     $.CONSUME(T.Eight); 
-                    value = 8; 
+                    return 8; 
                 }},
                 { ALT: () => {
                     $.CONSUME(T.Nine); 
-                    value = 9; 
+                    return 9; 
                 }},
                 { ALT: () => {
                     $.CONSUME(T.Ten); 
-                    value = 10; 
+                    return 10; 
                 }},
 
-                { ALT: () => value = parseInt($.CONSUME(T.NumberLiteral).image) },
+                { ALT: () => parseInt($.CONSUME(T.NumberLiteral).image) },
             ]));
 
             return value;
@@ -138,32 +138,33 @@ export class Human2RegexParser extends EmbeddedActionsParser {
             return new CountSubStatementCST(from, to, opt);
         });
 
-        let mss_rules : IOrAlt<unknown>[] | null = null;
+        let mss_rules : IOrAlt<MatchSubStatementValue>[] | null = null;
         const MatchSubStatement = $.RULE("MatchSubStatement", () => {
             let count: CountSubStatementCST | null = null;
             let invert: boolean = false;
             const values: MatchSubStatementValue[] = [];
+            let from : string | null = null;
+            let to : string | null = null;
+            let type : MatchSubStatementType = MatchSubStatementType.Anything;
 
-            $.OPTION(() => count = $.SUBRULE(CountSubStatement) );
-            $.OPTION2(() => { 
+            count = $.OPTION(() => $.SUBRULE(CountSubStatement) );
+            invert = $.OPTION2(() => { 
                 $.CONSUME(T.Not); 
-                invert = true;
+                return true;
             });
             $.AT_LEAST_ONE_SEP({
                 SEP: T.Or,
                 DEF: () => {
-                    let from : string | null = null;
-                    let to : string | null = null;
-                    let type : MatchSubStatementType = MatchSubStatementType.Anything;
-
                     $.OPTION3(() => $.CONSUME(T.A));
-                    $.OR(mss_rules || (mss_rules = [
+                    values.push($.OR(mss_rules || (mss_rules = [
                         { ALT: () => {
                             $.OPTION4(() => $.CONSUME(T.From));
                             from = $.CONSUME2(T.StringLiteral).image; 
                             $.CONSUME(T.To);
                             to = $.CONSUME3(T.StringLiteral).image;
                             type = MatchSubStatementType.Between;
+
+                            return new MatchSubStatementValue(type, from, to);
                         }},
                         { ALT: () => {
                             $.CONSUME(T.Between);
@@ -171,54 +172,76 @@ export class Human2RegexParser extends EmbeddedActionsParser {
                             $.CONSUME(T.And);
                             to = $.CONSUME5(T.StringLiteral).image;
                             type = MatchSubStatementType.Between;
+
+                            return new MatchSubStatementValue(type, from, to);
                         }},
                         { ALT: () => {
                             from = $.CONSUME(T.StringLiteral).image;
                             type = MatchSubStatementType.SingleString;
+
+                            return new MatchSubStatementValue(type, from);
                         }},
                         { ALT: () => { 
                             $.CONSUME(T.Anything); 
                             type = MatchSubStatementType.Anything;
+
+                            return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
                             $.CONSUME(T.Word); 
                             type = MatchSubStatementType.Word;
+
+                            return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
                             $.CONSUME(T.Digit); 
                             type = MatchSubStatementType.Digit;
+
+                            return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
                             $.CONSUME(T.Character); 
                             type = MatchSubStatementType.Character;
+
+                            return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
                             $.CONSUME(T.Whitespace); 
                             type = MatchSubStatementType.Whitespace;
+
+                            return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
                             $.CONSUME(T.Number); 
                             type = MatchSubStatementType.Number;
+
+                            return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
                             $.CONSUME(T.Tab); 
                             type = MatchSubStatementType.Tab;
+
+                            return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
                             $.CONSUME(T.Linefeed); 
                             type = MatchSubStatementType.Linefeed;
+
+                            return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
                             $.CONSUME(T.Newline); 
                             type = MatchSubStatementType.Newline;
+
+                            return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
                             $.CONSUME(T.CarriageReturn); 
                             type = MatchSubStatementType.CarriageReturn;
-                        }},
-                    ]));
 
-                    values.push(new MatchSubStatementValue(type, from, to));
+                            return new MatchSubStatementValue(type);
+                        }},
+                    ])));
                 }
             });
 
@@ -257,7 +280,7 @@ export class Human2RegexParser extends EmbeddedActionsParser {
         });
 
         // using global matching
-        let us_rules : IOrAlt<unknown>[] | null = null;
+        let us_rules : IOrAlt<UsingFlags>[] | null = null;
         const UsingStatement = $.RULE("UsingStatement", () => {
             const usings: UsingFlags[] = [];
 
@@ -265,28 +288,28 @@ export class Human2RegexParser extends EmbeddedActionsParser {
             $.AT_LEAST_ONE_SEP({
                 SEP: T.And,
                 DEF: () => {
-                    $.OR(us_rules || (us_rules = [
+                    usings.push($.OR(us_rules || (us_rules = [
                         { ALT: () => {
-                            $.CONSUME(T.Multiline); 
-                            usings.push(UsingFlags.Multiline);
+                            $.CONSUME(T.Multiline);
+                            return UsingFlags.Multiline;
                         }},
                         { ALT: () => { 
                             $.CONSUME(T.Global);
-                            usings.push(UsingFlags.Global);
+                            return UsingFlags.Global;
                         }},
                         { ALT: () => { 
                             $.CONSUME(T.CaseInsensitive);
-                            usings.push(UsingFlags.Insensitive); 
+                            return UsingFlags.Insensitive; 
                         }},
                         { ALT: () => { 
                             $.CONSUME(T.CaseSensitive);
-                            usings.push(UsingFlags.Sensitive); 
+                            return UsingFlags.Sensitive; 
                         }},
                         { ALT: () => { 
                             $.CONSUME(T.Exact); 
-                            usings.push(UsingFlags.Exact);
+                            return UsingFlags.Exact;
                         }}
-                    ]));
+                    ])));
                     $.OPTION(() => $.CONSUME(T.Matching));
                 }
             });
@@ -354,16 +377,11 @@ export class Human2RegexParser extends EmbeddedActionsParser {
         });
 
         const Statement = $.RULE("Statement", () => {
-            // eslint-disable-next-line init-declarations
-            let statement! : StatementCST;
-
-            $.OR([
-                { ALT: () => statement = $.SUBRULE(MatchStatement) },
-                { ALT: () => statement = $.SUBRULE(GroupStatement) },
-                { ALT: () => statement = $.SUBRULE(RepeatStatement) }
+            return $.OR([
+                { ALT: () => $.SUBRULE(MatchStatement) },
+                { ALT: () => $.SUBRULE(GroupStatement) },
+                { ALT: () => $.SUBRULE(RepeatStatement) }
             ]);
-
-            return statement;
         });
 
         const Regex = $.RULE("Regex", () => {

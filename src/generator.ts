@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
 
-import { regexEscape, removeQuotes, hasFlag, combineFlags } from "./utilities";
+import { regexEscape, removeQuotes, hasFlag, combineFlags, isSingleRegexCharacter } from "./utilities";
 
 export enum RobotLanguage {
     JS,
@@ -25,7 +25,6 @@ export enum UsingFlags {
 }
 /* eslint-enable no-bitwise */
 
-
 export enum MatchSubStatementType {
     SingleString,
     Between,
@@ -42,7 +41,7 @@ export enum MatchSubStatementType {
 }
 
 export class MatchSubStatementValue {
-    constructor(public type: MatchSubStatementType, public from: string | null, public to: string | null) {
+    constructor(public type: MatchSubStatementType, public from: string | null = null, public to: string | null = null) {
         /* empty */
     }
 }
@@ -66,7 +65,7 @@ export class MatchSubStatementCST implements H2RCST {
     public validate(language: RobotLanguage): Error[] {
         let errors: Error[] = [];
 
-        if (this.count !== null) {
+        if (this.count) {
             errors = errors.concat(this.count.validate(language));
         }
 
@@ -75,20 +74,14 @@ export class MatchSubStatementCST implements H2RCST {
                 let from = value.from as string;
                 let to = value.to as string;
 
-                if ((from.startsWith("\\u") && from.length !== 6) ||
-                    (from.startsWith("\\U") && from.length !== 8) ||
-                    (from.startsWith("\\") && from.length !== 2) ||
-                    (from.length !== 1)) {
+                if (!isSingleRegexCharacter(from)) {
                         errors.push(new Error("Between statement must begin with a single character"));
                 }
                 else if (from.startsWith("\\u") || from.startsWith("\\U") || from.startsWith("\\")) {
                     from = JSON.parse(`"${regexEscape(from)}"`);
                 }
 
-                if ((to.startsWith("\\u") && to.length !== 6) ||
-                    (to.startsWith("\\U") && to.length !== 8) ||
-                    (to.startsWith("\\") && to.length !== 2) ||
-                    (to.length !== 1)) {
+                if (!isSingleRegexCharacter(to)) {
                         errors.push(new Error("Between statement must end with a single character"));
                 }
                 else if (to.startsWith("\\u") || to.startsWith("\\U") || to.startsWith("\\")) {
@@ -118,13 +111,13 @@ export class MatchSubStatementCST implements H2RCST {
                     str.push(this.invert ? `[^${value.from}-${value.to}]` : `[${value.from}-${value.to}]`);
                     break;
                 case MatchSubStatementType.Word:
-                    str.push(this.invert ? "\\W" : "\\w");
+                    str.push(this.invert ? "\\W+" : "\\w+");
                     break;
                 case MatchSubStatementType.Digit:
                     str.push(this.invert ? "\\D" : "\\d");
                     break;
                 case MatchSubStatementType.Character:
-                    str.push(this.invert ? "[^a-zA-Z]" : "[a-zA-Z]");
+                    str.push(this.invert ? "\\W" : "\\w");
                     break;
                 case MatchSubStatementType.Whitespace:
                     str.push(this.invert ? "\\S" : "\\s");
@@ -149,7 +142,42 @@ export class MatchSubStatementCST implements H2RCST {
             }
         }
 
-        return "(?:" + str.join("|") + ")";
+        let ret = "";
+
+        if (str.length === 1) {
+            ret = str[0];
+        }
+        // we can use regex's [] for single chars, otherwise we need a group
+        else if (str.every(isSingleRegexCharacter)) {
+            ret = "[" + str.join("") + "]";
+        }
+        else {
+            //use a no-capture group
+            ret = "(?:" + str.join("|") + ")";
+        }
+
+        if (this.count) {
+            if (this.count.from === 1 && this.count.to === null) {
+                if (this.count.opt === "+") {
+                    ret += "+";
+                }
+                // if we only have a count of 1, we can ignore adding any extra text
+            }
+            else if (this.count.from === 0 && this.count.to === null) {
+                if (this.count.opt === "+") {
+                    ret += "*";
+                }
+                else {
+                    // match 0 of anything? ok...
+                    ret = "";
+                }
+            }
+            else {
+                ret += this.count.toRegex(language);
+            }
+        }
+
+        return ret;
     }
 
 }

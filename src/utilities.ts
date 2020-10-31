@@ -10,6 +10,13 @@ export function combineFlags(a: number, b: number): number {
 }
 /* eslint-enable no-bitwise */
 
+export function isSingleRegexCharacter(char: string): boolean {
+    return (char.startsWith("\\u") && char.length === 6) ||
+           (char.startsWith("\\U") && char.length === 8) ||
+           (char.startsWith("\\") && char.length === 2) ||
+           char.length === 1;
+}
+
 export function last<T>(array: T[]) : T {
     return array[array.length-1];
 }
@@ -33,9 +40,9 @@ export function findLastIndexPredicate<T>(array: T[], predicate: (x: T) => boole
 }
 
 export function removeQuotes(input: string): string {
-    return input.substring(1, input.length-2);
+    return input.substring(1, input.length-1);
 }
 
 export function regexEscape(input: string) : string {
-    return input.replace("\\", "\\\\").replace(/([=:\-\.\[\]\^\|\(\)\*\+\?\{\}\$])/, "\\$1");
+    return input.replace("\\", "\\\\").replace(/([=:\-\.\[\]\^\|\(\)\*\+\?\{\}\$\/])/g, "\\$1");
 }
