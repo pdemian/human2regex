@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
 
-import { regexEscape, removeQuotes, hasFlag, combineFlags, isSingleRegexCharacter } from "./utilities";
+import { regexEscape, removeQuotes, hasFlag, combineFlags, isSingleRegexCharacter, first, last } from "./utilities";
+import { IToken } from "chevrotain";
 
 export enum RobotLanguage {
     JS,
@@ -10,9 +11,34 @@ export enum RobotLanguage {
     Java
 }
 
+export interface ISemanticError {
+    startLine: number,
+    startColumn: number,
+    length: number,
+    message: string
+}
+
 export abstract class H2RCST {
-    public abstract validate(language: RobotLanguage): Error[];
+    public tokens: IToken[];
+
+    constructor(tokens: IToken[]) {
+        this.tokens = tokens;
+    }
+
+    public abstract validate(language: RobotLanguage): ISemanticError[];
     public abstract toRegex(language: RobotLanguage): string;
+
+    protected error(message: string): ISemanticError {
+        const f = first(this.tokens);
+        const l = last(this.tokens);
+
+        return { 
+            startLine: f.startLine ?? NaN,
+            startColumn: f.startColumn ?? NaN,
+            length: (l.endOffset ?? l.startOffset) - f.startOffset,
+            message: message
+        };
+    }
 }
 
 /* eslint-disable no-bitwise */
@@ -52,18 +78,16 @@ export class MatchStatementValue {
     }
 }
 
-export abstract class StatementCST implements H2RCST {
-    public abstract validate(language: RobotLanguage): Error[];
-    public abstract toRegex(language: RobotLanguage): string;
+export abstract class StatementCST extends H2RCST {
 }
 
-export class MatchSubStatementCST implements H2RCST {
-    constructor(public count: CountSubStatementCST | null, public invert: boolean = false, public values: MatchSubStatementValue[]) {
-        /* empty */
+export class MatchSubStatementCST extends H2RCST {
+    constructor(public tokens: IToken[], public count: CountSubStatementCST | null, public invert: boolean = false, public values: MatchSubStatementValue[]) {
+        super(tokens);
     }
     
-    public validate(language: RobotLanguage): Error[] {
-        let errors: Error[] = [];
+    public validate(language: RobotLanguage): ISemanticError[] {
+        let errors: ISemanticError[] = [];
 
         if (this.count) {
             errors = errors.concat(this.count.validate(language));
@@ -75,21 +99,21 @@ export class MatchSubStatementCST implements H2RCST {
                 let to = value.to as string;
 
                 if (!isSingleRegexCharacter(from)) {
-                        errors.push(new Error("Between statement must begin with a single character"));
+                        errors.push(this.error("Between statement must begin with a single character"));
                 }
                 else if (from.startsWith("\\u") || from.startsWith("\\U") || from.startsWith("\\")) {
                     from = JSON.parse(`"${regexEscape(from)}"`);
                 }
 
                 if (!isSingleRegexCharacter(to)) {
-                        errors.push(new Error("Between statement must end with a single character"));
+                        errors.push(this.error("Between statement must end with a single character"));
                 }
                 else if (to.startsWith("\\u") || to.startsWith("\\U") || to.startsWith("\\")) {
                     to = JSON.parse(`"${regexEscape(to)}"`);
                 }
 
                 if (from.charCodeAt(0) >= to.charCodeAt(0)) {
-                    errors.push(new Error("Between statement range invalid"));
+                    errors.push(this.error("Between statement range invalid"));
                 }
             }
         }
@@ -182,27 +206,29 @@ export class MatchSubStatementCST implements H2RCST {
 
 }
 
-export class UsingStatementCST implements H2RCST {
-    constructor(public flags: UsingFlags[]) {
-        /* empty */
+export class UsingStatementCST extends H2RCST {
+    constructor(public tokens: IToken[], public flags: UsingFlags[]) {
+        super(tokens);
     }
-    public validate(language: RobotLanguage): Error[] {
-        const errors: Error[] = [];
+
+    public validate(language: RobotLanguage): ISemanticError[] {
+        const errors: ISemanticError[] = [];
         let flag = this.flags[0];
 
         for (let i = 1; i < this.flags.length; i++) {
             if (hasFlag(flag, this.flags[i])) {
-                errors.push(new Error("Duplicate modifier: " + MatchSubStatementType[this.flags[i]] ));
+                errors.push(this.error("Duplicate modifier: " + MatchSubStatementType[this.flags[i]] ));
             }
             flag = combineFlags(flag, this.flags[i]);
         }
 
         if (hasFlag(flag, UsingFlags.Sensitive) && hasFlag(flag, UsingFlags.Insensitive)) {
-            errors.push(new Error("Cannot be both case sensitive and insensitive"));
+            errors.push(this.error("Cannot be both case sensitive and insensitive"));
         }
 
         return errors;
     }
+
     public toRegex(language: RobotLanguage): string {
         let str = "";
         let exact = false;
@@ -226,19 +252,19 @@ export class UsingStatementCST implements H2RCST {
     }
 }
 
-export class CountSubStatementCST implements H2RCST {
-    constructor(public from: number, public to: number | null, public opt: "inclusive" | "exclusive" | "+" | null) {
-        /* empty */
+export class CountSubStatementCST extends H2RCST {
+    constructor(public tokens: IToken[], public from: number, public to: number | null = null, public opt: "inclusive" | "exclusive" | "+" | null = null) {
+        super(tokens);
     }
 
-    public validate(language: RobotLanguage): Error[] {
-        const errors: Error[] = [];
+    public validate(language: RobotLanguage): ISemanticError[] {
+        const errors: ISemanticError[] = [];
 
         if (this.from < 0) {
-            errors.push(new Error("Value cannot be negative"));
+            errors.push(this.error("Value cannot be negative"));
         }
         else if (this.to !== null && ((this.opt === "exclusive" && (this.to-1) <= this.from) || this.to <= this.from)) {
-            errors.push(new Error("Values must be in range of eachother"));
+            errors.push(this.error("Values must be in range of eachother"));
         }
 
         return errors;
@@ -263,13 +289,13 @@ export class CountSubStatementCST implements H2RCST {
     }
 }
 
-export class MatchStatementCST implements StatementCST {
-    constructor(public matches: MatchStatementValue[]) {
-        /* empty */
+export class MatchStatementCST extends StatementCST {
+    constructor(public tokens: IToken[], public matches: MatchStatementValue[]) {
+        super(tokens);
     }
 
-    public validate(language: RobotLanguage): Error[] {
-        let errors: Error[] = [];
+    public validate(language: RobotLanguage): ISemanticError[] {
+        let errors: ISemanticError[] = [];
 
         for (const match of this.matches) {
             errors = errors.concat(match.statement.validate(language));
@@ -285,13 +311,13 @@ export class MatchStatementCST implements StatementCST {
     }
 }
 
-export class RepeatStatementCST implements StatementCST {
-    constructor(public optional: boolean, public count: CountSubStatementCST | null, public statements: StatementCST[]) {
-        /* empty */
+export class RepeatStatementCST extends StatementCST {
+    constructor(public tokens: IToken[], public optional: boolean, public count: CountSubStatementCST | null, public statements: StatementCST[]) {
+        super(tokens);
     }
 
-    public validate(language: RobotLanguage): Error[] {
-        let errors: Error[] = [];
+    public validate(language: RobotLanguage): ISemanticError[] {
+        let errors: ISemanticError[] = [];
 
         if (this.count !== null) {
             errors = errors.concat(this.count.validate(language));
@@ -335,16 +361,16 @@ export class RepeatStatementCST implements StatementCST {
     }
 }
 
-export class GroupStatementCST implements StatementCST {
-    constructor(public optional: boolean, public name: string | null, public statements: StatementCST[]) {
-        /* empty */
+export class GroupStatementCST extends StatementCST {
+    constructor(public tokens: IToken[], public optional: boolean, public name: string | null, public statements: StatementCST[]) {
+        super(tokens);
     }
 
-    public validate(language: RobotLanguage): Error[] {
-        let errors : Error[] = [];
+    public validate(language: RobotLanguage): ISemanticError[] {
+        let errors : ISemanticError[] = [];
         
         if (language !== RobotLanguage.DotNet && language !== RobotLanguage.JS) {
-            errors.push(new Error("This language does not support named groups"));
+            errors.push(this.error("This language does not support named groups"));
         }
 
         for (const statement of this.statements) {
@@ -373,13 +399,13 @@ export class GroupStatementCST implements StatementCST {
     }
 }
 
-export class RegularExpressionCST implements H2RCST {
-    constructor(public usings: UsingStatementCST, public statements: StatementCST[]) {
-        /* empty */
+export class RegularExpressionCST extends H2RCST {
+    constructor(public tokens: IToken[], public usings: UsingStatementCST, public statements: StatementCST[]) {
+        super(tokens);
     }
 
-    public validate(language: RobotLanguage): Error[] {
-        let errors: Error[] = this.usings.validate(language);
+    public validate(language: RobotLanguage): ISemanticError[] {
+        let errors: ISemanticError[] = this.usings.validate(language);
 
         for (const statement of this.statements) {
             errors = errors.concat(statement.validate(language));

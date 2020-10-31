@@ -1,5 +1,8 @@
 /*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
 
+import { ISemanticError } from "./generator";
+import { IRecognitionException, ILexingError } from "chevrotain";
+
 /* eslint-disable no-bitwise */
 export function hasFlag(a: number, b: number) : boolean {
     return (a & b) !== 0;
@@ -17,11 +20,15 @@ export function isSingleRegexCharacter(char: string): boolean {
            char.length === 1;
 }
 
-export function last<T>(array: T[]) : T {
+export function first<T>(array: T[]): T {
+    return array[0];
+}
+
+export function last<T>(array: T[]): T {
     return array[array.length-1];
 }
 
-export function findLastIndex<T>(array: T[], value: T) : number {
+export function findLastIndex<T>(array: T[], value: T): number {
     for (let index = array.length-1; index >= 0; index--) {
         if (array[index] === value) {
             return index;
@@ -45,4 +52,37 @@ export function removeQuotes(input: string): string {
 
 export function regexEscape(input: string) : string {
     return input.replace("\\", "\\\\").replace(/([=:\-\.\[\]\^\|\(\)\*\+\?\{\}\$\/])/g, "\\$1");
+}
+
+export interface ICommonError {
+	type: string,
+	startLine: number,
+    startColumn: number,
+    length: number,
+    message: string
+}
+
+export function lexErrorToCommonError(error: ILexingError): ICommonError {
+	return {
+		type: "Lexer Error",
+		startLine: error.line,
+		startColumn: error.column,
+		length: error.length,
+		message: error.message
+	};
+}
+
+export function parseErrorToCommonError(error: IRecognitionException): ICommonError {
+	return {
+		type: "Parser Error",
+		startLine: error.token.startLine ?? NaN,
+		startColumn: error.token.startColumn ?? NaN,
+		length: error.token.endOffset ?? NaN - error.token.startOffset,
+		message: error.name + ": " + error.message,
+	};
+}
+
+export function semanticErrorToCommonError(error: ISemanticError): ICommonError {
+	(error as ICommonError).type = "Semantic Error";
+	return error as ICommonError;
 }

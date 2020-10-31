@@ -5,12 +5,16 @@ import "./webpage/style.css";
 
 import { Human2RegexLexer, Human2RegexLexerOptions } from "./lexer";
 import { Human2RegexParser, Human2RegexParserOptions } from "./parser";
+import { RobotLanguage } from "./generator";
+import { lexErrorToCommonError, parseErrorToCommonError, semanticErrorToCommonError, ICommonError } from "./utilities";
 
 /*
 $(function() {
 
 });
 */
+
+
 
 const lexer = new Human2RegexLexer(new Human2RegexLexerOptions(false));
 const parser = new Human2RegexParser(new Human2RegexParserOptions(false));
@@ -28,9 +32,9 @@ create an optional group called protocol
 	match "http"
 	optionally match "s"
 	match "://"
-create a group called subdomain
+create an optional group called subdomain
 	repeat
-		match 1+ words
+		match a word
 		match "."
 create a group called domain
 	match 1+ words or "_" or "-"
@@ -57,9 +61,23 @@ create an optional group
 `);
 
 
-console.log(result.errors);
 
-parser.input = result.tokens;
-const regex = parser.parse();
-console.log(JSON.stringify(regex, undefined, 4));
-console.log(parser.errors);
+const total_errors: ICommonError[] = [];
+
+
+result.errors.map(lexErrorToCommonError).forEach((x) => total_errors.push(x));
+
+if (total_errors.length === 0) {
+	parser.input = result.tokens;
+	const regex = parser.parse();
+
+	parser.errors.map(parseErrorToCommonError).forEach((x) => total_errors.push(x));
+	regex.validate(RobotLanguage.JS).map(semanticErrorToCommonError).forEach((x) => total_errors.push(x));
+
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+	if (total_errors.length === 0) {
+		console.log(regex.toRegex(RobotLanguage.JS));
+	}
+}
+
+console.log("Errors = " + total_errors);

@@ -1,8 +1,9 @@
 /*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
 
-import { EmbeddedActionsParser, IOrAlt } from "chevrotain";
+import { EmbeddedActionsParser, IOrAlt, IToken } from "chevrotain";
 import * as T from "./tokens";
 import { CountSubStatementCST, UsingFlags, MatchSubStatementType, MatchSubStatementValue, MatchSubStatementCST, UsingStatementCST, RegularExpressionCST, StatementCST, RepeatStatementCST, MatchStatementValue, MatchStatementCST, GroupStatementCST } from "./generator";
+import { first } from "./utilities";
 
 export class Human2RegexParserOptions {
     constructor(public skip_validations: boolean = false) {
@@ -10,10 +11,21 @@ export class Human2RegexParserOptions {
     }
 }
 
+class TokenAndValue<T> {
+    constructor(public token: IToken, public value: T) {
+        /* empty */
+    }
+}
+class TokensAndValue<T> {
+    constructor(public tokens: IToken[], public value: T) {
+        /* empty */
+    }
+}
+
 export class Human2RegexParser extends EmbeddedActionsParser {
     private static already_init = false;
 
-    public parse : (idxInCallingRule?: number, ...args: unknown[]) => RegularExpressionCST;
+    public parse: (idxInCallingRule?: number, ...args: unknown[]) => RegularExpressionCST;
 
     constructor(private options: Human2RegexParserOptions = new Human2RegexParserOptions()) {
         super(T.AllTokens, { recoveryEnabled: false, maxLookahead: 2, skipValidations: options.skip_validations });
@@ -26,116 +38,96 @@ export class Human2RegexParser extends EmbeddedActionsParser {
         
         const $ = this;
 
-        let nss_rules : IOrAlt<number>[] | null = null;
+        // IN REGARDS TO KEEPING TOKENS:
+        // We don't really need to keep each token, only the first and last tokens
+        // This is due to the fact we calculate the difference between those tokens
+        // However, sometimes we have optional starts and ends
+        // Each optional near the start and end MUST be recorded because they may be the first/last token
+        // ex) "optional match 3..." the start token is "optional", but "match 3..."'s start token is "match"
+
+        let nss_rules : IOrAlt<TokenAndValue<number>>[] | null = null;
         const NumberSubStatement = $.RULE("NumberSubStatement", () => {
-            let value: number = 0;
-
-            value = $.OR(nss_rules || (nss_rules = [
+            return $.OR(nss_rules || (nss_rules = [
+                { ALT: () => new TokenAndValue($.CONSUME(T.Zero), 0) },
+                { ALT: () => new TokenAndValue($.CONSUME(T.One), 1) },
+                { ALT: () => new TokenAndValue($.CONSUME(T.Two), 2) },
+                { ALT: () => new TokenAndValue($.CONSUME(T.Three), 3) },
+                { ALT: () => new TokenAndValue($.CONSUME(T.Four), 4) },
+                { ALT: () => new TokenAndValue($.CONSUME(T.Five), 5) },
+                { ALT: () => new TokenAndValue($.CONSUME(T.Six), 6) },
+                { ALT: () => new TokenAndValue($.CONSUME(T.Seven), 7) },
+                { ALT: () => new TokenAndValue($.CONSUME(T.Eight), 8) },
+                { ALT: () => new TokenAndValue($.CONSUME(T.Nine), 9) },
+                { ALT: () => new TokenAndValue($.CONSUME(T.Ten), 10) },
                 { ALT: () => {
-                    $.CONSUME(T.Zero); 
-                    return 0; 
-                }},
-                { ALT: () => {
-                    $.CONSUME(T.One); 
-                    return 1; 
-                }},
-                { ALT: () => {
-                    $.CONSUME(T.Two); 
-                    return 2; 
-                }},
-                { ALT: () => {
-                    $.CONSUME(T.Three); 
-                    return 3; 
-                }},
-                { ALT: () => {
-                    $.CONSUME(T.Four); 
-                    return 4; 
-                }},
-                { ALT: () => {
-                    $.CONSUME(T.Five); 
-                    return 5; 
-                }},
-                { ALT: () => {
-                    $.CONSUME(T.Six); 
-                    return 6; 
-                }},
-                { ALT: () => {
-                    $.CONSUME(T.Seven); 
-                    return 7; 
-                }},
-                { ALT: () => {
-                    $.CONSUME(T.Eight); 
-                    return 8; 
-                }},
-                { ALT: () => {
-                    $.CONSUME(T.Nine); 
-                    return 9; 
-                }},
-                { ALT: () => {
-                    $.CONSUME(T.Ten); 
-                    return 10; 
-                }},
-
-                { ALT: () => parseInt($.CONSUME(T.NumberLiteral).image) },
+                    const tok = $.CONSUME(T.NumberLiteral);
+                    return new TokenAndValue(tok, parseInt(tok.image));
+                }}
             ]));
-
-            return value;
         });
 
         // 1, 1..2, between 1 and/to 2 inclusively/exclusively
         const CountSubStatement = $.RULE("CountSubStatement", () => {
-            let from : number = 0;
-            let to: number | null = null;
-            let opt: "inclusive" | "exclusive" | "+" | null = null;
-            
-            $.OR([
+            return $.OR([
                 { ALT: () => {
-                    $.CONSUME(T.Between);
-                    from = $.SUBRULE4(NumberSubStatement);
+                    const tokens: IToken[] = [];
+
+                    tokens.push($.CONSUME(T.Between));
+                    const from = $.SUBRULE4(NumberSubStatement);
                     $.OR3([
                         { ALT: () => $.CONSUME2(T.To) },
                         { ALT: () => $.CONSUME(T.And) }
                     ]);
-                    to = $.SUBRULE5(NumberSubStatement);
-                    $.OPTION4(() => $.CONSUME3(T.Times));
-                    $.OPTION5(() => {
-                        $.OR4([
+                    const to = $.SUBRULE5(NumberSubStatement);
+                    tokens.push(to.token);
+                    $.OPTION4(() => tokens.push($.CONSUME3(T.Times)));
+                    const opt = $.OPTION5(() => {
+                        return $.OR4([
                             { ALT: () => {
-                                $.CONSUME(T.Inclusive);
-                                opt = "inclusive";
+                                tokens.push($.CONSUME(T.Inclusive));
+                                return "inclusive";
                             }},
                             { ALT: () => {
-                                $.CONSUME(T.Exclusive);
-                                opt = "exclusive";
+                                tokens.push($.CONSUME(T.Exclusive));
+                                return "exclusive";
                             }}
                         ]);
                     });
+
+                    return new CountSubStatementCST(tokens, from.value, to.value, opt as "inclusive" | "exclusive" | null);
                 }},
                 
-                { ALT: () => { 
-                    $.OPTION2(() => $.CONSUME(T.From));
-                    from = $.SUBRULE2(NumberSubStatement);
-                    $.OR2([
-                        { ALT: () => {
-                            $.CONSUME(T.OrMore);
-                            opt = "+";
-                        }},
+                { ALT: () => {
+                    const tokens: IToken[] = [];
+
+                    $.OPTION2(() => tokens.push($.CONSUME(T.From)));
+                    const from = $.SUBRULE2(NumberSubStatement);
+                    const to = $.OR2([
+                        { ALT: () => new TokenAndValue($.CONSUME(T.OrMore), [ null, "+" ]) },
                         { ALT: () => { 
                             $.CONSUME(T.To); 
-                            to = $.SUBRULE3(NumberSubStatement); 
+                            const val = $.SUBRULE3(NumberSubStatement);
+                            return new TokenAndValue(val.token, [ val.value, null ]);
                         }}
                     ]);
-                    $.OPTION3(() => $.CONSUME2(T.Times));
+                    tokens.push(to.token);
+                    $.OPTION3(() => tokens.push($.CONSUME2(T.Times)));
+
+                    return new CountSubStatementCST(tokens, from.value, to.value ? to.value[0] : null, to.value ? to.value[1] : null);
                 }},
 
                 { ALT: () => { 
-                    $.OPTION(() => $.CONSUME(T.Exactly));
-                    from = $.SUBRULE(NumberSubStatement);
-                    $.OPTION6(() => $.CONSUME(T.Times));
+                    const tokens: IToken[] = [];
+                    $.OPTION(() => tokens.push($.CONSUME(T.Exactly)));
+                    const from = $.SUBRULE(NumberSubStatement);
+                    tokens.push(from.token);
+                    $.OPTION6(() => tokens.push($.CONSUME(T.Times)));
+
+                    return new CountSubStatementCST(tokens, from.value);
                 }} 
             ]);
 
-            return new CountSubStatementCST(from, to, opt);
+            
         });
 
         let mss_rules : IOrAlt<MatchSubStatementValue>[] | null = null;
@@ -147,9 +139,19 @@ export class Human2RegexParser extends EmbeddedActionsParser {
             let to : string | null = null;
             let type : MatchSubStatementType = MatchSubStatementType.Anything;
 
-            count = $.OPTION(() => $.SUBRULE(CountSubStatement) );
+            const tokens: IToken[] = [];
+
+            count = $.OPTION(() => {
+                const css = $.SUBRULE(CountSubStatement);
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                if (css.tokens) {
+                    tokens.push(first(css.tokens));
+                }
+                return css;
+            });
+
             invert = $.OPTION2(() => { 
-                $.CONSUME(T.Not); 
+                tokens.push($.CONSUME(T.Not));
                 return true;
             });
             $.AT_LEAST_ONE_SEP({
@@ -161,7 +163,9 @@ export class Human2RegexParser extends EmbeddedActionsParser {
                             $.OPTION4(() => $.CONSUME(T.From));
                             from = $.CONSUME2(T.StringLiteral).image; 
                             $.CONSUME(T.To);
-                            to = $.CONSUME3(T.StringLiteral).image;
+                            const token = $.CONSUME3(T.StringLiteral);
+                            tokens.push(token);
+                            to = token.image;
                             type = MatchSubStatementType.Between;
 
                             return new MatchSubStatementValue(type, from, to);
@@ -170,73 +174,77 @@ export class Human2RegexParser extends EmbeddedActionsParser {
                             $.CONSUME(T.Between);
                             from = $.CONSUME4(T.StringLiteral).image;
                             $.CONSUME(T.And);
-                            to = $.CONSUME5(T.StringLiteral).image;
+                            const token = $.CONSUME5(T.StringLiteral);
+                            to = token.image;
+                            tokens.push(token);
                             type = MatchSubStatementType.Between;
 
                             return new MatchSubStatementValue(type, from, to);
                         }},
                         { ALT: () => {
-                            from = $.CONSUME(T.StringLiteral).image;
+                            const token = $.CONSUME(T.StringLiteral);
+                            tokens.push(token);
+                            from = token.image;
                             type = MatchSubStatementType.SingleString;
 
                             return new MatchSubStatementValue(type, from);
                         }},
                         { ALT: () => { 
-                            $.CONSUME(T.Anything); 
+                            tokens.push($.CONSUME(T.Anything)); 
                             type = MatchSubStatementType.Anything;
 
                             return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
-                            $.CONSUME(T.Word); 
+                            tokens.push($.CONSUME(T.Word)); 
                             type = MatchSubStatementType.Word;
 
                             return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
-                            $.CONSUME(T.Digit); 
+                            tokens.push($.CONSUME(T.Digit)); 
                             type = MatchSubStatementType.Digit;
 
                             return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
-                            $.CONSUME(T.Character); 
+                            tokens.push($.CONSUME(T.Character)); 
                             type = MatchSubStatementType.Character;
 
                             return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
-                            $.CONSUME(T.Whitespace); 
+                            tokens.push($.CONSUME(T.Whitespace)); 
                             type = MatchSubStatementType.Whitespace;
 
                             return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
-                            $.CONSUME(T.Number); 
+                            tokens.push($.CONSUME(T.Number)); 
                             type = MatchSubStatementType.Number;
 
                             return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
-                            $.CONSUME(T.Tab); 
+                            tokens.push($.CONSUME(T.Tab)); 
                             type = MatchSubStatementType.Tab;
 
                             return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
-                            $.CONSUME(T.Linefeed); 
+                            tokens.push($.CONSUME(T.Linefeed)); 
                             type = MatchSubStatementType.Linefeed;
 
                             return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
-                            $.CONSUME(T.Newline); 
+                            tokens.push($.CONSUME(T.Newline)); 
                             type = MatchSubStatementType.Newline;
 
                             return new MatchSubStatementValue(type);
                         }},
                         { ALT: () => { 
-                            $.CONSUME(T.CarriageReturn); 
+                            tokens.push($.CONSUME(T.CarriageReturn)); 
                             type = MatchSubStatementType.CarriageReturn;
 
                             return new MatchSubStatementValue(type);
@@ -245,19 +253,20 @@ export class Human2RegexParser extends EmbeddedActionsParser {
                 }
             });
 
-            return new MatchSubStatementCST(count, invert, values);
+            return new MatchSubStatementCST(tokens, count, invert, values);
         });
 
         // optionally match "+" then 1+ words
         const MatchStatement = $.RULE("MatchStatement", () => {
             let optional = false;
             const msv: MatchStatementValue[] = [];
+            const tokens: IToken[] = [];
 
             $.OPTION(() => {
-                $.CONSUME(T.Optional);
+                tokens.push($.CONSUME(T.Optional));
                 optional = true;
             });
-            $.CONSUME(T.Match);
+            tokens.push($.CONSUME(T.Match));
             msv.push(new MatchStatementValue(optional, $.SUBRULE(MatchSubStatement)));
             $.MANY(() => {
                 $.OR([
@@ -274,9 +283,9 @@ export class Human2RegexParser extends EmbeddedActionsParser {
                 });
                 msv.push(new MatchStatementValue(optional, $.SUBRULE2(MatchSubStatement)));
             });
-            $.CONSUME(T.EndOfLine);
+            tokens.push($.CONSUME(T.EndOfLine));
 
-            return new MatchStatementCST(msv);
+            return new MatchStatementCST(tokens, msv);
         });
 
         // using global matching
@@ -284,7 +293,7 @@ export class Human2RegexParser extends EmbeddedActionsParser {
         const UsingStatement = $.RULE("UsingStatement", () => {
             const usings: UsingFlags[] = [];
 
-            $.CONSUME(T.Using);
+            const tokens = [ $.CONSUME(T.Using) ];
             $.AT_LEAST_ONE_SEP({
                 SEP: T.And,
                 DEF: () => {
@@ -313,67 +322,75 @@ export class Human2RegexParser extends EmbeddedActionsParser {
                     $.OPTION(() => $.CONSUME(T.Matching));
                 }
             });
-            $.CONSUME(T.EndOfLine);
+            tokens.push($.CONSUME(T.EndOfLine));
 
-            return usings;
+            return new TokensAndValue(tokens, usings);
         });
 
         const GroupStatement = $.RULE("GroupStatement", () => {
+            const tokens: IToken[] = [];
             let optional = false;
             let name: string | null = null;
             const statement: StatementCST[] = [];
 
-            $.OR([
+            tokens.push($.OR([
                 { ALT: () => {
                     optional = true;
-                    $.CONSUME(T.Optional);
+                    const first_token = $.CONSUME(T.Optional);
                     $.CONSUME(T.Create);
                     $.CONSUME(T.A);
+
+                    return first_token;
                 }},
                 { ALT: () => {
-                    $.CONSUME2(T.Create);
+                    const first_token = $.CONSUME2(T.Create);
                     $.CONSUME2(T.A);
                     $.OPTION2(() => {
                         $.CONSUME2(T.Optional);
                         optional = true;
                     });
+
+                    return first_token;
                 }}
-            ]);
+            ]));
 
             $.CONSUME(T.Group);
             $.OPTION(() => {
                 $.CONSUME(T.Called);
                 name = $.CONSUME(T.Identifier).image;
             });
-            $.CONSUME2(T.EndOfLine);
+            // Note: Technically not the end token, 
+            // BUT this is way more useful than the Outdent for error reporting
+            tokens.push($.CONSUME2(T.EndOfLine));
             $.CONSUME(T.Indent);
             $.AT_LEAST_ONE(() => {
                 statement.push($.SUBRULE(Statement));
             });
             $.CONSUME(T.Outdent);
 
-            return new GroupStatementCST(optional, name, statement);
+            return new GroupStatementCST(tokens, optional, name, statement);
         });
 
         const RepeatStatement = $.RULE("RepeatStatement", () => {
+            const tokens: IToken[] = [];
             let optional = false;
             let count : CountSubStatementCST | null = null;
             const statements: StatementCST[] = [];
 
             $.OPTION3(() => {
-                $.CONSUME(T.Optional);
+                tokens.push($.CONSUME(T.Optional));
                 optional = true;
             });
-            $.CONSUME(T.Repeat);
+            tokens.push($.CONSUME(T.Repeat));
             $.OPTION(() => count = $.SUBRULE(CountSubStatement));
             $.CONSUME3(T.EndOfLine);
             $.CONSUME(T.Indent);
             $.AT_LEAST_ONE(() => {
                 statements.push($.SUBRULE(Statement));
             });
-            $.CONSUME(T.Outdent);
+            tokens.push($.CONSUME(T.Outdent));
 
-            return new RepeatStatementCST(optional, count, statements);
+            return new RepeatStatementCST(tokens, optional, count, statements);
         });
 
         const Statement = $.RULE("Statement", () => {
@@ -385,13 +402,18 @@ export class Human2RegexParser extends EmbeddedActionsParser {
         });
 
         const Regex = $.RULE("Regex", () => {
+            let tokens: IToken[] = [];
             let usings: UsingFlags[] = [];
             const statements: StatementCST[] = [];
 
-            $.MANY(() => usings = usings.concat($.SUBRULE(UsingStatement)));
+            $.MANY(() => {
+                const using = $.SUBRULE(UsingStatement);
+                tokens = tokens.concat(using.tokens);
+                usings = usings.concat(using.value);
+            });
             $.MANY2(() => statements.push($.SUBRULE(Statement)) );
 
-            return new RegularExpressionCST(new UsingStatementCST(usings), statements);
+            return new RegularExpressionCST([], new UsingStatementCST(tokens, usings), statements);
         });
 
         this.performSelfAnalysis();
