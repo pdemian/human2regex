@@ -19,6 +19,7 @@ $(function() {
 const lexer = new Human2RegexLexer(new Human2RegexLexerOptions(false));
 const parser = new Human2RegexParser(new Human2RegexParserOptions(false));
 
+console.time("tokenize");
 const result = lexer.tokenize(`
 // H2R supports // # and /**/ as comments
 // A group is only captured if given a name. 
@@ -59,7 +60,7 @@ create an optional group
 	match "#"
 	match 0+ any thing
 `);
-
+console.timeEnd("tokenize");
 
 
 const total_errors: ICommonError[] = [];
@@ -69,14 +70,26 @@ result.errors.map(lexErrorToCommonError).forEach((x) => total_errors.push(x));
 
 if (total_errors.length === 0) {
 	parser.input = result.tokens;
+
+	console.time("parse");
 	const regex = parser.parse();
+	console.timeEnd("parse");
 
 	parser.errors.map(parseErrorToCommonError).forEach((x) => total_errors.push(x));
-	regex.validate(RobotLanguage.JS).map(semanticErrorToCommonError).forEach((x) => total_errors.push(x));
+
+	console.time("validate");
+	const valid = regex.validate(RobotLanguage.JS);
+	console.timeEnd("validate");
+	
+	valid.map(semanticErrorToCommonError).forEach((x) => total_errors.push(x));
 
 	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 	if (total_errors.length === 0) {
-		console.log(regex.toRegex(RobotLanguage.JS));
+		console.time("to regex");
+		const r = regex.toRegex(RobotLanguage.JS);
+		console.timeEnd("to regex");
+
+		console.log(r);
 	}
 }
 

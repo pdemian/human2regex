@@ -555,30 +555,6 @@ pre code {
   margin-left: auto;
 }
 
-@media (min-width: 576px) {
-  .container {
-    max-width: 540px;
-  }
-}
-
-@media (min-width: 768px) {
-  .container {
-    max-width: 720px;
-  }
-}
-
-@media (min-width: 992px) {
-  .container {
-    max-width: 960px;
-  }
-}
-
-@media (min-width: 1200px) {
-  .container {
-    max-width: 1140px;
-  }
-}
-
 .container-fluid {
   width: 100%;
   padding-right: 15px;
@@ -9253,6 +9229,38 @@ footer {
 
 
 /*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
+ 
+@media (max-width: 992px) {
+	.margin-when-small {
+		margin-top: 10px;
+		margin-bottom: 10px;
+	}
+}
+ 
+h4 {
+	margin-top: 10px; 
+}
+
+.cheatsheet {
+	height:100%; 
+	padding:10px; 
+	border-color: #ced4da;
+	border-style: solid; 
+	border-radius: 10px; 
+	border-width: 1px;
+}
+
+p {
+	font-size: 16px !important;
+}
+
+.zero-margin-bottom {
+	margin-bottom: 0px;
+}
+
+#maincontent {
+	margin-top: 75px;
+}
  
 .align_header {
     text-align: center;
