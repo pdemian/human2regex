@@ -16,7 +16,7 @@
 					<h4>Your Regular Expression:</h4>
 					<input readonly type="text" class="form-control" id="regex"></input>
 					<h4>Human Speak:</h4>
-					<textarea class="form-control" id="human" rows="25">
+					<textarea class="form-control" id="human" rows="25" onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'\t'+v.substring(e);this.selectionStart=this.selectionEnd=s+1;return false;}">
 // H2R supports // # and /**/ as comments
 // A group is only captured if given a name. 
 // You can use "and", "or", "not" to specify "[]" regex
@@ -58,7 +58,7 @@ create an optional group
 </textarea>
 				</div>
 				<br>
-				<div class="col-lg-4" class="margin-when-small">
+				<div class="col-lg-4 margin-when-small">
 					<div class="cheatsheet">
 						<h2>Cheat Sheet:</h2>
 						<p>Full documentation available <a href="tutorial.html">here</a></p>
@@ -72,7 +72,7 @@ create an optional group
 						<p><code>match 3 "hello"</code> matches exactly "hellohellohello"</p>
 						<p><code>match 1 to 5 "hello"</code> matches between 1 to 5 "hello"s</p>
 						<p><code>repeat 0 or more</code> repeats the intended text 0 or more times (default)</p>
-						<p><code>optionally repeat between 3 to 5</code></p> optionally repeats the indented text 3 to 5 times
+						<p><code>optionally repeat between 3 to 5</code> optionally repeats the indented text 3 to 5 times</p>
 						<p class="font-weight-bold">Grouping</p>
 						<p><code>create a group called "mygroup"</code> creates a group called "mygroup"</p>
 						<p><code>create an optional group</code> creates an unnamed optional group</p>

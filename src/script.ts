@@ -1,96 +1,71 @@
 /*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
 "use strict";
 
-import "./webpage/style.css";
-
 import { Human2RegexLexer, Human2RegexLexerOptions } from "./lexer";
 import { Human2RegexParser, Human2RegexParserOptions } from "./parser";
 import { RobotLanguage } from "./generator";
 import { lexErrorToCommonError, parseErrorToCommonError, semanticErrorToCommonError, ICommonError } from "./utilities";
+import $ from "jquery";
 
-/*
+import "./webpage/bootstrap.css";
+import "./webpage/cleanblog.css";
+import "./webpage/style.css";
+
+
+
 $(function() {
+	const total_errors: ICommonError[] = [];
+	const lexer = new Human2RegexLexer(new Human2RegexLexerOptions(true));
+	const parser = new Human2RegexParser(new Human2RegexParserOptions(true));
+	const result = lexer.tokenize($("#human").text());
 
-});
-*/
+	result.errors.map(lexErrorToCommonError).forEach((x) => total_errors.push(x));
 
-
-
-const lexer = new Human2RegexLexer(new Human2RegexLexerOptions(false));
-const parser = new Human2RegexParser(new Human2RegexParserOptions(false));
-
-console.time("tokenize");
-const result = lexer.tokenize(`
-// H2R supports // # and /**/ as comments
-// A group is only captured if given a name. 
-// You can use "and", "or", "not" to specify "[]" regex
-// You can use "then" to combine match statements, however I find using multiple "match" statements easier to read
-
-// exact matching means use a ^ and $ to signify the start and end of the string
-
-using global and exact matching
-create an optional group called protocol
-	match "http"
-	optionally match "s"
-	match "://"
-create an optional group called subdomain
-	repeat
-		match a word
-		match "."
-create a group called domain
-	match 1+ words or "_" or "-"
-	match "."
-	match a word
-# port, but we don't care about it, so ignore it
-optionally match ":" then 0+ digits
-create an optional group called path
-	repeat
-		match "/"
-		match 0+ words or "_" or "-"
-create an optional group
-	# we don't want to capture the '?', so don't name the group until afterwards
-	match "?"
-	create a group called query
-		repeat
-			match 1+ words or "_" or "-"
-			match "="
-			match 1+ words or "_" or "-"
-create an optional group
-	# fragment, again, we don't care, so ignore everything afterwards
-	match "#"
-	match 0+ any thing
-`);
-console.timeEnd("tokenize");
-
-
-const total_errors: ICommonError[] = [];
-
-
-result.errors.map(lexErrorToCommonError).forEach((x) => total_errors.push(x));
-
-if (total_errors.length === 0) {
-	parser.input = result.tokens;
-
-	console.time("parse");
-	const regex = parser.parse();
-	console.timeEnd("parse");
-
-	parser.errors.map(parseErrorToCommonError).forEach((x) => total_errors.push(x));
-
-	console.time("validate");
-	const valid = regex.validate(RobotLanguage.JS);
-	console.timeEnd("validate");
-	
-	valid.map(semanticErrorToCommonError).forEach((x) => total_errors.push(x));
-
-	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 	if (total_errors.length === 0) {
-		console.time("to regex");
-		const r = regex.toRegex(RobotLanguage.JS);
-		console.timeEnd("to regex");
+		parser.input = result.tokens;
+	
+		const regex = parser.parse();
+	
+		parser.errors.map(parseErrorToCommonError).forEach((x) => total_errors.push(x));
+	
+		let lang: RobotLanguage = RobotLanguage.JS;
+		switch ($("#dialect option:selected").val()) {
+			case "dotnet":
+				lang = RobotLanguage.DotNet;
+				break;
+			case "java":
+				lang = RobotLanguage.Java;
+				break;
+			case "perl":
+				lang = RobotLanguage.Perl;
+				break;
+			default:
+				lang = RobotLanguage.JS;
+				break;
+		}
 
-		console.log(r);
+		const valid = regex.validate(lang);
+		
+		valid.map(semanticErrorToCommonError).forEach((x) => total_errors.push(x));
+	
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		if (total_errors.length === 0) {
+			const r = regex.toRegex(lang);
+			$("#regex").attr("value", r);
+		}
 	}
-}
+	
+	console.log("Errors = " + total_errors);
 
-console.log("Errors = " + total_errors);
+	$("#dialect").on("selectionchanged", () => {
+		//do something
+	});
+
+	$("#human").on("input", () => {
+		//do something
+	});
+});
+
+
+
+
