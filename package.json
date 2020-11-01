@@ -39,6 +39,7 @@
   "license": "MIT",
   "dependencies": {
     "chevrotain": "^7.0.2",
+    "codemirror": "^5.58.2",
     "jquery": "^3.5.1"
   },
   "repository": {

@@ -54,35 +54,24 @@ export function regexEscape(input: string) : string {
     return input.replace("\\", "\\\\").replace(/([=:\-\.\[\]\^\|\(\)\*\+\?\{\}\$\/])/g, "\\$1");
 }
 
-export interface ICommonError {
-	type: string,
-	startLine: number,
-    startColumn: number,
-    length: number,
-    message: string
-}
+export class CommonError {
+    constructor(public type: string, public start_line: number, public start_column: number, public length: number, public message: string) {
+        /* empty */
+    }
 
-export function lexErrorToCommonError(error: ILexingError): ICommonError {
-	return {
-		type: "Lexer Error",
-		startLine: error.line,
-		startColumn: error.column,
-		length: error.length,
-		message: error.message
-	};
-}
+    public static fromLexError(error: ILexingError): CommonError {
+        return new CommonError("Lexer Error", error.line, error.column, error.length, error.message);
+    }
 
-export function parseErrorToCommonError(error: IRecognitionException): ICommonError {
-	return {
-		type: "Parser Error",
-		startLine: error.token.startLine ?? NaN,
-		startColumn: error.token.startColumn ?? NaN,
-		length: error.token.endOffset ?? NaN - error.token.startOffset,
-		message: error.name + ": " + error.message,
-	};
-}
+    public static fromParseError(error: IRecognitionException): CommonError {
+        return new CommonError("Parser Error", error.token.startLine ?? NaN, error.token.startColumn ?? NaN, error.token.endOffset ?? NaN - error.token.startOffset, error.name + ": " + error.message);
+    }
 
-export function semanticErrorToCommonError(error: ISemanticError): ICommonError {
-	(error as ICommonError).type = "Semantic Error";
-	return error as ICommonError;
+    public static fromSemanticError(error: ISemanticError): CommonError {
+        return new CommonError("Semantic Error", error.startLine, error.startColumn, error.length, error.message);
+    }
+
+    public toString(): string {
+        return `${this.type} @ ${this.start_line} ${this.start_column}: ${this.message}`;
+    }
 }

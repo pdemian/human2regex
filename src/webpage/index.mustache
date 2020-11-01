@@ -2,21 +2,30 @@
 		<!-- Main Content -->
 		<div class="container" id="maincontent" role="main">
             <div class="row">
-				<div class="col-lg-8">
+				<div class="col-lg-8 tenpx-margin-bottom">
 					<div class="form-group row zero-margin-bottom">
-						<p class="col-sm-4">Regex dialect:</p>
-						<span class="col-sm-8">
-						<select class="form-control" id="dialect">
-							<option value="js" selected>Javascript</option>
-							<option value="dotnet">.NET</option>
-							<option value="java">Java</option>
-							<option value="perl">Perl</option>
-						</select>
+						<label for="dialect" class="col-sm-4 col-form-label">Regex dialect:</label>
+						<div class="col-sm-8">
+							<select class="form-control" id="dialect">
+								<option value="js" selected>Javascript</option>
+								<option value="dotnet">.NET</option>
+								<option value="java">Java</option>
+								<option value="perl">Perl</option>
+							</select>
+						</div>
 					</div>
 					<h4>Your Regular Expression:</h4>
-					<input readonly type="text" class="form-control" id="regex"></input>
+					<div class="row">
+						<div class="col-xl-11">
+							<input readonly type="text" class="form-control" id="regex"></input>
+						</div>
+						<div class="col-xl-1">
+							<button type="button" class="btn btn-secondary" id="clip">Copy</button>
+						</div>
+					</div>
+					
 					<h4>Human Speak:</h4>
-					<textarea class="form-control" id="human" rows="25" onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'\t'+v.substring(e);this.selectionStart=this.selectionEnd=s+1;return false;}">
+					<textarea class="form-control" id="human" rows="25">
 // H2R supports // # and /**/ as comments
 // A group is only captured if given a name. 
 // You can use "and", "or", "not" to specify "[]" regex
@@ -56,9 +65,11 @@ create an optional group
 	match "#"
 	match 0+ any thing
 </textarea>
+					<h4>Errors:</h4>
+					<textarea readonly class="form-control " id="errors" rows="5"></textarea>
 				</div>
 				<br>
-				<div class="col-lg-4 margin-when-small">
+				<div class="col-lg-4 tenpx-margin-bottom">
 					<div class="cheatsheet">
 						<h2>Cheat Sheet:</h2>
 						<p>Full documentation available <a href="tutorial.html">here</a></p>

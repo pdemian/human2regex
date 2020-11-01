@@ -1,10 +1,7 @@
 /*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
  
-@media (max-width: 992px) {
-	.margin-when-small {
-		margin-top: 10px;
-		margin-bottom: 10px;
-	}
+.tenpx-margin-bottom {
+	margin-bottom: 10px;
 }
  
 h4 {
@@ -81,4 +78,48 @@ a:hover {
 
 .navbar-light .navbar-nav .nav-link {
     color: rgba(0, 0, 0, 0.54);
+}
+
+.navbar {
+	padding: 0 !important;
+}
+
+#errors {
+	resize: none;
+	background-color: #FFF;
+}
+
+.CodeMirror {
+    /* Bootstrap Settings */
+    box-sizing: border-box;
+    margin: 0;
+    font: inherit;
+    overflow: auto;
+    font-family: inherit;
+    display: block;
+    width: 100%;
+    padding: 6px 6px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    /* Code Mirror Settings */
+    font-family: monospace;
+    position: relative;
+    overflow: hidden;
+	resize: vertical;
+	height: 400px;
+}
+
+.CodeMirror-focused {
+    /* Bootstrap Settings */
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0.2rem rgba(102, 175, 233, .6);
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
 }
