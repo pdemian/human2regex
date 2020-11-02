@@ -1,27 +1,58 @@
 /*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
 
+/**
+ * The Lexer for Human2Regex
+ * @packageDocumentation
+ */
+
 import { Lexer, IToken, createTokenInstance, ILexingResult, ILexingError } from "chevrotain";
 import { last, findLastIndex } from "./utilities";
 import { Indent, Outdent, EndOfLine, AllTokens } from "./tokens";
 
+/**
+ * Defines the type of indents the lexer will allow
+ */
 export enum IndentType {
     Tabs,
     Spaces,
     Both
 }
 
+/**
+ * The options for the Lexer
+ */
 export class Human2RegexLexerOptions {
+
+    /**
+     * Constructor for the Human2RegexLexerOptions
+     * 
+     * @param skip_validations If true, the lexer will skip validations (~25% faster)
+     * @param type The type of indents the lexer will allow
+     * @param spaces_per_tab Number of spaces per tab
+     */
     constructor(public skip_validations = false, public type: IndentType = IndentType.Both, public spaces_per_tab: number = 4) {
         /* empty */
     }
 }
 
+/**
+ * Human2Regex Lexer
+ * 
+ * @remarks Only 1 lexer instance allowed due to a technical limitation and performance reasons
+ */
 export class Human2RegexLexer {
     private static already_init = false;
 
     private lexer!: Lexer;
     private options!: Human2RegexLexerOptions;
 
+    /**
+     * Human2Regex Lexer
+     * 
+     * @remarks Only 1 lexer instance allowed due to a technical limitation and performance reasons
+     * @param options options for the lexer
+     * @see Human2RegexLexerOptions
+     */
     constructor(options: Human2RegexLexerOptions = new Human2RegexLexerOptions()) {
         if (Human2RegexLexer.already_init) {
             throw new Error("Only 1 instance of Human2RegexLexer allowed");
@@ -32,11 +63,18 @@ export class Human2RegexLexer {
         this.setOptions(options);
     }
 
-    public setOptions(options: Human2RegexLexerOptions) : void {
+    /**
+     * Sets the options for this lexer
+     * 
+     * @param options options for the lexer
+     * @see Human2RegexLexerOptions
+     */
+    public setOptions(options: Human2RegexLexerOptions): void {
         this.options = options;
-        
+
         let indent_regex: RegExp | null = null;
 
+        // Generate an index lexer (accepts tabs or spaces or both based on options)
         if (this.options.type === IndentType.Tabs) {
             indent_regex = /\t/y;
         }
@@ -65,6 +103,12 @@ export class Human2RegexLexer {
         };
     }
 
+    /**
+     * Tokenizes the given text
+     * 
+     * @param text the text to analyze
+     * @returns a lexing result which contains the token stream and error list
+     */
     public tokenize(text: string) : ILexingResult {
         const lex_result = this.lexer.tokenize(text);
 
@@ -72,7 +116,6 @@ export class Human2RegexLexer {
             return lex_result;
         }
 
-        // create Outdents
         const tokens: IToken[] = [];
         const indent_stack = [ 0 ];
 
@@ -80,6 +123,7 @@ export class Human2RegexLexer {
         let start_of_line = true;
         let had_indents = false;
 
+        // create Outdents
         for (let i = 0; i < lex_result.tokens.length; i++) {
 
             // EoL? check for indents next (by setting startOfLine = true)
@@ -117,13 +161,16 @@ export class Human2RegexLexer {
                     // Ignore all indents AND newline
                     // continue;
                 }
+                // new indent is too far ahead
                 else if (!start_of_line || (curr_indent_level > last(indent_stack) + 1)) {
                     lex_result.errors.push(this.lexError(start_token));
                 }
+                // new indent is just 1 above
                 else if (curr_indent_level > last(indent_stack)) {
                     indent_stack.push(curr_indent_level);
                     tokens.push(start_token);
                 }
+                // new indent is below the past indent
                 else if (curr_indent_level < last(indent_stack)) {
                     const index = findLastIndex(indent_stack, curr_indent_level);
 

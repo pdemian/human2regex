@@ -1,16 +1,26 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
 
-import { regexEscape, removeQuotes, hasFlag, combineFlags, isSingleRegexCharacter, first, last } from "./utilities";
+/**
+ * Includes all Concrete Syntax Trees for Human2Regex
+ * @packageDocumentation
+ */
+
+import { regexEscape, removeQuotes, hasFlag, combineFlags, isSingleRegexCharacter, first, last, unusedParameter, makeFlag } from "./utilities";
 import { IToken } from "chevrotain";
 
-export enum RobotLanguage {
+/** 
+ * List of regular expression dialects we support
+ */
+export enum RegexDialect {
     JS,
     Perl,
     DotNet,
     Java
 }
 
+/**
+ * Interface for all semantic errors
+ */
 export interface ISemanticError {
     startLine: number,
     startColumn: number,
@@ -18,16 +28,52 @@ export interface ISemanticError {
     message: string
 }
 
+/**
+ * The base concrete syntax tree class
+ * 
+ * @internal
+ */
 export abstract class H2RCST {
     public tokens: IToken[];
 
+    /**
+     * Constructor for H2RCST
+     * 
+     * @param tokens Tokens used to calculate where an error occured
+     * @internal
+     */
     constructor(tokens: IToken[]) {
         this.tokens = tokens;
     }
 
-    public abstract validate(language: RobotLanguage): ISemanticError[];
-    public abstract toRegex(language: RobotLanguage): string;
+    /**
+     * Validate that this is both valid and can be generated in the specified language
+     * 
+     * @remarks There is no guarantee toRegex will work unless validate returns no errors
+     * 
+     * @param language the regex dialect we're validating
+     * @returns A list of errors
+     * @public
+     */
+    public abstract validate(language: RegexDialect): ISemanticError[];
 
+    /**
+     * Generate a regular expression fragment based on this syntax tree
+     * 
+     * @remarks There is no guarantee toRegex will work unless validate returns no errors
+     * 
+     * @param language the regex dialect we're generating
+     * @returns a regular expression fragment
+     * @public
+     */
+    public abstract toRegex(language: RegexDialect): string;
+
+    /**
+     * Creates an ISemanticError with a given message and the tokens provided from the constructor
+     * 
+     * @param message the message
+     * @internal
+     */
     protected error(message: string): ISemanticError {
         const f = first(this.tokens);
         const l = last(this.tokens);
@@ -41,16 +87,28 @@ export abstract class H2RCST {
     }
 }
 
-/* eslint-disable no-bitwise */
+/**
+ * Flags for the using statement
+ * 
+ * @internal
+ */
 export enum UsingFlags {
-    Multiline = 1 << 0,
-    Global = 1 << 1,
-    Sensitive = 1 << 2,
-    Insensitive = 1 << 3,
-    Exact = 1 << 4
+    Multiline = makeFlag(0),
+    Global = makeFlag(1),
+    Sensitive = makeFlag(2),
+    Insensitive = makeFlag(3),
+    Exact = makeFlag(4)
 }
-/* eslint-enable no-bitwise */
 
+/**
+ * Type of match arguments
+ * 
+ * @remarks SingleString means an escaped string
+ * @remarks Between means a range (ex. a-z)
+ * @remarks Anything means .
+ * @remarks Word, Digit, Character, Whitespace, Number, Tab, Linefeed, Newline, and Carriage return are \w+, \d, \w, \s, \d+, \t, \n, \n, \r respectively
+ * @internal
+ */
 export enum MatchSubStatementType {
     SingleString,
     Between,
@@ -66,27 +124,73 @@ export enum MatchSubStatementType {
     CarriageReturn
 }
 
+/**
+ * Container for match statements
+ * 
+ * @internal
+ */
 export class MatchSubStatementValue {
+
+    /**
+     * Constructor for MatchSubStatementValue
+     * 
+     * @param type the type of this match
+     * @param from optional range string
+     * @param to  optional range string
+     * @internal
+     */
     constructor(public type: MatchSubStatementType, public from: string | null = null, public to: string | null = null) {
         /* empty */
     }
 }
 
+/**
+ * Container for MatchStatementValue
+ * 
+ * @internal
+ */
 export class MatchStatementValue {
+
+    /**
+     * Constructor for MatchStatementValue
+     * 
+     * @param optional is this match optional 
+     * @param statement the substatement to generate
+     * @internal 
+     */
     constructor(public optional: boolean, public statement: MatchSubStatementCST) {
         /* empty */
     }
 }
 
+/**
+ * The base class for all statement concrete syntax trees
+ * 
+ * @internal
+ */
 export abstract class StatementCST extends H2RCST {
 }
 
+/**
+ * Concrete Syntax Tree for Match Sub statements
+ * 
+ * @internal
+ */
 export class MatchSubStatementCST extends H2RCST {
-    constructor(public tokens: IToken[], public count: CountSubStatementCST | null, public invert: boolean = false, public values: MatchSubStatementValue[]) {
+
+    /**
+     * Constructor for MatchSubStatementCST
+     * 
+     * @param tokens Tokens used to calculate where an error occured
+     * @param count optional count statement
+     * @param invert is this match inverted (ex, [^a-z] or [a-z])
+     * @param values sub statements to match
+     */
+    constructor(tokens: IToken[], private count: CountSubStatementCST | null, private invert: boolean = false, private values: MatchSubStatementValue[]) {
         super(tokens);
     }
     
-    public validate(language: RobotLanguage): ISemanticError[] {
+    public validate(language: RegexDialect): ISemanticError[] {
         let errors: ISemanticError[] = [];
 
         if (this.count) {
@@ -121,7 +225,7 @@ export class MatchSubStatementCST extends H2RCST {
         return errors;
     }
 
-    public toRegex(language: RobotLanguage): string {
+    public toRegex(language: RegexDialect): string {
         const str: string[] = [];
 
         for (const value of this.values) {
@@ -181,37 +285,33 @@ export class MatchSubStatementCST extends H2RCST {
         }
 
         if (this.count) {
-            if (this.count.from === 1 && this.count.to === null) {
-                if (this.count.opt === "+") {
-                    ret += "+";
-                }
-                // if we only have a count of 1, we can ignore adding any extra text
-            }
-            else if (this.count.from === 0 && this.count.to === null) {
-                if (this.count.opt === "+") {
-                    ret += "*";
-                }
-                else {
-                    // match 0 of anything? ok...
-                    ret = "";
-                }
-            }
-            else {
-                ret += this.count.toRegex(language);
-            }
+            ret += this.count.toRegex(language);
         }
 
         return ret;
     }
-
 }
 
+/**
+ * Concrete Syntax Tree for Using statements
+ * 
+ * @internal
+ */
 export class UsingStatementCST extends H2RCST {
-    constructor(public tokens: IToken[], public flags: UsingFlags[]) {
+
+    /**
+     * Constructor for UsingStatementCST
+     * 
+     * @param tokens Tokens used to calculate where an error occured
+     * @param flags using flags
+     */
+    constructor(tokens: IToken[], private flags: UsingFlags[]) {
         super(tokens);
     }
 
-    public validate(language: RobotLanguage): ISemanticError[] {
+    public validate(language: RegexDialect): ISemanticError[] {
+        unusedParameter(language, "Using Statement does not change based on language");
+
         const errors: ISemanticError[] = [];
         let flag = this.flags[0];
 
@@ -229,7 +329,9 @@ export class UsingStatementCST extends H2RCST {
         return errors;
     }
 
-    public toRegex(language: RobotLanguage): string {
+    public toRegex(language: RegexDialect): string {
+        unusedParameter(language, "Using Statement does not change based on language");
+
         let str = "";
         let exact = false;
 
@@ -252,12 +354,27 @@ export class UsingStatementCST extends H2RCST {
     }
 }
 
+/**
+ * Concrete Syntax Tree for Count sub statements
+ * 
+ * @internal
+ */
 export class CountSubStatementCST extends H2RCST {
-    constructor(public tokens: IToken[], public from: number, public to: number | null = null, public opt: "inclusive" | "exclusive" | "+" | null = null) {
+    /**
+     * Constructor for CountSubStatementCST
+     * 
+     * @param tokens Tokens used to calculate where an error occured
+     * @param from number to count from
+     * @param to optional number to count to
+     * @param opt option modifier
+     */
+    constructor(tokens: IToken[], private from: number, private to: number | null = null, private opt: "inclusive" | "exclusive" | "+" | null = null) {
         super(tokens);
     }
 
-    public validate(language: RobotLanguage): ISemanticError[] {
+    public validate(language: RegexDialect): ISemanticError[] {
+        unusedParameter(language, "Count does not need checking");
+
         const errors: ISemanticError[] = [];
 
         if (this.from < 0) {
@@ -270,31 +387,56 @@ export class CountSubStatementCST extends H2RCST {
         return errors;
     }
 
-    public toRegex(language: RobotLanguage): string {
+    public toRegex(language: RegexDialect): string {
+        unusedParameter(language, "Count does not change from language");
+
         const from = this.from;
         let to = this.to;
-        if (to !== null && this.opt === "exclusive") {
-            to--;
+
+
+        // if we only have a count of 1, we can ignore adding any extra text
+        if (to === null) {
+            if (from === 1) {
+                return this.opt === "+" ? "+" : "*";
+            }
+            else if (from === 0) {
+                return this.opt === "+" ? "*" : "";
+            }
         }
 
         if (to !== null) {
+            if (this.opt === "exclusive") {
+                to--;
+            }
             return `{${from},${to}}`;
         }
         else if (this.opt === "+") {
             return `{${from},}`;
         }
         else {
-            return `{${this.from}}`;
+            return `{${from}}`;
         }
     }
 }
 
+/**
+ * Concrete Syntax Tree for a Match statement
+ * 
+ * @internal
+ */
 export class MatchStatementCST extends StatementCST {
-    constructor(public tokens: IToken[], public matches: MatchStatementValue[]) {
+
+    /**
+     * Constructor for MatchStatementCST
+     * 
+     * @param tokens Tokens used to calculate where an error occured
+     * @param matches 
+     */
+    constructor(tokens: IToken[], private matches: MatchStatementValue[]) {
         super(tokens);
     }
 
-    public validate(language: RobotLanguage): ISemanticError[] {
+    public validate(language: RegexDialect): ISemanticError[] {
         let errors: ISemanticError[] = [];
 
         for (const match of this.matches) {
@@ -304,19 +446,33 @@ export class MatchStatementCST extends StatementCST {
         return errors;
     }
 
-    public toRegex(language: RobotLanguage): string {
+    public toRegex(language: RegexDialect): string {
         return this.matches.map((x) => {
             return x.statement.toRegex(language) + (x.optional ? "?" : "");
         }).join("");
     }
 }
 
+/**
+ * Concrete Syntax Tree for a Repeat statement
+ * 
+ * @internal
+ */
 export class RepeatStatementCST extends StatementCST {
-    constructor(public tokens: IToken[], public optional: boolean, public count: CountSubStatementCST | null, public statements: StatementCST[]) {
+
+    /**
+     * Constructor for RepeatStatementCST
+     * 
+     * @param tokens Tokens used to calculate where an error occured
+     * @param optional is this repetition optional
+     * @param count optional number of times to repeat
+     * @param statements the statements to repeat
+     */
+    constructor(tokens: IToken[], private optional: boolean, private count: CountSubStatementCST | null, private statements: StatementCST[]) {
         super(tokens);
     }
 
-    public validate(language: RobotLanguage): ISemanticError[] {
+    public validate(language: RegexDialect): ISemanticError[] {
         let errors: ISemanticError[] = [];
 
         if (this.count !== null) {
@@ -330,66 +486,15 @@ export class RepeatStatementCST extends StatementCST {
         return errors;
     }
 
-    public toRegex(language: RobotLanguage): string {
+    public toRegex(language: RegexDialect): string {
         let str = "(" + this.statements.map((x) => x.toRegex(language)).join("") + ")";
 
-        if (this.count !== null) {
-            if (this.count.from === 1 && this.count.to === null) {
-                if (this.count.opt === "+") {
-                    str += "+";
-                }
-                // if we only have a count of 1, we can ignore adding any extra text
-            }
-            else if (this.count.from === 0 && this.count.to === null) {
-                if (this.count.opt === "+") {
-                    str += "*";
-                }
-                else {
-                    // match 0 of anything? ok...
-                    str = "";
-                }
-            }
-            else {
-                str += this.count.toRegex(language);
-            }
+        if (this.count) {
+            str += this.count.toRegex(language);
         }
         else {
             str += "*";
         }
-
-        return str;
-    }
-}
-
-export class GroupStatementCST extends StatementCST {
-    constructor(public tokens: IToken[], public optional: boolean, public name: string | null, public statements: StatementCST[]) {
-        super(tokens);
-    }
-
-    public validate(language: RobotLanguage): ISemanticError[] {
-        let errors : ISemanticError[] = [];
-        
-        if (language !== RobotLanguage.DotNet && language !== RobotLanguage.JS) {
-            errors.push(this.error("This language does not support named groups"));
-        }
-
-        for (const statement of this.statements) {
-            errors = errors.concat(statement.validate(language));
-        }
-
-        return errors;
-    }
-
-    public toRegex(language: RobotLanguage): string {
-        let str = "(";
-
-        if (this.name !== null) {
-            str += `?<${this.name}>`;
-        }
-
-        str += this.statements.map((x) => x.toRegex(language)).join("");
-
-        str += ")";
 
         if (this.optional) {
             str += "?";
@@ -399,12 +504,77 @@ export class GroupStatementCST extends StatementCST {
     }
 }
 
-export class RegularExpressionCST extends H2RCST {
-    constructor(public tokens: IToken[], public usings: UsingStatementCST, public statements: StatementCST[]) {
+/**
+ * Conrete Syntax Tree for a group Statement
+ * 
+ * @internal
+ */
+export class GroupStatementCST extends StatementCST {
+    
+    /**
+     * Constructor for GroupStatementCST
+     * 
+     * @param tokens Tokens used to calculate where an error occured
+     * @param optional is this group optional
+     * @param name optional name for named group
+     * @param statements other statements
+     * @internal
+     */
+    constructor(tokens: IToken[], private optional: boolean, private name: string | null, private statements: StatementCST[]) {
         super(tokens);
     }
 
-    public validate(language: RobotLanguage): ISemanticError[] {
+    public validate(language: RegexDialect): ISemanticError[] {
+        let errors : ISemanticError[] = [];
+        
+        // All languages currently support named groups
+        //if (false) {
+        //    errors.push(this.error("This language does not support named groups"));
+        //}
+
+        for (const statement of this.statements) {
+            errors = errors.concat(statement.validate(language));
+        }
+
+        return errors;
+    }
+
+    public toRegex(language: RegexDialect): string {
+        let str = "(";
+
+        // named group
+        if (this.name !== null) {
+            str += `?<${this.name}>`;
+        }
+
+        str += this.statements.map((x) => x.toRegex(language)).join("");
+
+        str += (this.optional ? ")?" : ")");
+
+        return str;
+    }
+}
+
+/**
+ * Concrete Syntax Tree for a regular expression
+ * 
+ * @public
+ */
+export class RegularExpressionCST extends H2RCST {
+
+    /**
+     * Constructor for RegularExpressionCST
+     * 
+     * @param tokens Tokens used to calculate where an error occured
+     * @param usings using statements
+     * @param statements other statements
+     * @internal
+     */
+    constructor(tokens: IToken[], private usings: UsingStatementCST, private statements: StatementCST[]) {
+        super(tokens);
+    }
+
+    public validate(language: RegexDialect): ISemanticError[] {
         let errors: ISemanticError[] = this.usings.validate(language);
 
         for (const statement of this.statements) {
@@ -413,11 +583,10 @@ export class RegularExpressionCST extends H2RCST {
 
         return errors;
     }
-    public toRegex(language: RobotLanguage): string {
+    public toRegex(language: RegexDialect): string {
         const modifiers = this.usings.toRegex(language);
         const regex = this.statements.map((x) => x.toRegex(language)).join("");
 
         return modifiers.replace("{regex}", regex);
     }
-    
 }

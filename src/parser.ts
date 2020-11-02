@@ -1,11 +1,24 @@
 /*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
 
+/**
+ * The parser for Human2Regex
+ * @packageDocumentation
+ */
+
 import { EmbeddedActionsParser, IOrAlt, IToken } from "chevrotain";
 import * as T from "./tokens";
 import { CountSubStatementCST, UsingFlags, MatchSubStatementType, MatchSubStatementValue, MatchSubStatementCST, UsingStatementCST, RegularExpressionCST, StatementCST, RepeatStatementCST, MatchStatementValue, MatchStatementCST, GroupStatementCST } from "./generator";
-import { first } from "./utilities";
+import { first, usefulConditional, unusedParameter } from "./utilities";
 
+/**
+ * The options for the Parser
+ */
 export class Human2RegexParserOptions {
+    /**
+     * Constructor for Human2RegexParserOptions
+     * 
+     * @param skip_validations If true, the lexer will skip validations (~25% faster)
+     */
     constructor(public skip_validations: boolean = false) {
         /* empty */
     }
@@ -22,6 +35,11 @@ class TokensAndValue<T> {
     }
 }
 
+/**
+ * The Parser class
+ * 
+ * @remarks Only 1 parser instance allowed due to performance reasons
+ */
 export class Human2RegexParser extends EmbeddedActionsParser {
     private static already_init = false;
 
@@ -38,14 +56,17 @@ export class Human2RegexParser extends EmbeddedActionsParser {
         
         const $ = this;
 
-        // IN REGARDS TO KEEPING TOKENS:
-        // We don't really need to keep each token, only the first and last tokens
-        // This is due to the fact we calculate the difference between those tokens
-        // However, sometimes we have optional starts and ends
-        // Each optional near the start and end MUST be recorded because they may be the first/last token
-        // ex) "optional match 3..." the start token is "optional", but "match 3..."'s start token is "match"
+        /** 
+         * IN REGARDS TO KEEPING TOKENS:
+         * We don't really need to keep each token, only the first and last tokens
+         * This is due to the fact we calculate the difference between those tokens
+         * However, sometimes we have optional starts and ends
+         * Each optional near the start and end MUST be recorded because they may be the first/last token
+         * ex) "optional match 3..." the start token is "optional", but "match 3..."'s start token is "match"
+         * */ 
 
-        let nss_rules : IOrAlt<TokenAndValue<number>>[] | null = null;
+        // number rules
+        let nss_rules: IOrAlt<TokenAndValue<number>>[] | null = null;
         const NumberSubStatement = $.RULE("NumberSubStatement", () => {
             return $.OR(nss_rules || (nss_rules = [
                 { ALT: () => new TokenAndValue($.CONSUME(T.Zero), 0) },
@@ -69,6 +90,8 @@ export class Human2RegexParser extends EmbeddedActionsParser {
         // 1, 1..2, between 1 and/to 2 inclusively/exclusively
         const CountSubStatement = $.RULE("CountSubStatement", () => {
             return $.OR([
+
+                // between 1 to 4
                 { ALT: () => {
                     const tokens: IToken[] = [];
 
@@ -97,6 +120,7 @@ export class Human2RegexParser extends EmbeddedActionsParser {
                     return new CountSubStatementCST(tokens, from.value, to.value, opt as "inclusive" | "exclusive" | null);
                 }},
                 
+                // from 1 to 4
                 { ALT: () => {
                     const tokens: IToken[] = [];
 
@@ -116,6 +140,7 @@ export class Human2RegexParser extends EmbeddedActionsParser {
                     return new CountSubStatementCST(tokens, from.value, to.value ? to.value[0] : null, to.value ? to.value[1] : null);
                 }},
 
+                // exactly 2
                 { ALT: () => { 
                     const tokens: IToken[] = [];
                     $.OPTION(() => tokens.push($.CONSUME(T.Exactly)));
@@ -126,27 +151,27 @@ export class Human2RegexParser extends EmbeddedActionsParser {
                     return new CountSubStatementCST(tokens, from.value);
                 }} 
             ]);
-
-            
         });
 
-        let mss_rules : IOrAlt<MatchSubStatementValue>[] | null = null;
+        // match sub rules
+        let mss_rules: IOrAlt<MatchSubStatementValue>[] | null = null;
         const MatchSubStatement = $.RULE("MatchSubStatement", () => {
             let count: CountSubStatementCST | null = null;
             let invert: boolean = false;
             const values: MatchSubStatementValue[] = [];
-            let from : string | null = null;
-            let to : string | null = null;
-            let type : MatchSubStatementType = MatchSubStatementType.Anything;
+            let from: string | null = null;
+            let to: string | null = null;
+            let type: MatchSubStatementType = MatchSubStatementType.Anything;
 
             const tokens: IToken[] = [];
 
             count = $.OPTION(() => {
                 const css = $.SUBRULE(CountSubStatement);
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                if (css.tokens) {
+
+                if (usefulConditional(css.tokens, "due to how chevrotain works, the first run produces a null value")) {
                     tokens.push(first(css.tokens));
                 }
+
                 return css;
             });
 
@@ -159,6 +184,8 @@ export class Human2RegexParser extends EmbeddedActionsParser {
                 DEF: () => {
                     $.OPTION3(() => $.CONSUME(T.A));
                     values.push($.OR(mss_rules || (mss_rules = [
+
+                        // range [a-z]
                         { ALT: () => {
                             $.OPTION4(() => $.CONSUME(T.From));
                             from = $.CONSUME2(T.StringLiteral).image; 
@@ -170,6 +197,8 @@ export class Human2RegexParser extends EmbeddedActionsParser {
 
                             return new MatchSubStatementValue(type, from, to);
                         }},
+
+                        // range [a-z]
                         { ALT: () => {
                             $.CONSUME(T.Between);
                             from = $.CONSUME4(T.StringLiteral).image;
@@ -181,6 +210,8 @@ export class Human2RegexParser extends EmbeddedActionsParser {
 
                             return new MatchSubStatementValue(type, from, to);
                         }},
+
+                        // exact string
                         { ALT: () => {
                             const token = $.CONSUME(T.StringLiteral);
                             tokens.push(token);
@@ -289,7 +320,7 @@ export class Human2RegexParser extends EmbeddedActionsParser {
         });
 
         // using global matching
-        let us_rules : IOrAlt<UsingFlags>[] | null = null;
+        let us_rules: IOrAlt<UsingFlags>[] | null = null;
         const UsingStatement = $.RULE("UsingStatement", () => {
             const usings: UsingFlags[] = [];
 
@@ -327,12 +358,16 @@ export class Human2RegexParser extends EmbeddedActionsParser {
             return new TokensAndValue(tokens, usings);
         });
 
+        // group rules
         const GroupStatement = $.RULE("GroupStatement", () => {
             const tokens: IToken[] = [];
             let optional = false;
             let name: string | null = null;
             const statement: StatementCST[] = [];
 
+            // position of optional must be OR'd because 
+            // otherwise it could appear twice
+            // ex) optional? create an optional? group
             tokens.push($.OR([
                 { ALT: () => {
                     optional = true;
@@ -371,10 +406,11 @@ export class Human2RegexParser extends EmbeddedActionsParser {
             return new GroupStatementCST(tokens, optional, name, statement);
         });
 
+        // repeat rules
         const RepeatStatement = $.RULE("RepeatStatement", () => {
             const tokens: IToken[] = [];
             let optional = false;
-            let count : CountSubStatementCST | null = null;
+            let count: CountSubStatementCST | null = null;
             const statements: StatementCST[] = [];
 
             $.OPTION3(() => {
@@ -393,6 +429,7 @@ export class Human2RegexParser extends EmbeddedActionsParser {
             return new RepeatStatementCST(tokens, optional, count, statements);
         });
 
+        // statement super class
         const Statement = $.RULE("Statement", () => {
             return $.OR([
                 { ALT: () => $.SUBRULE(MatchStatement) },
@@ -401,6 +438,7 @@ export class Human2RegexParser extends EmbeddedActionsParser {
             ]);
         });
 
+        // full regex
         const Regex = $.RULE("Regex", () => {
             let tokens: IToken[] = [];
             let usings: UsingFlags[] = [];
@@ -421,7 +459,7 @@ export class Human2RegexParser extends EmbeddedActionsParser {
         this.parse = Regex;
     }
 
-    //public set_options(options: Human2RegexParserOptions) : void {
-    //    // empty so far
-    //}
+    public setOptions(options: Human2RegexParserOptions): void {
+        unusedParameter(options, "skip_validations is not valid to change once we've already initialized");
+    }
 }

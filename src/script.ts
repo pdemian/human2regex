@@ -3,17 +3,16 @@
 
 import { Human2RegexLexer, Human2RegexLexerOptions } from "./lexer";
 import { Human2RegexParser, Human2RegexParserOptions } from "./parser";
-import { RobotLanguage } from "./generator";
-import { CommonError } from "./utilities";
+import { RegexDialect } from "./generator";
+import { CommonError, unusedParameter, usefulConditional } from "./utilities";
 import $ from "jquery";
 import CodeMirror from "codemirror/lib/codemirror";
-require("codemirror/mode/javascript/javascript");
+import "codemirror/mode/javascript/javascript";
 
 import "./webpage/bootstrap.css";
 import "./webpage/cleanblog.css";
 import "codemirror/lib/codemirror.css";
 import "./webpage/style.css";
-
 
 $(function() {
 	const total_errors: CommonError[] = [];
@@ -32,19 +31,19 @@ $(function() {
 	
 		parser.errors.map(CommonError.fromParseError).forEach((x) => total_errors.push(x));
 	
-		let lang: RobotLanguage = RobotLanguage.JS;
+		let lang: RegexDialect = RegexDialect.JS;
 		switch ($("#dialect option:selected").val()) {
 			case "dotnet":
-				lang = RobotLanguage.DotNet;
+				lang = RegexDialect.DotNet;
 				break;
 			case "java":
-				lang = RobotLanguage.Java;
+				lang = RegexDialect.Java;
 				break;
 			case "perl":
-				lang = RobotLanguage.Perl;
+				lang = RegexDialect.Perl;
 				break;
 			default:
-				lang = RobotLanguage.JS;
+				lang = RegexDialect.JS;
 				break;
 		}
 
@@ -52,8 +51,7 @@ $(function() {
 		
 		valid.map(CommonError.fromSemanticError).forEach((x) => total_errors.push(x));
 	
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-		if (total_errors.length === 0) {
+		if (!usefulConditional(total_errors.length, "total_errors may have added an error")) {
 			regex_result = regex.toRegex(lang);
 			$("#regex").attr("value", regex_result);
 		}
@@ -76,8 +74,9 @@ $(function() {
 	});
 
 	$("#clip").on("click", () => {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-		if (window.isSecureContext && navigator?.clipboard?.writeText) {
+		if (window.isSecureContext && 
+			usefulConditional(navigator.clipboard, "clipboard may be undefined") &&
+			usefulConditional(navigator.clipboard.writeText, "writeText may be undefined")) {
 			navigator.clipboard.writeText(regex_result);
 		}
 		else {
@@ -96,6 +95,9 @@ $(function() {
 	});
 
 	editor.on("change", (instance: unknown, change_obj: unknown) => {
+		unusedParameter(instance, "Instance is not required, we have a reference already");
+		unusedParameter(change_obj, "Change is not required, we want the full value");
+
 		/* not empty */
 		console.log(editor.getValue());
 	});
