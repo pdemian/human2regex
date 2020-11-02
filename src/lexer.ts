@@ -210,7 +210,7 @@ export class Human2RegexLexer {
         const tok = last(tokens);
 
         // Do we have an EOL marker at the end?
-        if (tok.tokenType !== EndOfLine) {
+        if (tokens.length > 0 && tok.tokenType !== EndOfLine) {
             tokens.push(createTokenInstance(EndOfLine, "\n", tok.endOffset ?? NaN, tok.endOffset ?? NaN, tok.startLine ?? NaN, NaN, tok.startColumn ?? NaN, NaN)); 
         }
     

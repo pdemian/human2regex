@@ -448,7 +448,20 @@ export class MatchStatementCST extends StatementCST {
 
     public toRegex(language: RegexDialect): string {
         return this.matches.map((x) => {
-            return x.statement.toRegex(language) + (x.optional ? "?" : "");
+            let match_stmt = x.statement.toRegex(language);
+
+            // need to group if optional and ungrouped
+            if (x.optional) {
+                if (!isSingleRegexCharacter(match_stmt)) {
+                    // don't re-group a group
+                    if (match_stmt[0] !== "(" && match_stmt[match_stmt.length-1] !== ")") {
+                        match_stmt = "(?:" + match_stmt + ")";
+                    }
+                }
+                match_stmt += "?";
+            }
+
+            return match_stmt;
         }).join("");
     }
 }

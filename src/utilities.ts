@@ -174,7 +174,7 @@ export class CommonError {
      */
     public static fromLexError(error: ILexingError): CommonError {
         // not really fond of --> and <--
-        const new_msg = error.message.replace(/(-->|<--)/g, "");
+        const new_msg = error.message.replace(/(--?>|<--?)/g, "");
 
         return new CommonError("Lexer Error", error.line, error.column, error.length, new_msg);
     }
@@ -187,7 +187,7 @@ export class CommonError {
      */
     public static fromParseError(error: IRecognitionException): CommonError {
         // not really fond of --> and <--
-        const new_msg = error.name + " - " + error.message.replace(/(-->|<--)/g, "");
+        const new_msg = error.name + " - " + error.message.replace(/(--?>|<--?)/g, "");
         
         return new CommonError("Parser Error", error.token.startLine ?? NaN, error.token.startColumn ?? NaN, error.token.endOffset ?? NaN - error.token.startOffset, new_msg);
     }
