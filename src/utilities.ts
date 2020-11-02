@@ -173,7 +173,10 @@ export class CommonError {
      * @returns a new CommonError
      */
     public static fromLexError(error: ILexingError): CommonError {
-        return new CommonError("Lexer Error", error.line, error.column, error.length, error.message);
+        // not really fond of --> and <--
+        const new_msg = error.message.replace(/(-->|<--)/g, "");
+
+        return new CommonError("Lexer Error", error.line, error.column, error.length, new_msg);
     }
 
     /**
@@ -183,7 +186,10 @@ export class CommonError {
      * @returns a new CommonError
      */
     public static fromParseError(error: IRecognitionException): CommonError {
-        return new CommonError("Parser Error", error.token.startLine ?? NaN, error.token.startColumn ?? NaN, error.token.endOffset ?? NaN - error.token.startOffset, error.name + ": " + error.message);
+        // not really fond of --> and <--
+        const new_msg = error.name + " - " + error.message.replace(/(-->|<--)/g, "");
+        
+        return new CommonError("Parser Error", error.token.startLine ?? NaN, error.token.startColumn ?? NaN, error.token.endOffset ?? NaN - error.token.startOffset, new_msg);
     }
 
     /**
@@ -202,6 +208,6 @@ export class CommonError {
      * @returns a string representation
      */
     public toString(): string {
-        return `${this.type} @ ${this.start_line} ${this.start_column}: ${this.message}`;
+        return `${this.type} @ (${this.start_line}, ${this.start_column}): ${this.message}`;
     }
 }

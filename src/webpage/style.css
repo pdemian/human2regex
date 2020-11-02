@@ -127,3 +127,8 @@ a:hover {
 code {
 	font-style: italic!important;
 }
+
+#tutorial {
+	max-width: 80%;
+	margin: auto;
+}

@@ -4,18 +4,40 @@
 import { Human2RegexLexer, Human2RegexLexerOptions } from "./lexer";
 import { Human2RegexParser, Human2RegexParserOptions } from "./parser";
 import { RegexDialect } from "./generator";
-import { CommonError, unusedParameter, usefulConditional } from "./utilities";
-import CodeMirror from "codemirror/lib/codemirror";
+import { CommonError, usefulConditional, unusedParameter } from "./utilities";
+import cm from "codemirror/lib/codemirror";
 import "codemirror/addon/mode/simple";
 import "codemirror/addon/runmode/runmode";
+import "codemirror/addon/lint/lint";
 
 import "./webpage/bootstrap.css";
 import "./webpage/cleanblog.css";
 import "./webpage/codemirror.css";
 import "./webpage/style.css";
 
+interface CodeMirror {
+	defineSimpleMode: (name: string, value: Record<string, unknown>) => void;
+	runMode: (text: string, name: string, element: HTMLElement) => void;
+	fromTextArea: (element: HTMLElement, value: Record<string, unknown>) => CodeMirrorEditor;
+	registerHelper: (what: string, value: string, callback: (text: string) => CodeMirrorLintError[]) => void;
+	Pos: (line: number, column: number) => number;
+}
+
+interface CodeMirrorEditor {
+	on: (event_name: string, event: () => void) => void;
+	getValue: () => string;
+}
+
+interface CodeMirrorLintError {
+	from: number,
+	to: number,
+	message: string
+}
+
+const code_mirror = cm as CodeMirror;
+
 document.addEventListener("DOMContentLoaded", function() {
-	CodeMirror.defineSimpleMode("human2regex", {
+	code_mirror.defineSimpleMode("human2regex", {
 		start: [
 			{token: "number", regex: /zero/i},
 			{token: "number", regex: /one/i},
@@ -28,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			{token: "number", regex: /eight/i},
 			{token: "number", regex: /nine/i},
 			{token: "number", regex: /ten/i},
-			{token: "qualifier", regex: /optional(ly)?/i},
+			{token: "qualifier", regex: /(optional(ly)?|possibl[ye])/i},
 			{token: "builtin", regex: /matching/i},
 			{token: "keyword", regex: /match(es)?/i},
 			{token: "operator", regex: /then/i},
@@ -45,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			{token: "builtin", regex: /(multi line|multiline)/i},
 			{token: "builtin", regex: /exact/i},
 			{token: "operator", regex: /not/i},
-			{token: "operator", regex: /between/i},
+			{token: "keyword", regex: /between/i},
 			{token: "builtin", regex: /tab/i},
 			{token: "builtin", regex: /(line feed|linefeed)/i},
 			{token: "keyword", regex: /group/i},
@@ -55,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			{token: "keyword", regex: /inclusive(ly)?/i},
 			{token: "keyword", regex: /exclusive(ly)?/i},
 			{token: "keyword", regex: /from/i},
-			{token: "keyword", regex: /(to|through|thru|\-|\.\.|\.\.\.)/i},
+			{token: "keyword", regex: /(to|through|thru|\-|\.\.\.|\.\.)/i},
 			{token: "keyword", regex: /create(s)?/i},
 			{token: "keyword", regex: /name(d)?|call(ed)?/i},
 			{token: "keyword", regex: /repeat(s|ing)?/i},
@@ -91,7 +113,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	// highlight all <code> elements on page
 	// eslint-disable-next-line @typescript-eslint/prefer-for-of
 	for (let i = 0; i < $code.length; i++) {
-		CodeMirror.runMode($code[i].innerText, {name: "human2regex"}, $code[i]);
+		code_mirror.runMode($code[i].innerText, "human2regex", $code[i]);
 	}
 
 	// We're not on index
@@ -101,8 +123,26 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	const lexer = new Human2RegexLexer(new Human2RegexLexerOptions(true));
 	const parser = new Human2RegexParser(new Human2RegexParserOptions(true));
+	let total_errors: CommonError[] = [];
 	let regex_result: string = "";
 	let dialect = RegexDialect.JS;
+
+	code_mirror.registerHelper("lint", "human2regex", lint);
+
+	function lint(text: string): CodeMirrorLintError[] {
+		unusedParameter(text, "Text is not needed in this instance as we do no parsing");
+
+		const errs : CodeMirrorLintError[] = [];
+
+		for (const error of total_errors) {
+			const from = code_mirror.Pos(error.start_line-1, error.start_column-1);
+			const to = code_mirror.Pos(error.start_line-1, error.start_column-1 + error.length);
+		
+			errs.push({from: from, to: to, message: error.message});
+		}
+
+		return errs;
+	}
 
 	function mapDialect(value: string | string[] | number | undefined): RegexDialect {
 		switch (value) {
@@ -132,7 +172,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 		$errors.appendChild(document.createTextNode("Compiling..."));
 
-		const total_errors: CommonError[] = [];
+		total_errors = [];
 		const result = lexer.tokenize(text);
 
 		result.errors.map(CommonError.fromLexError).forEach((x) => total_errors.push(x));
@@ -162,7 +202,6 @@ document.addEventListener("DOMContentLoaded", function() {
 		}
 	}
 
-
 	$dialect.addEventListener("change", () => {
 		const index = $dialect.selectedIndex;
 		const value = $dialect.options[index].value;
@@ -184,18 +223,16 @@ document.addEventListener("DOMContentLoaded", function() {
 		}
 	});
 
-	const editor = CodeMirror.fromTextArea($human, {
-		mode: {name: "human2regex"},
+	const editor = code_mirror.fromTextArea($human, {
+		mode: "human2regex",
 		lineNumbers: false,
 		indentUnit: 4,
 		viewportMargin: Infinity,
-		theme: "idea"
+		theme: "idea",
+		lint: true
 	});
 
-	editor.on("change", (instance: unknown, change_obj: unknown) => {
-		unusedParameter(instance, "Instance is not required, we have a reference already");
-		unusedParameter(change_obj, "Change is not required, we want the full value");
-
+	editor.on("change", () => {
 		runH2R(editor.getValue());
 	});
 
