@@ -7,21 +7,21 @@
 
 import { createToken, Lexer } from "chevrotain";
 
-/** @internal */ export const Zero = createToken({name: "Zero", pattern: /zero/i });
-/** @internal */ export const One = createToken({name: "One", pattern: /one/i });
-/** @internal */ export const Two = createToken({name: "Two", pattern: /two/i });
-/** @internal */ export const Three = createToken({name: "Three", pattern: /three/i });
-/** @internal */ export const Four = createToken({name: "Four", pattern: /four/i });
-/** @internal */ export const Five = createToken({name: "Five", pattern: /five/i });
-/** @internal */ export const Six = createToken({name: "Six", pattern: /six/i });
-/** @internal */ export const Seven = createToken({name: "Seven", pattern: /seven/i });
-/** @internal */ export const Eight = createToken({name: "Eight", pattern: /eight/i });
-/** @internal */ export const Nine = createToken({name: "Nine", pattern: /nine/i });
-/** @internal */ export const Ten = createToken({name: "Ten", pattern: /ten/i });
+/** @internal */ export const Zero = createToken({name: "Zero", pattern: /zero/i});
+/** @internal */ export const One = createToken({name: "One", pattern: /one/i});
+/** @internal */ export const Two = createToken({name: "Two", pattern: /two/i});
+/** @internal */ export const Three = createToken({name: "Three", pattern: /three/i});
+/** @internal */ export const Four = createToken({name: "Four", pattern: /four/i});
+/** @internal */ export const Five = createToken({name: "Five", pattern: /five/i});
+/** @internal */ export const Six = createToken({name: "Six", pattern: /six/i});
+/** @internal */ export const Seven = createToken({name: "Seven", pattern: /seven/i});
+/** @internal */ export const Eight = createToken({name: "Eight", pattern: /eight/i});
+/** @internal */ export const Nine = createToken({name: "Nine", pattern: /nine/i});
+/** @internal */ export const Ten = createToken({name: "Ten", pattern: /ten/i});
 
-/** @internal */ export const Optional = createToken({name: "Optional", pattern: /optional(ly)?/i });
-/** @internal */ export const Match = createToken({name: "Match", pattern: /match(es)?/i });
-/** @internal */ export const Then = createToken({name: "Then", pattern: /then/i });
+/** @internal */ export const Optional = createToken({name: "Optional", pattern: /optional(ly)?/i});
+/** @internal */ export const Match = createToken({name: "Match", pattern: /match(es)?/i});
+/** @internal */ export const Then = createToken({name: "Then", pattern: /then/i});
 /** @internal */ export const Anything = createToken({name: "Anything", pattern: /(any thing|any|anything)(s)?/i});
 /** @internal */ export const Or = createToken({name: "Or", pattern: /or/i});
 /** @internal */ export const And = createToken({name: "And", pattern: /and|,/i});
@@ -35,13 +35,13 @@ import { createToken, Lexer } from "chevrotain";
 /** @internal */ export const Multiline = createToken({name: "Multiline", pattern: /(multi line|multiline)/i});
 /** @internal */ export const Exact = createToken({name: "Exact", pattern: /exact/i});
 /** @internal */ export const Matching = createToken({name: "Matching", pattern: /matching/i});
-/** @internal */ export const Not = createToken({name: "Not", pattern: /not/i }); //, longer_alt: Nothing});
+/** @internal */ export const Not = createToken({name: "Not", pattern: /not/i}); //, longer_alt: Nothing});
 /** @internal */ export const Between = createToken({name: "Between", pattern: /between/i});
 /** @internal */ export const Tab = createToken({name: "Tab", pattern: /tab/i});
 /** @internal */ export const Linefeed = createToken({name: "Linefeed", pattern: /(line feed|linefeed)/i});
 /** @internal */ export const Group = createToken({name: "Group", pattern: /group/i});
 /** @internal */ export const A = createToken({name: "A", pattern: /a(n)?/i }); //, longer_alt: Anything});
-/** @internal */ export const Times = createToken({name: "Times", pattern: /times/i });
+/** @internal */ export const Times = createToken({name: "Times", pattern: /times/i});
 /** @internal */ export const Exactly = createToken({name: "Exactly", pattern: /exact(ly)?/i});
 /** @internal */ export const Inclusive = createToken({name: "Inclusive", pattern: /inclusive(ly)?/i});
 /** @internal */ export const Exclusive = createToken({name: "Exclusive", pattern: /exclusive(ly)?/i});
@@ -54,7 +54,7 @@ import { createToken, Lexer } from "chevrotain";
 /** @internal */ export const CarriageReturn = createToken({name: "CarriageReturn", pattern: /carriage return/i});
 /** @internal */ export const CaseInsensitive = createToken({name: "CaseInsensitive", pattern: /case insensitive/i});
 /** @internal */ export const CaseSensitive = createToken({name: "CaseSensitive", pattern: /case sensitive/i});
-/** @internal */ export const OrMore = createToken({name: "OrMore", pattern: /\+|or more/i });
+/** @internal */ export const OrMore = createToken({name: "OrMore", pattern: /\+|or more/i});
 
 /*
 //Not being used currently
@@ -77,14 +77,14 @@ export const By = createToken({name: "By", pattern: /by/i});
 */
 
 
-/** @internal */ export const EndOfLine = createToken({name: "EOL", pattern: /\n/ });
-/** @internal */ export const WS = createToken({name: "Whitespace", pattern: /\s+/, group: Lexer.SKIPPED });
-/** @internal */ export const SingleLineComment = createToken({name: "SingleLineComment", pattern: /(#|\/\/).*/, group: Lexer.SKIPPED });
-/** @internal */ export const MultilineComment = createToken({name: "MultiLineComment", pattern: /\/\*(.*)\*\//, line_breaks: true, group: Lexer.SKIPPED });
+/** @internal */ export const EndOfLine = createToken({name: "EOL", pattern: /\n/});
+/** @internal */ export const WS = createToken({name: "Whitespace", pattern: /[^\S\n]+/, start_chars_hint: [ " ", "\r" ], group: Lexer.SKIPPED});
+/** @internal */ export const SingleLineComment = createToken({name: "SingleLineComment", pattern: /(#|\/\/).*/, group: Lexer.SKIPPED});
+/** @internal */ export const MultilineComment = createToken({name: "MultiLineComment", pattern: /\/\*(.*)\*\//, line_breaks: true, group: Lexer.SKIPPED});
 
-/** @internal */ export const Identifier = createToken({name: "Identifier", pattern: /[a-z]\w*/i });
-/** @internal */ export const NumberLiteral = createToken({name: "NumberLiteral", pattern: /-?\d+/ });
-/** @internal */ export const StringLiteral = createToken({name: "StringLiteral", pattern: /"(?:[^\\"]|\\(?:[bfnrtv"\\/]|u[0-9a-f]{4}|U[0-9a-f]{8}))*"/i });
+/** @internal */ export const Identifier = createToken({name: "Identifier", pattern: /[a-z]\w*/i});
+/** @internal */ export const NumberLiteral = createToken({name: "NumberLiteral", pattern: /-?\d+/});
+/** @internal */ export const StringLiteral = createToken({name: "StringLiteral", pattern: /"(?:[^\\"]|\\(?:[bfnrtv"\\/]|u[0-9a-f]{4}|U[0-9a-f]{8}))*"/i});
 
 /** @internal */ export const Indent = createToken({name: "Indent"});
 /** @internal */ export const Outdent = createToken({name: "Outdent"});

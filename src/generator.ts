@@ -13,7 +13,7 @@ import { IToken } from "chevrotain";
  */
 export enum RegexDialect {
     JS,
-    Perl,
+    PCRE,
     DotNet,
     Java
 }
@@ -400,7 +400,7 @@ export class CountSubStatementCST extends H2RCST {
                 return this.opt === "+" ? "+" : "*";
             }
             else if (from === 0) {
-                return this.opt === "+" ? "*" : "";
+                return this.opt === "+" ? "*" : "{0}";
             }
         }
 

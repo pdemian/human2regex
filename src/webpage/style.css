@@ -123,3 +123,7 @@ a:hover {
     box-shadow: 0 0 0.2rem rgba(102, 175, 233, .6);
     transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
 }
+
+code {
+	font-style: italic!important;
+}
