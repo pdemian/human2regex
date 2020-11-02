@@ -1,4 +1,3 @@
-
 /*!
  * Start Bootstrap - Clean Blog v5.0.8 (https://startbootstrap.com/template-overviews/clean-blog)
  * Copyright 2013-2019 Start Bootstrap
@@ -6,45 +5,44 @@
  */
 
 body {
-    font-size: 20px;
-    color: #212529;
+	font-size: 20px;
+	color: #212529
 }
 
 p {
-    line-height: 1.5;
+	line-height: 1.5
 }
 
 p a {
-    text-decoration: underline;
+	text-decoration: underline
 }
 
-@media (max-width: 575px) {
+@media (max-width:575px) {
 	.form-inline .form-control {
-        display: inline-block;
-        width: auto;
-        vertical-align: middle;
-    }
-
-    .form-inline label {
-        display: -ms-flexbox;
-        display: flex;
-        -ms-flex-align: center;
-        align-items: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        margin-bottom: 0;
-    }
-    .form-inline .form-group {
-        display: -ms-flexbox;
-        display: flex;
-        -ms-flex: 0 0 auto;
-        flex: 0 0 auto;
-        -ms-flex-flow: row wrap;
-        flex-flow: row wrap;
-        -ms-flex-align: center;
-        align-items: center;
-        margin-bottom: 0;
-    }
+		display: inline-block;
+		width: auto;
+		vertical-align: middle
+	}
+	.form-inline label {
+		display: -ms-flexbox;
+		display: flex;
+		-ms-flex-align: center;
+		align-items: center;
+		-ms-flex-pack: center;
+		justify-content: center;
+		margin-bottom: 0
+	}
+	.form-inline .form-group {
+		display: -ms-flexbox;
+		display: flex;
+		-ms-flex: 0 0 auto;
+		flex: 0 0 auto;
+		-ms-flex-flow: row wrap;
+		flex-flow: row wrap;
+		-ms-flex-align: center;
+		align-items: center;
+		margin-bottom: 0
+	}
 }
 
 h1,
@@ -53,171 +51,82 @@ h3,
 h4,
 h5,
 h6 {
-    font-weight: 800;
-    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font-weight: 800;
+	font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif
 }
 
 ::-moz-selection {
-    color: #fff;
-    background: #0085a1;
-    text-shadow: none;
+	color: #fff;
+	background: #0085a1;
+	text-shadow: none
 }
 
 ::selection {
-    color: #fff;
-    background: #0085a1;
-    text-shadow: none;
+	color: #fff;
+	background: #0085a1;
+	text-shadow: none
 }
 
 #mainNav {
-    position: absolute;
+	position: absolute;
 	border-bottom: 1px solid transparent;
-    background-color: #232323;
-    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	background-color: #232323;
+	font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif
 }
 
 #mainNav .navbar-brand {
-    font-weight: 800;
-    color: #fff;
+	font-weight: 800;
+	color: #fff
 }
 
-#mainNav .navbar-toggler {
-    font-size: 16px;
-    font-weight: 800;
-    padding: 13px;
-    text-transform: uppercase;
-    color: #343a40;
+@media only screen and (max-width:991px) {
+	#mainNav {
+		position: fixed
+	}
 }
 
-#mainNav .navbar-nav > li.nav-item > a {
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-@media only screen and (max-width: 991px) {
-    #mainNav {
-        position: fixed;
-    }
-}
-
-@media only screen and (min-width: 992px) {
-    #mainNav .navbar-brand {
-        padding: 10px 20px;
-        color: #fff;
-    }
-    #mainNav .navbar-brand:focus, #mainNav .navbar-brand:hover {
-        color: rgba(255, 255, 255, 0.8);
-    }
-    #mainNav .navbar-nav > li.nav-item > a {
-        padding: 10px 20px;
-        color: #fff;
-    }
-    #mainNav .navbar-nav > li.nav-item > a:focus, #mainNav .navbar-nav > li.nav-item > a:hover {
-        color: rgba(255, 255, 255, 0.8);
-    }
-}
-
-header.masthead {
-    background: no-repeat center center;
-    background-color: #868e96;
-    background-attachment: scroll;
-    position: relative;
-    background-size: cover;
-}
-
-header.masthead .overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    background-color: #212529;
-    opacity: 0.5;
-}
-
-header.masthead .site-heading {
-    padding: 60px 0 20px;
-    color: #fff;
-}
-
-@media only screen and (min-width: 768px) {
-    header.masthead .site-heading {
-        padding: 60px 0 20px;
-    }
-}
-
-header.masthead .site-heading {
-    text-align: center;
-}
-
-header.masthead .site-heading h1 {
-    font-size: 50px;
-    margin-top: 0;
-}
-
-header.masthead .site-heading .subheading {
-    font-size: 24px;
-    font-weight: 300;
-    line-height: 1.1;
-    display: block;
-    margin: 10px 0 0;
-    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
-
-@media only screen and (min-width: 768px) {
-    header.masthead .site-heading h1 {
-        font-size: 60px;
-    }
+@media only screen and (min-width:992px) {
+	#mainNav .navbar-brand {
+		padding: 10px 20px;
+		color: #fff
+	}
+	#mainNav .navbar-brand:focus,
+	#mainNav .navbar-brand:hover {
+		color: rgba(255, 255, 255, .8)
+	}
 }
 
 .wrapper {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+	display: flex;
+	flex-direction: column;
+	height: 100vh
 }
 
 #maincontent {
-	flex: 1 0 auto;
-}
-
-header {
-	flex-shrink: 0;
+	flex: 1 0 auto
 }
 
 footer {
 	flex-shrink: 0;
-    width: 100%;
-    right: 0;
-    left: 0;
-    padding: 20px 0 20px;
-    background-color: #232323;
-    color: #fff;
+	width: 100%;
+	right: 0;
+	left: 0;
+	padding: 20px 0 20px;
+	background-color: #232323;
+	color: #fff
 }
 
 .copyright {
-    font-size: 14px;
-    margin-bottom: 0;
-    text-align: center;
+	font-size: 14px;
+	margin-bottom: 0;
+	text-align: center
 }
 
 .btn {
-    font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-
-.btn-primary {
-    background-color: #00748c;
-    border-color: #00748c;
-}
-
-.btn-primary:active, .btn-primary:focus, .btn-primary:hover {
-    color: #fff;
-    background-color: #004b5c !important;
-    border-color: #004b5c !important;
+	font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif
 }
 
 .btn-lg {
-    font-size: 16px;
-    padding: 25px 35px;
+	font-size: 16px;
+	padding: 25px 35px
 }

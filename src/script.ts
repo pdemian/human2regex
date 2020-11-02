@@ -5,18 +5,16 @@ import { Human2RegexLexer, Human2RegexLexerOptions } from "./lexer";
 import { Human2RegexParser, Human2RegexParserOptions } from "./parser";
 import { RegexDialect } from "./generator";
 import { CommonError, unusedParameter, usefulConditional } from "./utilities";
-import $ from "jquery";
 import CodeMirror from "codemirror/lib/codemirror";
 import "codemirror/addon/mode/simple";
 import "codemirror/addon/runmode/runmode";
 
 import "./webpage/bootstrap.css";
 import "./webpage/cleanblog.css";
-import "codemirror/lib/codemirror.css";
-import "codemirror/theme/idea.css";
+import "./webpage/codemirror.css";
 import "./webpage/style.css";
 
-$(function() {
+document.addEventListener("DOMContentLoaded", function() {
 	CodeMirror.defineSimpleMode("human2regex", {
 		start: [
 			{token: "number", regex: /zero/i},
@@ -83,14 +81,21 @@ $(function() {
 		}
 	});
 
-	const $regex = $("#regex");
-	const $dialect = $("#dialect");
-	const $clip = $("#clip");
-	const $human = $("#human");
-	const $errors = $("#errors");
+	const $regex = document.getElementById("regex") as HTMLTextAreaElement | null;
+	const $dialect = document.getElementById("dialect") as HTMLSelectElement | null;
+	const $clip = document.getElementById("clip");
+	const $human = document.getElementById("human");
+	const $errors = document.getElementById("errors");
+	const $code = document.getElementsByTagName("code");
+
+	// highlight all <code> elements on page
+	// eslint-disable-next-line @typescript-eslint/prefer-for-of
+	for (let i = 0; i < $code.length; i++) {
+		CodeMirror.runMode($code[i].innerText, {name: "human2regex"}, $code[i]);
+	}
 
 	// We're not on index
-	if (!$regex.length || !$human.length) {
+	if (!$regex || !$dialect || !$clip || !$human || !$errors) {
 		return;
 	}
 
@@ -112,9 +117,20 @@ $(function() {
 		}
 	}
 
+	function empty(element: HTMLElement): void {
+		while (element.firstChild) {
+			element.removeChild(element.firstChild);
+		}
+	}
+
 	function runH2R(text: string): void {
-		$errors.empty();
-		$errors.append("Compiling...");
+		if (!$errors || !$regex) {
+			return;
+		}
+
+		empty($errors);
+
+		$errors.appendChild(document.createTextNode("Compiling..."));
 
 		const total_errors: CommonError[] = [];
 		const result = lexer.tokenize(text);
@@ -134,26 +150,29 @@ $(function() {
 				if (total_errors.length === 0) {
 					regex_result = regex.toRegex(dialect);
 
-					$regex.attr("value", regex_result);
+					$regex.setAttribute("value", regex_result);
 				}
 			}
 		}
 
-		$errors.empty();
+		empty($errors);
+
 		for (const error of total_errors) {
-			$errors.append(`${error.toString()}\n`);
+			$errors.appendChild(document.createTextNode(`${error.toString()}\n`));
 		}
 	}
 
 
-	$dialect.on("change", () => {
-		dialect = mapDialect($("#dialect option:selected").val());
+	$dialect.addEventListener("change", () => {
+		const index = $dialect.selectedIndex;
+		const value = $dialect.options[index].value;
+
+		dialect = mapDialect(value);
 	});
 
-	$clip.on("click", () => {
+	$clip.addEventListener("click", () => {
 		// prefer to use writeText, but "emulate" selecting all, even though it isn't required
-		const text = $regex[0] as unknown as { select: () => void };
-		text.select();
+		$regex.select();
 
 		if (window.isSecureContext && 
 			usefulConditional(navigator.clipboard, "clipboard may be undefined") &&
@@ -165,11 +184,12 @@ $(function() {
 		}
 	});
 
-	const editor = CodeMirror.fromTextArea($human[0], {
+	const editor = CodeMirror.fromTextArea($human, {
 		mode: {name: "human2regex"},
 		lineNumbers: false,
 		indentUnit: 4,
-		viewportMargin: Infinity
+		viewportMargin: Infinity,
+		theme: "idea"
 	});
 
 	editor.on("change", (instance: unknown, change_obj: unknown) => {
@@ -181,8 +201,4 @@ $(function() {
 
 	//run what's currently in the textarea to initialize
 	runH2R(editor.getValue());
-
-	for (const code of $("code")) {
-		CodeMirror.runMode(code.innerText, {name: "human2regex"}, code);
-	}
 });
