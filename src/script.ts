@@ -57,6 +57,8 @@ document.addEventListener("DOMContentLoaded", function() {
 			{token: "builtin", regex: /(any thing|any|anything)(s)?/i},
 			{token: "operator", regex: /or/i},
 			{token: "operator", regex: /and|,/i},
+			{token: "builtin", regex: /unicode( class)?/i},
+			{token: "builtin", regex: /(word )boundary/i},
 			{token: "builtin", regex: /word(s)?/i},
 			{token: "builtin", regex: /digit(s)?/i},
 			{token: "builtin", regex: /character(s)?/i},

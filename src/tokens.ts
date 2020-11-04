@@ -29,18 +29,20 @@ import { createToken, Lexer } from "chevrotain";
 /** @internal */ export const Digit = createToken({name: "DigitSpecifier", pattern: /digit(s)?/i});
 /** @internal */ export const Character = createToken({name: "CharacterSpecifier", pattern: /character(s)?/i});
 /** @internal */ export const Whitespace = createToken({name: "WhitespaceSpecifier", pattern: /(white space|whitespace)(s)?/i});
+/** @internal */ export const Boundary = createToken({name: "BoundarySpecifier", pattern: /(word )boundary/i});
 /** @internal */ export const Number = createToken({name: "NumberSpecifier", pattern: /number(s)?/i});
+/** @internal */ export const Unicode = createToken({name: "UnicodeSpecifier", pattern: /unicode( class)?/i});
 /** @internal */ export const Using = createToken({name: "Using", pattern: /using/i});
 /** @internal */ export const Global = createToken({name: "Global", pattern: /global/i});
 /** @internal */ export const Multiline = createToken({name: "Multiline", pattern: /(multi line|multiline)/i});
 /** @internal */ export const Exact = createToken({name: "Exact", pattern: /exact/i});
 /** @internal */ export const Matching = createToken({name: "Matching", pattern: /matching/i});
-/** @internal */ export const Not = createToken({name: "Not", pattern: /not/i}); //, longer_alt: Nothing});
+/** @internal */ export const Not = createToken({name: "Not", pattern: /not/i});
 /** @internal */ export const Between = createToken({name: "Between", pattern: /between/i});
 /** @internal */ export const Tab = createToken({name: "Tab", pattern: /tab/i});
 /** @internal */ export const Linefeed = createToken({name: "Linefeed", pattern: /(line feed|linefeed)/i});
 /** @internal */ export const Group = createToken({name: "Group", pattern: /group/i});
-/** @internal */ export const A = createToken({name: "A", pattern: /a(n)?/i }); //, longer_alt: Anything});
+/** @internal */ export const A = createToken({name: "A", pattern: /a(n)?/i });
 /** @internal */ export const Times = createToken({name: "Times", pattern: /times/i});
 /** @internal */ export const Exactly = createToken({name: "Exactly", pattern: /exact(ly)?/i});
 /** @internal */ export const Inclusive = createToken({name: "Inclusive", pattern: /inclusive(ly)?/i});
@@ -111,11 +113,13 @@ export const AllTokens = [
     Then,
     Anything,
     And,
+    Boundary,
     Word,
     Digit,
     Character,
     Whitespace,
     Number,
+    Unicode,
     /*
     Of,
     As,

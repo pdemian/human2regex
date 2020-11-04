@@ -160,6 +160,7 @@ export class Human2RegexParser extends EmbeddedActionsParser {
             let invert: boolean = false;
             const values: MatchSubStatementValue[] = [];
             let from: string | null = null;
+            let value: string | null = null;
             let to: string | null = null;
             let type: MatchSubStatementType = MatchSubStatementType.Anything;
 
@@ -215,14 +216,32 @@ export class Human2RegexParser extends EmbeddedActionsParser {
                         { ALT: () => {
                             const token = $.CONSUME(T.StringLiteral);
                             tokens.push(token);
-                            from = token.image;
+                            value = token.image;
                             type = MatchSubStatementType.SingleString;
 
-                            return new MatchSubStatementValue(type, from);
+                            return new MatchSubStatementValue(type, value);
                         }},
+
+                        //unicode
+                        { ALT: () => {
+                            $.CONSUME(T.Unicode);
+                            const token = $.CONSUME5(T.StringLiteral);
+                            tokens.push(token);
+                            value = token.image;
+                            type = MatchSubStatementType.Unicode;
+
+                            return new MatchSubStatementValue(type, value);
+                        }},
+
                         { ALT: () => { 
                             tokens.push($.CONSUME(T.Anything)); 
                             type = MatchSubStatementType.Anything;
+
+                            return new MatchSubStatementValue(type);
+                        }},
+                        { ALT: () => {
+                            tokens.push($.CONSUME(T.Boundary));
+                            type = MatchSubStatementType.Boundary;
 
                             return new MatchSubStatementValue(type);
                         }},

@@ -28,6 +28,40 @@ export interface ISemanticError {
     message: string
 }
 
+const unicode_property_codes = [
+    "C", "Cc", "Cf", "Cn", "Co", "Cs", 
+    "L", "Ll", "Lm", "Lo", "Lt", "Lu", 
+    "M", "Mc", "Me", "Mn", "N", "Nd", 
+    "Nl", "No", "P", "Pc", "Pd", "Pe", 
+    "Pf", "Pi", "Po", "Ps", "S", "Sc", 
+    "Sk", "Sm", "So", "Z", "Zl", "Zp", 
+    "Zs"
+];
+
+const unicode_script_codes = [
+    "Arabic", "Armenian", "Avestan", "Balinese", "Bamum",
+    "Batak", "Bengali", "Bopomofo", "Brahmi", "Braille",
+    "Buginese", "Buhid", "Canadian_Aboriginal", "Carian", "Chakma",
+    "Cham", "Cherokee", "Common", "Coptic", "Cuneiform",
+    "Cypriot", "Cyrillic", "Deseret", "Devanagari", "Egyptian_Hieroglyphs",
+    "Ethiopic", "Georgian", "Glagolitic", "Gothic", "Greek",
+    "Gujarati", "Gurmukhi", "Han", "Hangul", "Hanunoo", "Hebrew",
+    "Hiragana", "Imperial_Aramaic", "Inherited", "Inscriptional_Pahlavi",
+    "Inscriptional_Parthian", "Javanese", "Kaithi", "Kannada", "Katakana", 
+    "Kayah_Li", "Kharoshthi", "Khmer", "Lao", "Latin", "Lepcha", "Limbu",
+    "Linear_B", "Lisu", "Lycian", "Lydian", "Malayalam", "Mandaic", 
+    "Meetei_Mayek", "Meroitic_Cursive", "Meroitic_Hieroglyphs", "Miao",
+    "Mongolian", "Myanmar", "New_Tai_Lue", "Nko", "Ogham", "Old_Italic",
+    "Old_Persian", "Old_South_Arabian", "Old_Turkic", "Ol_Chiki", "Oriya",
+    "Osmanya", "Phags_Pa", "Phoenician", "Rejang", "Runic", "Samaritan", 
+    "Saurashtra", "Sharada", "Shavian", "Sinhala", "Sora_Sompeng", 
+    "Sundanese", "Syloti_Nagri", "Syriac", "Tagalog", "Tagbanwa", "Tai_Le",
+    "Tai_Tham", "Tai_Viet", "Takri", "Tamil", "Telugu", "Thaana", "Thai",
+    "Tibetan", "Tifinagh", "Ugaritic", "Vai", "Yi"
+];
+
+
+
 /**
  * The base concrete syntax tree class
  * 
@@ -102,7 +136,7 @@ export enum UsingFlags {
 
 /**
  * Type of match arguments
- * 
+ *
  * @remarks SingleString means an escaped string
  * @remarks Between means a range (ex. a-z)
  * @remarks Anything means .
@@ -121,7 +155,9 @@ export enum MatchSubStatementType {
     Tab,
     Linefeed,
     Newline,
-    CarriageReturn
+    CarriageReturn,
+    Boundary,
+    Unicode
 }
 
 /**
@@ -135,7 +171,7 @@ export class MatchSubStatementValue {
      * Constructor for MatchSubStatementValue
      * 
      * @param type the type of this match
-     * @param from optional range string
+     * @param from optional value or range string
      * @param to  optional range string
      * @internal
      */
@@ -203,14 +239,14 @@ export class MatchSubStatementCST extends H2RCST {
                 let to = value.to as string;
 
                 if (!isSingleRegexCharacter(from)) {
-                        errors.push(this.error("Between statement must begin with a single character"));
+                    errors.push(this.error("Between statement must begin with a single character"));
                 }
                 else if (from.startsWith("\\u") || from.startsWith("\\U") || from.startsWith("\\")) {
                     from = JSON.parse(`"${regexEscape(from)}"`);
                 }
 
                 if (!isSingleRegexCharacter(to)) {
-                        errors.push(this.error("Between statement must end with a single character"));
+                    errors.push(this.error("Between statement must end with a single character"));
                 }
                 else if (to.startsWith("\\u") || to.startsWith("\\U") || to.startsWith("\\")) {
                     to = JSON.parse(`"${regexEscape(to)}"`);
@@ -218,6 +254,27 @@ export class MatchSubStatementCST extends H2RCST {
 
                 if (from.charCodeAt(0) >= to.charCodeAt(0)) {
                     errors.push(this.error("Between statement range invalid"));
+                }
+            }
+            else if (value.type === MatchSubStatementType.Unicode) {
+                let unicode_class = value.from as string;
+                // check to see if the given code is supported
+                if (!unicode_property_codes.includes(unicode_class)) {
+                    // check to see if the given script is supported
+
+                    // Java and C# requires "Is*"
+                    if (language === RegexDialect.DotNet || language === RegexDialect.Java) {
+                        if (!unicode_class.startsWith("Is")) {
+                            errors.push(this.error("This dialect requires script names to begin with Is, such as IsCyrillic rather than Cyrillic"));
+                            continue;
+                        }
+                        unicode_class = unicode_class.substr(0, 2);
+                    }
+
+                    // attempt with and without "_" characters
+                    if (!unicode_script_codes.includes(unicode_class) && !unicode_script_codes.includes(unicode_class.replace("_", ""))) {
+                        errors.push(this.error(`Unknown unicode specifier ${value.from}`));
+                    }
                 }
             }
         }
@@ -237,6 +294,12 @@ export class MatchSubStatementCST extends H2RCST {
                 }
                 case MatchSubStatementType.Between:
                     str.push(this.invert ? `[^${value.from}-${value.to}]` : `[${value.from}-${value.to}]`);
+                    break;
+                case MatchSubStatementType.Unicode:
+                    str.push(this.invert ? `\\P{${value.from}}` : `\\p{${value.from}}`);
+                    break;
+                case MatchSubStatementType.Boundary:
+                    str.push(this.invert ? "\\B" : "\\b");
                     break;
                 case MatchSubStatementType.Word:
                     str.push(this.invert ? "\\W+" : "\\w+");
