@@ -154,7 +154,7 @@ export class Human2RegexParser extends EmbeddedActionsParser {
         });
 
         // match sub rules
-        let mss_rules: IOrAlt<MatchSubStatementValue>[] | null = null;
+        let mss_rules: IOrAlt<{tokens: IToken[], statement: MatchSubStatementValue}>[] | null = null;
         const MatchSubStatement = $.RULE("MatchSubStatement", () => {
             let count: CountSubStatementCST | null = null;
             let invert: boolean = false;
@@ -164,7 +164,7 @@ export class Human2RegexParser extends EmbeddedActionsParser {
             let to: string | null = null;
             let type: MatchSubStatementType = MatchSubStatementType.Anything;
 
-            const tokens: IToken[] = [];
+            let tokens: IToken[] = [];
 
             count = $.OPTION(() => {
                 const css = $.SUBRULE(CountSubStatement);
@@ -184,122 +184,124 @@ export class Human2RegexParser extends EmbeddedActionsParser {
                 SEP: T.Or,
                 DEF: () => {
                     $.OPTION3(() => $.CONSUME(T.A));
-                    values.push($.OR(mss_rules || (mss_rules = [
-
+                    const result = $.OR(mss_rules || (mss_rules = [
                         // range [a-z]
                         { ALT: () => {
-                            $.OPTION4(() => $.CONSUME(T.From));
-                            from = $.CONSUME2(T.StringLiteral).image; 
+                            const token0 = $.OPTION4(() => $.CONSUME(T.From));
+                            const token1 = $.CONSUME2(T.StringLiteral);
+                            from = token1.image; 
                             $.CONSUME(T.To);
-                            const token = $.CONSUME3(T.StringLiteral);
-                            tokens.push(token);
-                            to = token.image;
+                            const token2 = $.CONSUME3(T.StringLiteral);
+                            to = token2.image;
                             type = MatchSubStatementType.Between;
 
-                            return new MatchSubStatementValue(type, from, to);
+                            if (usefulConditional(token0, "Bug in type definition. Option should return <T|undefined>, but it doesn't")) {
+                                return { tokens: [ token0, token2 ], statement: new MatchSubStatementValue(type, from, to) };
+                            }
+                            return { tokens: [ token1, token2 ], statement: new MatchSubStatementValue(type, from, to) };
                         }},
 
                         // range [a-z]
                         { ALT: () => {
-                            $.CONSUME(T.Between);
+                            const token1 = $.CONSUME(T.Between);
                             from = $.CONSUME4(T.StringLiteral).image;
                             $.CONSUME(T.And);
-                            const token = $.CONSUME5(T.StringLiteral);
-                            to = token.image;
-                            tokens.push(token);
+                            const token2 = $.CONSUME5(T.StringLiteral);
+                            to = token2.image;
                             type = MatchSubStatementType.Between;
 
-                            return new MatchSubStatementValue(type, from, to);
+                            return { tokens: [ token1, token2 ], statement: new MatchSubStatementValue(type, from, to) };
                         }},
 
                         // exact string
                         { ALT: () => {
                             const token = $.CONSUME(T.StringLiteral);
-                            tokens.push(token);
                             value = token.image;
                             type = MatchSubStatementType.SingleString;
 
-                            return new MatchSubStatementValue(type, value);
+                            return { tokens: [ token ], statement: new MatchSubStatementValue(type, value) };
                         }},
 
                         //unicode
                         { ALT: () => {
-                            $.CONSUME(T.Unicode);
-                            const token = $.CONSUME5(T.StringLiteral);
-                            tokens.push(token);
-                            value = token.image;
+                            const token1 = $.CONSUME(T.Unicode);
+                            const token2 = $.CONSUME6(T.StringLiteral);
+                            value = token2.image;
                             type = MatchSubStatementType.Unicode;
 
-                            return new MatchSubStatementValue(type, value);
+                            return { tokens: [ token1, token2 ], statement: new MatchSubStatementValue(type, value) };
                         }},
 
                         { ALT: () => { 
-                            tokens.push($.CONSUME(T.Anything)); 
+                            const token = $.CONSUME(T.Anything); 
                             type = MatchSubStatementType.Anything;
 
-                            return new MatchSubStatementValue(type);
+                            return { tokens: [ token ], statement: new MatchSubStatementValue(type) };
                         }},
                         { ALT: () => {
-                            tokens.push($.CONSUME(T.Boundary));
+                            const token = $.CONSUME(T.Boundary);
                             type = MatchSubStatementType.Boundary;
 
-                            return new MatchSubStatementValue(type);
+                            return { tokens: [ token ], statement: new MatchSubStatementValue(type) };
                         }},
                         { ALT: () => { 
-                            tokens.push($.CONSUME(T.Word)); 
+                            const token = $.CONSUME(T.Word); 
                             type = MatchSubStatementType.Word;
 
-                            return new MatchSubStatementValue(type);
+                            return { tokens: [ token ], statement: new MatchSubStatementValue(type) };
                         }},
                         { ALT: () => { 
-                            tokens.push($.CONSUME(T.Digit)); 
+                            const token = $.CONSUME(T.Digit); 
                             type = MatchSubStatementType.Digit;
 
-                            return new MatchSubStatementValue(type);
+                            return { tokens: [ token ], statement: new MatchSubStatementValue(type) };
                         }},
                         { ALT: () => { 
-                            tokens.push($.CONSUME(T.Character)); 
+                            const token = $.CONSUME(T.Character); 
                             type = MatchSubStatementType.Character;
 
-                            return new MatchSubStatementValue(type);
+                            return { tokens: [ token ], statement: new MatchSubStatementValue(type) };
                         }},
                         { ALT: () => { 
-                            tokens.push($.CONSUME(T.Whitespace)); 
+                            const token = $.CONSUME(T.Whitespace); 
                             type = MatchSubStatementType.Whitespace;
 
-                            return new MatchSubStatementValue(type);
+                            return { tokens: [ token ], statement: new MatchSubStatementValue(type) };
                         }},
                         { ALT: () => { 
-                            tokens.push($.CONSUME(T.Number)); 
+                            const token = $.CONSUME(T.Number); 
                             type = MatchSubStatementType.Number;
 
-                            return new MatchSubStatementValue(type);
+                            return { tokens: [ token ], statement: new MatchSubStatementValue(type) };
                         }},
                         { ALT: () => { 
-                            tokens.push($.CONSUME(T.Tab)); 
+                            const token = $.CONSUME(T.Tab); 
                             type = MatchSubStatementType.Tab;
 
-                            return new MatchSubStatementValue(type);
+                            return { tokens: [ token ], statement: new MatchSubStatementValue(type) };
                         }},
                         { ALT: () => { 
-                            tokens.push($.CONSUME(T.Linefeed)); 
+                            const token = $.CONSUME(T.Linefeed); 
                             type = MatchSubStatementType.Linefeed;
 
-                            return new MatchSubStatementValue(type);
+                            return { tokens: [ token ], statement: new MatchSubStatementValue(type) };
                         }},
                         { ALT: () => { 
-                            tokens.push($.CONSUME(T.Newline)); 
+                            const token = $.CONSUME(T.Newline); 
                             type = MatchSubStatementType.Newline;
 
-                            return new MatchSubStatementValue(type);
+                            return { tokens: [ token ], statement: new MatchSubStatementValue(type) };
                         }},
                         { ALT: () => { 
-                            tokens.push($.CONSUME(T.CarriageReturn)); 
+                            const token = $.CONSUME(T.CarriageReturn); 
                             type = MatchSubStatementType.CarriageReturn;
 
-                            return new MatchSubStatementValue(type);
+                            return { tokens: [ token ], statement: new MatchSubStatementValue(type) };
                         }},
-                    ])));
+                    ]));
+
+                    tokens = tokens.concat(result.tokens);
+                    values.push(result.statement);
                 }
             });
 

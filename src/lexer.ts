@@ -93,7 +93,7 @@ export class Human2RegexLexer {
         this.lexer = new Lexer(AllTokens, { ensureOptimizations: true, skipValidations: options.skip_validations });
     }
 
-    private lexError(token: IToken) : ILexingError {
+    private lexError(token: IToken): ILexingError {
         return { 
             offset: token.startOffset,
             line: token.startLine ?? NaN,
@@ -109,7 +109,7 @@ export class Human2RegexLexer {
      * @param text the text to analyze
      * @returns a lexing result which contains the token stream and error list
      */
-    public tokenize(text: string) : ILexingResult {
+    public tokenize(text: string): ILexingResult {
         const lex_result = this.lexer.tokenize(text);
 
         if (lex_result.tokens.length === 0) {

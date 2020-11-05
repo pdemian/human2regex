@@ -68,15 +68,13 @@ const unicode_script_codes = [
  * @internal
  */
 export abstract class H2RCST {
-    public tokens: IToken[];
-
     /**
      * Constructor for H2RCST
      * 
      * @param tokens Tokens used to calculate where an error occured
      * @internal
      */
-    constructor(tokens: IToken[]) {
+    constructor(public tokens: IToken[]) {
         this.tokens = tokens;
     }
 
@@ -335,6 +333,8 @@ export class MatchSubStatementCST extends H2RCST {
 
         let ret = "";
 
+        let require_grouping = false;
+
         if (str.length === 1) {
             ret = str[0];
         }
@@ -344,10 +344,14 @@ export class MatchSubStatementCST extends H2RCST {
         }
         else {
             //use a no-capture group
-            ret = "(?:" + str.join("|") + ")";
+            ret = str.join("|");
+            require_grouping = true;
         }
 
         if (this.count) {
+            if (require_grouping) {
+                ret = "(?:" + ret + ")";
+            }
             ret += this.count.toRegex(language);
         }
 
@@ -380,7 +384,7 @@ export class UsingStatementCST extends H2RCST {
 
         for (let i = 1; i < this.flags.length; i++) {
             if (hasFlag(flag, this.flags[i])) {
-                errors.push(this.error("Duplicate modifier: " + MatchSubStatementType[this.flags[i]] ));
+                errors.push(this.error("Duplicate modifier: " + UsingFlags[this.flags[i]] ));
             }
             flag = combineFlags(flag, this.flags[i]);
         }
