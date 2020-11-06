@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable no-undef */
 const path = require("path");
@@ -29,7 +31,6 @@ const config = {
 
 
 function build_mustache() {
-
 	if (!existsSync(config.dst)){
 		mkdirSync(config.dst);
 	}
@@ -48,7 +49,7 @@ function build_mustache() {
     };
 
     // build main mustache files
-    for(const item of files) {
+    for (const item of files) {
         const filename = path.basename(item, ".json");
         const view = read_json_file(item);
         const to = path.join(config.dst, filename + ".html");

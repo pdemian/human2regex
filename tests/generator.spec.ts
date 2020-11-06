@@ -32,6 +32,11 @@ describe("Generator functionality", function() {
         const reg1 = parser.parse();
         expect(reg1.validate(RegexDialect.JS).length).toBe(0);
         expect(reg1.toRegex(RegexDialect.JS)).toBe("/https?/");
+
+        parser.input = lexer.tokenize("match 1+ words").tokens;
+        const reg2 = parser.parse();
+        expect(reg2.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg2.toRegex(RegexDialect.JS)).toBe("/\\w+/"); // used to generate w++. make sure not to regress
     });
 
     it("validates invalid regexes", function() {

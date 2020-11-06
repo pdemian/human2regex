@@ -334,9 +334,13 @@ export class MatchSubStatementCST extends H2RCST {
         let ret = "";
 
         let require_grouping = false;
+        let dont_clobber_plus = false;
 
         if (str.length === 1) {
             ret = str[0];
+            if (ret.endsWith("+")) {
+                dont_clobber_plus = true;
+            }
         }
         // we can use regex's [] for single chars, otherwise we need a group
         else if (str.every(isSingleRegexCharacter)) {
@@ -349,10 +353,36 @@ export class MatchSubStatementCST extends H2RCST {
         }
 
         if (this.count) {
-            if (require_grouping) {
-                ret = "(?:" + ret + ")";
+            if (dont_clobber_plus) {
+                const clobber = this.count.toRegex(language);
+
+                // + can be ignored as well as a count as long as that count is > 0
+                switch (clobber) {
+                    case "*":
+                    case "?":
+                        ret = "(?:" + ret + ")" + clobber;
+                        break;
+                    case "+":
+                        // ignore
+                        break;
+                    default:
+                        if (clobber.startsWith("{0")) {
+                            ret = "(?:" + ret + ")" + clobber;
+                        }
+                        else {
+                            // remove + and replace with count
+                            ret.substring(0, ret.length - 1) + clobber;
+                        }
+                        break;
+                }
             }
-            ret += this.count.toRegex(language);
+            else {
+                if (require_grouping) {
+                    ret = "(?:" + ret + ")";
+                }
+
+                ret += this.count.toRegex(language);
+            }
         }
 
         return ret;

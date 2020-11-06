@@ -2,21 +2,22 @@
 
 ## Purpose
 
-Generate regular expressions from natural language. Currently WIP, but should look something like this:
+Generate regular expressions from natural language.
 
-Instead of a convoluted mess of symbols why not
+Instead of a convoluted mess of symbols like `/([\w\.=\-]*\w+)/g` why not
 
     using global matching
-    create a group called "capture_me" 
-        match 0+ words or "." or "=" or "-"
+    create a group called capture_me
+        match 0+ characters or "." or "=" or "-"
         match 1+ words
+
+Is the former not much easier to read and bug fix than the latter?
 
 Running the program should result in the following output:
 
-    Your regex = /\$([\w\.=\-]*[\w]+)/g
-    "capture_me" is group id 1
+    Your regex = /(?<capture_me>[\w\.\=\-]*\w++)/g
 
-Is the former not much easier to read and bug fix than the latter?
+You can then use your regex in your language of choice, with Human2Regex validating your regex for you.
 
 Another example
 
@@ -61,16 +62,24 @@ Another example
 
 Running the program should result in the following output:
 
-    Your regex = /^(https?:\/\/)?((\w\.)*)(:\d+)?([\w_\-]\.\w)((/[\w_\-]))?(\?([\w_\-]=[\w_\-]))?(#.*)$/g
-    "protocol" is group id 1
-    "subdomain" is group id 2
-    "domain" is group id 4
-    "path" is group id 5
-    "query" is group id 5 or 6 if "path" exists
+    Your regex = /^(?<protocol>https?\:\/\/)?(?<subdomain>(\w+\.)*)?(?<domain>(?:\w+|_|\-)+\.\w+)\:?\d*(?<path>(\/(?:\w+|_|\-)*)*)?(\?(?<query>((?:\w+|_|\-)+\=(?:\w+|_|\-)+)*))?(#.*)?$/g
+
+Which one would you rather debug?
 
 ## Usage
-Configure config.ts
-Run
+Build
 
     npm run build
 
+Run
+    
+    point web browser to: docs/index.html
+
+Test
+
+    npm t
+
+
+## Todo
+- Seperate website and source code. Move to yarn/npm
+- Add more regex options such as back references, subroutines, lookahead/behind, and more character classes (eg,  `[:alpha:]`)
