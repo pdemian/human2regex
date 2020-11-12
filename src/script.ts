@@ -10,10 +10,10 @@ import "codemirror/addon/mode/simple";
 import "codemirror/addon/runmode/runmode";
 import "codemirror/addon/lint/lint";
 
-import "./webpage/bootstrap.css";
-import "./webpage/cleanblog.css";
-import "./webpage/codemirror.css";
-import "./webpage/style.css";
+import "./docs/bootstrap.css";
+import "./docs/cleanblog.css";
+import "./docs/codemirror.css";
+import "./docs/style.css";
 
 interface CodeMirror {
 	defineSimpleMode: (name: string, value: Record<string, unknown>) => void;

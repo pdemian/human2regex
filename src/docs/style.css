@@ -1,36 +1,36 @@
 /*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
  
 .tenpx-margin-bottom {
-	margin-bottom: 10px;
+    margin-bottom: 10px;
 }
  
 h4 {
-	margin-top: 10px; 
+    margin-top: 10px; 
 }
 
 .cheatsheet {
-	height:100%; 
-	padding:10px; 
-	border-color: #ced4da;
-	border-style: solid; 
-	border-radius: 10px; 
-	border-width: 1px;
+    height:100%; 
+    padding:10px; 
+    border-color: #ced4da;
+    border-style: solid; 
+    border-radius: 10px; 
+    border-width: 1px;
 }
 
 p {
-	font-size: 16px !important;
+    font-size: 16px !important;
 }
 
 .cheatsheet p {
-	line-height: 1 !important;
+    line-height: 1 !important;
 }
 
 .zero-margin-bottom {
-	margin-bottom: 0px;
+    margin-bottom: 0px;
 }
 
 #maincontent {
-	margin-top: 75px;
+    margin-top: 75px;
 }
  
 .align_header {
@@ -81,12 +81,12 @@ a:hover {
 }
 
 .navbar {
-	padding: 0 !important;
+    padding: 0 !important;
 }
 
 #errors {
-	resize: none;
-	background-color: #FFF;
+    resize: none;
+    background-color: #FFF;
 }
 
 .CodeMirror {
@@ -112,8 +112,8 @@ a:hover {
     font-family: monospace;
     position: relative;
     overflow: hidden;
-	resize: vertical;
-	height: 400px;
+    resize: vertical;
+    height: 400px;
 }
 
 .CodeMirror-focused {
@@ -125,10 +125,38 @@ a:hover {
 }
 
 code {
-	font-style: italic!important;
+    font-style: italic!important;
 }
 
-#tutorial {
-	max-width: 80%;
-	margin: auto;
+.tutorial-code {
+    display: block;
+    margin: 20px;
+}
+
+@media (min-width: 576px) {
+    .contained-container {
+        max-width:540px
+    }
+}
+
+@media (min-width: 768px) {
+    .contained-container {
+        max-width:720px
+    }
+}
+
+@media (min-width: 992px) {
+    .contained-container {
+        max-width:960px
+    }
+}
+
+@media (min-width: 1200px) {
+    .contained-container {
+        max-width:1140px
+    }
+}
+
+td {
+	font-size: 16px;
 }

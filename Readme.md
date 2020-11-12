@@ -1,5 +1,4 @@
 # Human2Regex
-
 ## Purpose
 
 Generate regular expressions from natural language.
@@ -66,6 +65,14 @@ Running the program should result in the following output:
 
 Which one would you rather debug?
 
+## Webpage
+Human2Regex is hosted on github pages at [https://pdemian.github.io/human2regex/](https://pdemian.github.io/human2regex/)
+
+## API
+Human2Regex is available as an embeddable API.
+
+The API reference is available [here](API.md)
+
 ## Usage
 Build
 
@@ -81,5 +88,6 @@ Test
 
 
 ## Todo
-- Seperate website and source code. Move to yarn/npm
+- Return CommonError rather than requiring the user to convert to a CommonError
+- Move to yarn/npm
 - Add more regex options such as back references, subroutines, lookahead/behind, and more character classes (eg,  `[:alpha:]`)

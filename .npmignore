@@ -1,0 +1,13 @@
+# Node build artifacts
+node_modules/
+coverage/
+npm-debug.log
+docs/
+src/
+tests/
+jest.config.ts
+webpack.config.js
+tsconfig.json
+.gitignore
+.travis.yml
+.eslintrc.json

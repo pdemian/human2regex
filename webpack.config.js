@@ -12,6 +12,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const WebpackBeforeBuildPlugin = require("before-build-webpack");
 const TerserPlugin = require("terser-webpack-plugin");
+const RemovePlugin = require('remove-files-webpack-plugin');
 
 const config = {
     prod: true,
@@ -40,12 +41,12 @@ function build_mustache() {
     compress_html = (input) =>  config.prod ? minify(input, config.compression_config.html) : input;
 
     // get views
-    const files = glob.sync(path.join(config.src, "webpage", "*.json"));
+    const files = glob.sync(path.join(config.src, "docs", "*.json"));
 
     // get partials
     const partials = {
-        header: readFileSync(path.join(config.src, "webpage", "header.mustache"), "utf8"),
-        footer: readFileSync(path.join(config.src, "webpage", "footer.mustache"), "utf8")
+        header: readFileSync(path.join(config.src, "docs", "header.mustache"), "utf8"),
+        footer: readFileSync(path.join(config.src, "docs", "footer.mustache"), "utf8")
     };
 
     // build main mustache files
@@ -53,7 +54,7 @@ function build_mustache() {
         const filename = path.basename(item, ".json");
         const view = read_json_file(item);
         const to = path.join(config.dst, filename + ".html");
-        const template = readFileSync(path.join(config.src, "webpage", filename + ".mustache"), "utf8");
+        const template = readFileSync(path.join(config.src, "docs", filename + ".mustache"), "utf8");
 
         writeFileSync(to, compress_html(render(template, view, partials)));
     }
@@ -82,7 +83,7 @@ module.exports = {
     plugins: [
         new CopyPlugin({
             patterns: [
-                { from: config.src + "webpage/" + "!(*.css|*.mustache|*.json)", to: "", flatten: true}
+                { from: config.src + "docs/" + "!(*.css|*.mustache|*.json)", to: "", flatten: true}
             ]
         }),
         new MiniCssExtractPlugin({ filename: "bundle.min.css" }),
@@ -90,6 +91,15 @@ module.exports = {
             build_mustache();
             callback();
         }),
+		new RemovePlugin({
+			after: {
+				root: "./lib",
+				include: [
+					"script.d.ts",
+					"script.d.ts.map"
+				]
+			}
+		})
     ],
     resolve: {
         extensions: [ ".ts", ".js" ]
