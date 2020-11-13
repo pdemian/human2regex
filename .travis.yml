@@ -9,6 +9,6 @@ before_script:
 
 script:
   - npm t
-
+  
 after_success:
-  - npm run extract
+  - npm run codecov

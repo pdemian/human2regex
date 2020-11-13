@@ -1,6 +1,6 @@
 {
   "name": "human2regex",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "Humanized Regular Expressions",
   "main": "./lib/index.js",
   "typings": "./lib/index.d.ts",
@@ -12,6 +12,7 @@
     "@typescript-eslint/eslint-plugin": "^4.6.1",
     "@typescript-eslint/parser": "^4.6.1",
     "before-build-webpack": "^0.2.9",
+    "codecov": "^3.8.1",
     "copy-webpack-plugin": "^6.3.0",
     "css-loader": "^4.3.0",
     "eslint": "^7.11.0",
@@ -32,8 +33,9 @@
   "scripts": {
     "build": "tsc && webpack --config webpack.config.js",
     "test": "eslint && jest",
-	"prepare": "npm run build",
-	"prepublishOnly": "npm t"
+	"codecov": "codecov",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm t"
   },
   "keywords": [
     "regex",

@@ -1,4 +1,20 @@
 # Human2Regex
+
+<div align="center">
+
+  ![H2R logo](./src/docs/favicon-small.png)
+
+  [![Build Status](https://travis-ci.org/pdemian/human2regex.svg?branch=master)](https://travis-ci.org/pdemian/human2regex)
+  ![Codecov](https://codecov.io/gh/pdemian/human2regex/branch/master/graphs/badge.svg?branch=master)
+  ![GitHub](https://img.shields.io/github/license/pdemian/human2regex)
+  [![Website](https://img.shields.io/badge/website-pdemian.github.io/human2regex-blue)](https://pdemian.github.io/human2regex/)
+  [![Docs](https://img.shields.io/badge/docs-API-blue)](API.md)
+  [![Docs](https://img.shields.io/badge/docs-language-blue)](https://pdemian.github.io/human2regex/tutorial.html)
+  
+  <!-- ![npm](https://img.shields.io/npm/v/human2regex) -->
+</div>
+
+
 ## Purpose
 
 Generate regular expressions from natural language.
@@ -14,7 +30,7 @@ Is the former not much easier to read and bug fix than the latter?
 
 Running the program should result in the following output:
 
-    Your regex = /(?<capture_me>[\w\.\=\-]*\w++)/g
+    Your regex = /(?<capture_me>[\w\.\=\-]*\w+)/g
 
 You can then use your regex in your language of choice, with Human2Regex validating your regex for you.
 
@@ -74,6 +90,10 @@ Human2Regex is available as an embeddable API.
 The API reference is available [here](API.md)
 
 ## Usage
+Prebuild
+
+    npm install
+
 Build
 
     npm run build
@@ -89,5 +109,4 @@ Test
 
 ## Todo
 - Return CommonError rather than requiring the user to convert to a CommonError
-- Move to yarn/npm
 - Add more regex options such as back references, subroutines, lookahead/behind, and more character classes (eg,  `[:alpha:]`)

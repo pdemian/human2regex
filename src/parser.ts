@@ -131,7 +131,21 @@ export class Human2RegexParser extends EmbeddedActionsParser {
                         { ALT: () => { 
                             $.CONSUME(T.To); 
                             const val = $.SUBRULE3(NumberSubStatement);
-                            return new TokenAndValue(val.token, [ val.value, null ]);
+
+                            const opt = $.OPTION7(() => {
+                                return $.OR5([
+                                    { ALT: () => {
+                                        tokens.push($.CONSUME2(T.Inclusive));
+                                        return "inclusive";
+                                    }},
+                                    { ALT: () => {
+                                        tokens.push($.CONSUME2(T.Exclusive));
+                                        return "exclusive";
+                                    }}
+                                ]);
+                            });
+
+                            return new TokenAndValue(val.token, [ val.value, opt ]);
                         }}
                     ]);
                     tokens.push(to.token);

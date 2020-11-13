@@ -7,40 +7,39 @@
 				<h2>Tutorial</h2>
 				<br>
 
-				<p class="font-weight-bold">Preface</p>
-				<p>Human2Regex (H2R) is a way to spell out a regular expression in an easy to read, easy to modify language. H2R supports multiple languages as well as many (though not all) different regular expression options such as named groups and quantifiers. You may notice multiple keywords specifying the same thing, and that is intended! H2R is made to be flexible and easy to understand. With a range, do you prefer "...", "through", or "to"? It's up to you to choose, H2R supports all of those!</p>
+				<p class="font-weight-bold" id="tut-preface">0. Preface</p>
+				<p>Human2Regex (H2R) is a way to spell out a regular expression in an easy to read, easy to modify language. H2R supports multiple languages as well as many (though not all) different regular expression options such as named groups and quantifiers. You may notice multiple keywords specifying the same thing, and that is intended! Just like how in English there are many ways to express yourself, H2R is made to be flexible and easy to understand. With a range, do you prefer "...", "through", or "to"? It's up to you to choose, H2R supports all of those!</p>
 
-				<p class="font-weight-bold">Your first Match</p>
-				<p>Every language starts with a "Hello World" program, so let's match the output of those programs. Matching is done using the keyword "match" followed by what you want to match.
+				<br>
+				<p class="font-weight-bold" id="tut-first-match">1. Your first Match</p>
+				<p>Every language starts with a "Hello World" program, so let's match the output of those programs. Matching is done using the keyword <code class="cm-s-idea">match</code> followed by what you want to match.
 <span class="tutorial-code"><code class="cm-s-idea">
 match "Hello World"
 </code></span>
-				The above statement will generate a regular expression that matches "Hello World". Any invalid characters will automatically be escaped, so you don't need to worry about it. 
-				H2R also supports block comments with <code class="cm-s-idea">/**/</code>, or line comments with <code class="cm-s-idea">//</code> or <code class="cm-s-idea">#</code> so you can explain why or what you intend to match.
-<span class="tutorial-code"><code class="cm-s-idea">
+				The above statement will generate a regular expression that matches "Hello World", like "/Hello World/". Any invalid characters will automatically be escaped, so you don't need to worry about it. H2R also supports block comments with <code class="cm-s-idea">/**/</code>, or line comments with <code class="cm-s-idea">//</code> or <code class="cm-s-idea">#</code> so you can explain why or what you intend to match.</p>
+<pre class="tutorial-code"><code class="cm-s-idea">/* This is a block comment */
 match "Hello World" // matches the output of "Hello World" programs
-</code></span>
-				Now what if we want to match every case variation of "Hello World" like "hello world" or "hELLO wORLD"? H2R supports the <code class="cm-s-idea">or</code> operator which allows you to specify many possible combinations.
+</code></pre>
+				<p>Now what if we want to match every case variation of "Hello World" like "hello world" or "hELLO wORLD"? H2R supports the <code class="cm-s-idea">or</code> operator which allows you to specify many possible combinations.
 <span class="tutorial-code"><code class="cm-s-idea">
 match "Hello World" or "hello world" or "hELLO wORLD"
 </code></span>
 				Or, you can use a <code class="cm-s-idea">using</code> statement to specify that you want it to be case insensitive.</p>
 
-				<p class="font-weight-bold">Using Specifiers</p>
+				<br>
+				<p class="font-weight-bold" id="tut-using">2. Using Specifiers</p>
 				<p>Using statements appear at the beginning. You may have one or more using statements which each can contain one or more specifiers. For example:
 <span class="tutorial-code"><code class="cm-s-idea">
 using global and case insensitive matching
 </code></span>
-				or
-<span class="tutorial-code"><code class="cm-s-idea">
-using global
-</code></span>
-<span class="tutorial-code"><code class="cm-s-idea">
+				or</p>
+<pre class="tutorial-code">
+<code class="cm-s-idea">using global
 using case insensitive
-</code></span>
-				The <code class="cm-s-idea">matching</code> keyword is optional. The flags which are available are:</p>
+</code></pre>
+				<p>The <code class="cm-s-idea">matching</code> keyword is optional. The flags which are available are:</p>
 
-				<table class="table table-striped table-bordered">
+				<table class="table table-sm table-striped table-bordered">
 					<thead>
 						<tr>
 							<th scope="col">Specifier</th>
@@ -77,26 +76,20 @@ using case insensitive
 					</tbody>
 				</table>
 
-				<p>To match any variation of hello world, we would then do the following:
-<span class="tutorial-code"><code class="cm-s-idea">
-using case insensitive matching
-</code></span>
-<span class="tutorial-code"><code class="cm-s-idea">
+				<p>To match any variation of hello world, we would then do the following:</p>
+<pre class="tutorial-code"><code class="cm-s-idea">using case insensitive matching
 match "hello world"
-</code></span></p>
+</code></pre>
 
-				<p class="font-weight-bold">Matching multiple items</p>
-				<p>H2R comes with 2 options to match multiple items in a row. The first is to simply write multiple seperate <code class="cm-s-idea">match</code> statements like:
-<span class="tutorial-code"><code class="cm-s-idea">
-match "hello"
-</code></span>
-<span class="tutorial-code"><code class="cm-s-idea">
+				<br>
+				<p class="font-weight-bold" id="tut-multiple-match">3. Matching multiple items</p>
+				<p>H2R comes with 2 options to match multiple items in a row. The first is to simply write multiple seperate <code class="cm-s-idea">match</code> statements like:</p>
+<pre class="tutorial-code">
+<code class="cm-s-idea">match "hello"
 match " "
-</code></span>
-<span class="tutorial-code"><code class="cm-s-idea">
 match "world"
-</code></span>
-				However, you can also use a comma, <code class="cm-s-idea">and</code>, or <code class="cm-s-idea">then</code> for a more concise match. 
+</code></pre>
+				<p>However, you can also use a comma, <code class="cm-s-idea">and</code>, or <code class="cm-s-idea">then</code> for a more concise match. 
 <span class="tutorial-code"><code class="cm-s-idea">
 match "hello", " ", "world"
 </code></span>
@@ -113,12 +106,13 @@ match "hello" then " " then "world"
 match "hello", " " and then "world"
 </code></span>
 
-				<p class="font-weight-bold">Optionality</p>
+				<br>
+				<p class="font-weight-bold" id="tut-optionality">4. Optionality</p>
 				<p>Sometimes you wish to match something that may or may not exist. In H2R, this is done via the <code class="cm-s-idea">optional</code> or <code class="cm-s-idea">optionally</code> keyword. 
 <span class="tutorial-code"><code class="cm-s-idea">
 optionally match "hello world"
 </code></span>
-				will match 0 or 1 "hello world"'s. This can be used along side matching multiple statements in a single <code class="cm-s-idea">match</code> statement.
+				will match 0 or 1 "hello world"'s. This can be used alongside matching multiple statements in a single <code class="cm-s-idea">match</code> statement.
 <span class="tutorial-code"><code class="cm-s-idea">
 match "hello", optionally " ", "world"
 </code></span>
@@ -128,20 +122,22 @@ optionally match "hello", " ", then "world"
 </code></span>
 				will actually make the whole "hello world" an optional match rather than just the first "hello". If you want to make the first match optional but keep the rest required, use multiple <code class="cm-s-idea">match</code> statements.</p>
 
-				<p class="font-weight-bold">Negation</p>
+				<br>
+				<p class="font-weight-bold" id="tut-negation">5. Negation</p>
 				<p>You can negate a match with the operator <code class="cm-s-idea">not</code>
 <span class="tutorial-code"><code class="cm-s-idea">
 match not "hello world"
 </code></span>
 				will match everything except for "hello world".</p>
 
-				<p class="font-weight-bold">Other matching specifiers</p>
+				<br>
+				<p class="font-weight-bold" id="tut-other-match">6. Other matching specifiers</p>
 				<p>Many times you don't know exactly what you wish to match. H2R comes with many specifiers that you can use for your matching. For example, you may wish to match any word. You can do that with:
 <span class="tutorial-code"><code class="cm-s-idea">
 match a word
 </code></span>
 				The <code class="cm-s-idea">a</code> or <code class="cm-s-idea">an</code> is optional. The possible specifiers that H2R supports are the following:</p>
-				<table class="table table-striped table-bordered">
+				<table class="table table-sm table-striped table-bordered">
 					<thead>
 						<tr>
 							<th scope="col">Specifier</th>
@@ -205,15 +201,15 @@ match a word
 
 				<p>You can also create ranges of characters to match. Say for example, you wanted to match any characters between a and z, you could write any of the following:
 <span class="tutorial-code"><code class="cm-s-idea">
-match from "a" to "z" // from is optional
+match from "a" to "z" // "from" is optional
 </code></span>
 				or
 <span class="tutorial-code"><code class="cm-s-idea">
-match between "a" and "z" // between is optional
+match between "a" and "z" // "between" is optional
 </code></span>
 				or
 <span class="tutorial-code"><code class="cm-s-idea">
-match "a" ... "z" // can use ... or ..
+match "a" ... "z" // can use "..." or ".."
 </code></span>
 				or
 <span class="tutorial-code"><code class="cm-s-idea">
@@ -224,65 +220,100 @@ match "a" - "z"
 match "a" through "z" // can also use thru
 </code></span>
 
-				<p class="font-weight-bold">Repetition</p>
-				<!--<p>H2R supports 2 types of repetition: single match repetition, or grouped repetition. When using "match" you can specify the number of captures you want just before the text you want to capture. Example: <code class="cm-s-idea">match 2 digits</code> will match any 2 characters in a row. You can also specify a range you wish to capture. Example: <code class="cm-s-idea">match 2..5 digits</code> will match 2, 3, 4, or 5 digits. You can specify if the final number is exclusive with the "exclusive" keyword. Example: <code class="cm-s-idea">match 2 to 5 exclusive digits</code> will only match up to 4 digits. You can group a repetition using the "repeat" keyword. By default, this will match 0 or more of the following statements. The same qualifiers that exist for match exist for repeat. Example: <code class="cm-s-idea">optionally repeat 3...7 times</code></p>
-				
-				<p>Optional repeat</p>-->
-				<p>TODO</p>
-				
-				<table class="table table-striped table-bordered">
-					<thead>
-						<tr>
-							<th scope="col">String value</th>
-							<th scope="col">Numeric value</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td>Zero</td><td>0</td>
-						</tr>
-						<tr>
-							<td>One</td><td>1</td>
-						</tr>
-						<tr>
-							<td>Two</td><td>2</td>
-						</tr>
-						<tr>
-							<td>Three</td><td>3</td>
-						</tr>
-						<tr>
-							<td>Four</td><td>4</td>
-						</tr>
-						<tr>
-							<td>Five</td><td>5</td>
-						</tr>
-						<tr>
-							<td>Six</td><td>6</td>
-						</tr>
-						<tr>
-							<td>Seven</td><td>7</td>
-						</tr>
-						<tr>
-							<td>Eight</td><td>8</td>
-						</tr>
-						<tr>
-							<td>Nine</td><td>9</td>
-						</tr>
-						<tr>
-							<td>Ten</td><td>10</td>
-						</tr>
-					</tbody>
-				</table>
+				<br>
+				<p class="font-weight-bold" id="tut-repeition">7. Repetition</p>
+				<p>H2R supports 2 types of repetition: single match repetition, or grouped repetition. When using <code class="cm-s-idea">match</code> you can specify the number of captures you want just before the text to capture. 
+<span class="tutorial-code"><code class="cm-s-idea">
+match 2 digits
+</code></span>
+				or
+<span class="tutorial-code"><code class="cm-s-idea">
+match exactly 2 digits
+</code></span>
+				will match any 2 digits in a row. You can also specify a range you wish to capture
+<span class="tutorial-code"><code class="cm-s-idea">
+match 2 ... 5 digits
+</code></span>
+				or
+<span class="tutorial-code"><code class="cm-s-idea">
+match 2 to 5 digits
+</code></span>
+				or
+<span class="tutorial-code"><code class="cm-s-idea">
+match between 2 to 5 digits
+</code></span>
+				will match 2, 3, 4, or 5 digits. You can specify if the final number is exclusive with the <code class="cm-s-idea">exclusive</code> or <code class="cm-s-idea">inclusive</code> keywords. 
+<span class="tutorial-code"><code class="cm-s-idea">
+match 2 to 5 exclusive digits
+</code></span>
+				 will only match up to 4 digits. You can also choose to leave the end unspecified.
+<span class="tutorial-code"><code class="cm-s-idea">
+match 2+ digits
+</code></span>
+				or
+<span class="tutorial-code"><code class="cm-s-idea">
+match 2 or more digits
+</code></span>
+				will match 2 or more digits. Repeition can be chained with the <code class="cm-s-idea">and then</code> keywords or the <code class="cm-s-idea">optional</code> keyword. For example:
+<span class="tutorial-code"><code class="cm-s-idea">
+match 1+ digits then optionally "." then optionally 0...8 digits
+</code></span>
+				 
+				Suppose you want to repeat a group of these match statements. You can group a repetition using the <code class="cm-s-idea">repeat</code> keyword. Everything underneath that is tabbed (scoped) will be repeated. By default, this will match 0 or more of the following statements.</p>
+<pre class="tutorial-code">
+<code class="cm-s-idea">repeat
+	match "Hello "
+match "World"
+</code></pre>
+				<p>Will match 0 or more "Hello "s, but only 1 "World". The same qualifiers that exist for <code class="cm-s-idea">match</code> statements also exist for <code class="cm-s-idea">repeat</code> statements.</p>
+<pre class="tutorial-code">
+<code class="cm-s-idea">optionally repeat 3...7 times
+	match "Hello World"
+</code></pre>
+				<p>Will potentially match "Hello World" between 3 and 7 times. H2R also supports the following for numbers: <code class="cm-s-idea">One, Two, Three, Four, Five, Six, Seven, Eight, Nine, and Ten</code></p>
 
-				<p class="font-weight-bold">Grouping</p>
-				<p>TODO</p>
-				<!-- Optional, create a group
-				create a group called 
-				-->
+				<br>
+				<p class="font-weight-bold" id="tut-grouping">8. Grouping</p>
+				<p>Just like regular expressions, capture and non-capture groups are supported in H2R. Each group is defined using the <code class="cm-s-idea">create a group</code> keyphrase.</p>
+<pre class="tutorial-code">
+<code class="cm-s-idea">create a group
+	match "Hello World"
+</code></pre>
+				<p>This will create a non-captured group, equivalent to the regular expression "/(?:Hello World)/". A non-captured group will not show up in your chosen language's matches. If you do wish to capture a group, simply give it a name:<p>
+<pre class="tutorial-code">
+<code class="cm-s-idea">create a group called TestGroup
+	match "Hello World"
+</code></pre>
+				<p>In most languages, a named group can be accessed through the match result's group list. Take for example, in JavaScript, 
+<pre class="tutorial-code">
+<code class="cm-s-idea">"hello".match(/(?&lt;TestGroup&gt;hello)/).groups</code>
+</pre>
+
+				<p>Will return an object with {TestGroup: "hello"}. For another example, check out <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/match#Using_named_capturing_groups">MDN web docs</a>. Groups can also be optional.</p>
+<pre class="tutorial-code">
+<code class="cm-s-idea">create an optional group
+	match "Hello World"
+</code></pre>
+			<p>And groups may be nested</p>
+<pre class="tutorial-code">
+<code class="cm-s-idea">create a group called TestGroup
+	match "Hello"
+	create a group called InnerGroup
+		match "World"
+</code></pre>
+				<p>The regular expression returned by this will be "/(?&lt;TestGroup&gt;Hello(?&lt;InnerGroup&gt;World))/". Again, in JavaScript, the following</p>
+<pre class="tutorial-code">
+<code class="cm-s-idea">"HelloWorld".match(/(?&lt;TestGroup&gt;Hello(?&lt;InnerGroup&gt;World))/).groups</code>
+</pre>
+				<p>Will return an object with {TestGroup: "HelloWorld", InnerGroup: "World"}.</p>
+
+				<br>
+				<h3 id="tut-final">Putting it all together</h3>
+				<p>Grouping, repetition, and matching are the 3 primary elements that make up H2R. They can be combined in any way to generate a regular expression. See the <a href="index.html">main page</a> for an example that combines all above to parse a URL.</p>
 
 				<h3>Miscellaneous features</h3>
 
-				<p class="font-weight-bold">Unicode character properties</p>
+				<p class="font-weight-bold" id="tut-unicode">Unicode character properties</p>
 				<p>You can match specific unicode sequences using <code class="cm-s-idea">"\uXXXX"
 				</code> or <code class="cm-s-idea">"\UXXXXXXXX"</code> where X is a hexadecimal character.
 <span class="tutorial-code"><code class="cm-s-idea">
@@ -296,86 +327,62 @@ match unicode "Latin" // matches any latin character
 match unicode "N" // matches any number character
 </code></span>
 				The following Unicode class specifiers are available:</p>
-				<table class="table table-striped table-bordered">
+				<table class="table table-sm table-striped table-bordered">
 					<thead>
 						<tr>
-							<th scope="col">Class</th>
-							<th scope="col">Description</th>
-							<th scope="col">Class</th>
-							<th scope="col">Description</th>
-							<th scope="col">Class</th>
-							<th scope="col">Description</th>
-							<th scope="col">Class</th>
-							<th scope="col">Description</th>
-							<th scope="col">Class</th>
-							<th scope="col">Description</th>
 							<th scope="col">Class</th>
 							<th scope="col">Description</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr>
-							<td>C</td><td>Other</td>
-							<td>Cc</td><td>Control</td>
-							<td>Cf</td><td>Format</td>
-							<td>Cn</td><td>Unassigned</td>
-							<td>Co</td><td>Private use</td>
-							<td>Cs</td><td>Surrogate</td>
-						</tr>
-						<tr>
-							<td>L</td><td>Letter</td>
-							<td>Ll</td><td>Lower case letter</td>
-							<td>Lm</td><td>Modifier letter</td>
-							<td>Lo</td><td>Other letter</td>
-							<td>Lt</td><td>Title case letter</td>
-							<td>Lu</td><td>Upper case letter</td>
-						</tr>
-						<tr>
-							<td>M</td><td>Mark</td>
-							<td>Mc</td><td>Spacing mark</td>
-							<td>Me</td><td>Enclosing mark</td>
-							<td>Mn</td><td>Non-spacing mark</td>
-							<td>N</td><td>Number</td>
-							<td>Nd</td><td>Decimal number</td>
-						</tr>
-						<tr>
-							<td>Nl</td><td>Letter number</td>
-							<td>No</td><td>Other number</td>
-							<td>P</td><td>Punctuation</td>
-							<td>Pc</td><td>Connector punctuation</td>
-							<td>Pd</td><td>Dash punctuation</td>
-							<td>Pe</td><td>Close punctuation</td>
-						</tr>
-						<tr>
-							<td>Pf</td><td>Final punctuation</td>
-							<td>Pi</td><td>Initial punctuation</td>
-							<td>Po</td><td>Other punctuation</td>
-							<td>Ps</td><td>Open punctuation</td>
-							<td>S</td><td>Symbol</td>
-							<td>Sc</td><td>Currency symbol</td>
-						</tr>
-						<tr>
-							<td>Sk</td><td>Modifier symbol</td>
-							<td>Sm</td><td>Mathematical symbol</td>
-							<td>So</td><td>Other symbol</td>
-							<td>Z</td><td>Separator</td>
-							<td>Zl</td><td>Line separator</td>
-							<td>Zp</td><td>Paragraph separator</td>
-						</tr>
-						<tr>
-							<td>Zs</td><td>Space separator</td>
-							<td>&nbsp;</td><td>&nbsp;</td>
-							<td>&nbsp;</td><td>&nbsp;</td>
-							<td>&nbsp;</td><td>&nbsp;</td>
-							<td>&nbsp;</td><td>&nbsp;</td>
-							<td>&nbsp;</td><td>&nbsp;</td>
-						</tr>
+						<tr><td>C</td><td>Other</td></tr>
+						<tr><td>Cc</td><td>Control</td></tr>
+						<tr><td>Cf</td><td>Format</td></tr>
+						<tr><td>Cn</td><td>Unassigned</td></tr>
+						<tr><td>Co</td><td>Private use</td></tr>
+						<tr><td>Cs</td><td>Surrogate</td></tr>
+
+						<tr><td>L</td><td>Letter</td></tr>
+						<tr><td>Ll</td><td>Lower case letter</td></tr>
+						<tr><td>Lm</td><td>Modifier letter</td></tr>
+						<tr><td>Lo</td><td>Other letter</td></tr>
+						<tr><td>Lt</td><td>Title case letter</td></tr>
+						<tr><td>Lu</td><td>Upper case letter</td></tr>
+
+						<tr><td>M</td><td>Mark</td></tr>
+						<tr><td>Mc</td><td>Spacing mark</td></tr>
+						<tr><td>Me</td><td>Enclosing mark</td></tr>
+						<tr><td>Mn</td><td>Non-spacing mark</td></tr>
+						<tr><td>N</td><td>Number</td></tr>
+						<tr><td>Nd</td><td>Decimal number</td></tr>
+
+						<tr><td>Nl</td><td>Letter number</td></tr>
+						<tr><td>No</td><td>Other number</td></tr>
+						<tr><td>P</td><td>Punctuation</td></tr>
+						<tr><td>Pc</td><td>Connector punctuation</td></tr>
+						<tr><td>Pd</td><td>Dash punctuation</td></tr>
+						<tr><td>Pe</td><td>Close punctuation</td></tr>
+
+						<tr><td>Pf</td><td>Final punctuation</td></tr>
+						<tr><td>Pi</td><td>Initial punctuation</td></tr>
+						<tr><td>Po</td><td>Other punctuation</td></tr>
+						<tr><td>Ps</td><td>Open punctuation</td></tr>
+						<tr><td>S</td><td>Symbol</td></tr>
+						<tr><td>Sc</td><td>Currency symbol</td></tr>
+
+						<tr><td>Sk</td><td>Modifier symbol</td></tr>
+						<tr><td>Sm</td><td>Mathematical symbol</td></tr>
+						<tr><td>So</td><td>Other symbol</td></tr>
+						<tr><td>Z</td><td>Separator</td></tr>
+						<tr><td>Zl</td><td>Line separator</td></tr>
+						<tr><td>Zp</td><td>Paragraph separator</td></tr>
+						<tr><td>Zs</td><td>Space separator</td></tr>
 					</tbody>
 				</table>
 
 				<p>The following Unicode script specifiers are available:</p>
 				<p>Note: Java and .NET require "Is" in front of the script name. For example, "IsLatin" rather than just "Latin"</p>
-				<table class="table table-striped table-bordered">
+				<table class="table table-sm table-striped table-bordered">
 					<tbody>
 						<tr>
 							<td>Arabic</td>

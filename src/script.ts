@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			{token: "keyword", regex: /inclusive(ly)?/i},
 			{token: "keyword", regex: /exclusive(ly)?/i},
 			{token: "keyword", regex: /from/i},
-			{token: "keyword", regex: /(to|through|thru|\-|\.\.\.|\.\.)/i},
+			{token: "keyword", regex: /(to|through|thru|\-|\.\.\.?)/i},
 			{token: "keyword", regex: /create(s)?/i},
 			{token: "keyword", regex: /name(d)?|call(ed)?/i},
 			{token: "keyword", regex: /repeat(s|ing)?/i},

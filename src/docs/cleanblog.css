@@ -6,22 +6,22 @@
 
 body {
 	font-size: 20px;
-	color: #212529
+	color: #212529;
 }
 
 p {
-	line-height: 1.5
+	line-height: 1.5;
 }
 
 p a {
-	text-decoration: underline
+	text-decoration: underline;
 }
 
 @media (max-width:575px) {
 	.form-inline .form-control {
 		display: inline-block;
 		width: auto;
-		vertical-align: middle
+		vertical-align: middle;
 	}
 	.form-inline label {
 		display: -ms-flexbox;
@@ -30,7 +30,7 @@ p a {
 		align-items: center;
 		-ms-flex-pack: center;
 		justify-content: center;
-		margin-bottom: 0
+		margin-bottom: 0;
 	}
 	.form-inline .form-group {
 		display: -ms-flexbox;
@@ -41,7 +41,7 @@ p a {
 		flex-flow: row wrap;
 		-ms-flex-align: center;
 		align-items: center;
-		margin-bottom: 0
+		margin-bottom: 0;
 	}
 }
 
@@ -52,58 +52,58 @@ h4,
 h5,
 h6 {
 	font-weight: 800;
-	font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif
+	font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 ::-moz-selection {
 	color: #fff;
 	background: #0085a1;
-	text-shadow: none
+	text-shadow: none;
 }
 
 ::selection {
 	color: #fff;
 	background: #0085a1;
-	text-shadow: none
+	text-shadow: none;
 }
 
 #mainNav {
 	position: absolute;
 	border-bottom: 1px solid transparent;
 	background-color: #232323;
-	font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif
+	font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 #mainNav .navbar-brand {
 	font-weight: 800;
-	color: #fff
+	color: #fff;
 }
 
 @media only screen and (max-width:991px) {
 	#mainNav {
-		position: fixed
+		position: fixed;
 	}
 }
 
 @media only screen and (min-width:992px) {
 	#mainNav .navbar-brand {
 		padding: 10px 20px;
-		color: #fff
+		color: #fff;
 	}
 	#mainNav .navbar-brand:focus,
 	#mainNav .navbar-brand:hover {
-		color: rgba(255, 255, 255, .8)
+		color: rgba(255, 255, 255, .8);
 	}
 }
 
 .wrapper {
 	display: flex;
 	flex-direction: column;
-	height: 100vh
+	height: 100vh;
 }
 
 #maincontent {
-	flex: 1 0 auto
+	flex: 1 0 auto;
 }
 
 footer {
@@ -113,20 +113,20 @@ footer {
 	left: 0;
 	padding: 20px 0 20px;
 	background-color: #232323;
-	color: #fff
+	color: #fff;
 }
 
 .copyright {
 	font-size: 14px;
 	margin-bottom: 0;
-	text-align: center
+	text-align: center;
 }
 
 .btn {
-	font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif
+	font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .btn-lg {
 	font-size: 16px;
-	padding: 25px 35px
+	padding: 25px 35px;
 }
