@@ -61,4 +61,3 @@ export declare class Human2RegexLexer {
      */
     tokenize(text: string): ILexingResult;
 }
-//# sourceMappingURL=lexer.d.ts.map

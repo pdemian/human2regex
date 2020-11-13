@@ -62,4 +62,3 @@
  * @internal
  */
 export declare const AllTokens: import("chevrotain").TokenType[];
-//# sourceMappingURL=tokens.d.ts.map

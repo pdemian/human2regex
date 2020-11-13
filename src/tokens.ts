@@ -19,7 +19,7 @@ import { createToken, Lexer } from "chevrotain";
 /** @internal */ export const Nine = createToken({name: "Nine", pattern: /nine/i});
 /** @internal */ export const Ten = createToken({name: "Ten", pattern: /ten/i});
 
-/** @internal */ export const Optional = createToken({name: "Optional", pattern: /(optional(ly)?|possibl[ye])/i});
+/** @internal */ export const Optional = createToken({name: "Optional", pattern: /(optional(ly)?|possibl[ye]|maybe)/i});
 /** @internal */ export const Match = createToken({name: "Match", pattern: /match(es)?/i});
 /** @internal */ export const Then = createToken({name: "Then", pattern: /then/i});
 /** @internal */ export const Anything = createToken({name: "Anything", pattern: /(any thing|any|anything)(s)?/i});

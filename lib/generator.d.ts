@@ -279,4 +279,3 @@ export declare class RegularExpressionCST extends H2RCST {
     validate(language: RegexDialect): ISemanticError[];
     toRegex(language: RegexDialect): string;
 }
-//# sourceMappingURL=generator.d.ts.map

@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			{token: "number", regex: /eight/i},
 			{token: "number", regex: /nine/i},
 			{token: "number", regex: /ten/i},
-			{token: "qualifier", regex: /(optional(ly)?|possibl[ye])/i},
+			{token: "qualifier", regex: /(optional(ly)?|possibl[ye]|maybe)/i},
 			{token: "builtin", regex: /matching/i},
 			{token: "keyword", regex: /match(es)?/i},
 			{token: "operator", regex: /then/i},

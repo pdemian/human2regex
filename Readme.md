@@ -7,11 +7,12 @@
   [![Build Status](https://travis-ci.org/pdemian/human2regex.svg?branch=master)](https://travis-ci.org/pdemian/human2regex)
   ![Codecov](https://codecov.io/gh/pdemian/human2regex/branch/master/graphs/badge.svg?branch=master)
   ![GitHub](https://img.shields.io/github/license/pdemian/human2regex)
-  [![Website](https://img.shields.io/badge/website-pdemian.github.io/human2regex-blue)](https://pdemian.github.io/human2regex/)
+  ![npm](https://img.shields.io/npm/v/human2regex)
+  [![Website](https://img.shields.io/badge/website-human2regex.com-blue)](https://human2regex.com)
   [![Docs](https://img.shields.io/badge/docs-API-blue)](API.md)
-  [![Docs](https://img.shields.io/badge/docs-language-blue)](https://pdemian.github.io/human2regex/tutorial.html)
+  [![Docs](https://img.shields.io/badge/docs-language-blue)](https://human2regex.com/tutorial.html)
   
-  <!-- ![npm](https://img.shields.io/npm/v/human2regex) -->
+
 </div>
 
 
@@ -82,7 +83,7 @@ Running the program should result in the following output:
 Which one would you rather debug?
 
 ## Webpage
-Human2Regex is hosted on github pages at [https://pdemian.github.io/human2regex/](https://pdemian.github.io/human2regex/)
+Human2Regex is hosted on github pages at [https://human2regex.com](https://human2regex.com)
 
 ## API
 Human2Regex is available as an embeddable API.

@@ -29,4 +29,3 @@ export declare class Human2RegexParser extends EmbeddedActionsParser {
     constructor(options?: Human2RegexParserOptions);
     setOptions(options: Human2RegexParserOptions): void;
 }
-//# sourceMappingURL=parser.d.ts.map

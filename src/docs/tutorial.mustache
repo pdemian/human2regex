@@ -83,7 +83,7 @@ match "hello world"
 
 				<br>
 				<p class="font-weight-bold" id="tut-multiple-match">3. Matching multiple items</p>
-				<p>H2R comes with 2 options to match multiple items in a row. The first is to simply write multiple seperate <code class="cm-s-idea">match</code> statements like:</p>
+				<p>H2R comes with 2 options to match multiple items in a row. The first is to simply write multiple separate <code class="cm-s-idea">match</code> statements like:</p>
 <pre class="tutorial-code">
 <code class="cm-s-idea">match "hello"
 match " "
@@ -108,17 +108,17 @@ match "hello", " " and then "world"
 
 				<br>
 				<p class="font-weight-bold" id="tut-optionality">4. Optionality</p>
-				<p>Sometimes you wish to match something that may or may not exist. In H2R, this is done via the <code class="cm-s-idea">optional</code> or <code class="cm-s-idea">optionally</code> keyword. 
+				<p>Sometimes you wish to match something that may or may not exist. In H2R, this is done via the <code class="cm-s-idea">optional</code>, <code class="cm-s-idea">optionally</code>, <code class="cm-s-idea">possibly</code> or <code class="cm-s-idea">maybe</code> keyword. 
 <span class="tutorial-code"><code class="cm-s-idea">
 optionally match "hello world"
 </code></span>
 				will match 0 or 1 "hello world"'s. This can be used alongside matching multiple statements in a single <code class="cm-s-idea">match</code> statement.
 <span class="tutorial-code"><code class="cm-s-idea">
-match "hello", optionally " ", "world"
+match "hello", maybe " ", "world"
 </code></span>
 				will match "hello", an optional space if it exists, and "world". However, the start <code class="cm-s-idea">optional</code> is for the entire match statement. Thus,
 <span class="tutorial-code"><code class="cm-s-idea">
-optionally match "hello", " ", then "world"
+possibly match "hello", " ", then "world"
 </code></span>
 				will actually make the whole "hello world" an optional match rather than just the first "hello". If you want to make the first match optional but keep the rest required, use multiple <code class="cm-s-idea">match</code> statements.</p>
 
