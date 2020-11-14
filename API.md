@@ -31,7 +31,7 @@ export declare enum IndentType {
 Once your options are determined, you can instanciate a lexer like so:
 
 ```typescript
-import { Human2RegexLexer, Human2RegexLexerOptions } from "./lexer";
+import { Human2RegexLexer, Human2RegexLexerOptions } from "human2regex";
 const lexer = new Human2RegexLexer(new Human2RegexLexerOptions(true));
 ```
 
@@ -43,25 +43,20 @@ To use the lexer, call tokenize on your input text:
 const lex_result = lexer.tokenize("<your text here>");
 ```
 
-This returns an ILexingResult which is passed on to the parser.
+This returns an TokenizeResult which is passed on to the parser.
 
 ```typescript
-export interface ILexingResult {
+export declare class TokenizeResult {
     // tokens parsed
     tokens: IToken[];
     // errors found
-    errors: ILexingError[];
+    errors: CommonError[];
 }
 ```
 
-To determine if the lex occured successfully, check to see if `lex_result.errors` contains any elements. If so you can extract the errors by converting them to `CommonError` and calling the `toString()` function
+To determine if the lex occured successfully, check to see if `lex_result.errors` contains any elements. The `CommonError` class contains a `.toString()` function which returns a textual representation of the error.
 
-```typescript
-import { CommonError } from "./utilities";
-result.errors.map(CommonError.fromLexError).forEach((x) => console.log(x.toString()));
-```
-
-You may also use the `CommonError` itself if you wish to incorporate it into a text editor
+You may also use the `CommonError` itself if you wish to incorporate it into a text editor.
 
 ```typescript
 export declare class CommonError {
@@ -78,7 +73,7 @@ export declare class CommonError {
 }
 ```
 
-You can reuse the lexer by calling `tokenize()` again.
+You can reuse the lexer by calling `tokenize()` again with new text.
 
 ## Parsing the tokens
 
@@ -93,7 +88,7 @@ export declare class Human2RegexParserOptions {
 Once your options are determined, you can instanciate a lexer like so:
 
 ```typescript
-import { Human2RegexParser, Human2RegexParserOptions } from "./parser";
+import { Human2RegexParser, Human2RegexParserOptions } from "human2regex";
 const parser = new Human2RegexParser(new Human2RegexParserOptions(true));
 ```
 
@@ -102,20 +97,18 @@ Due to a technical limitation as well as just for performance reasons, only 1 in
 To use it, call the parser with your tokens from the lexer:
 
 ```typescript
-parser.input = lex_result.tokens;
-const parse_result = parser.parse();
+const parse_result = parser.parse(lex_result.tokens);
 ```
 
-The parser's errors are found via `parser.errors` and again can be checked to see if the parse was successful by checking the length of this list. If it contains any errors, you can extract the errors by converting them to `CommonError` and calling the `toString()` function
-
+This returns an TokenizeResult which is passed on to the parser.
 ```typescript
-parser.errors.map(CommonError.fromParseError).forEach((x) => console.log(x.toString()));
+export declare class ParseResult {
+    // errors found
+    errors: CommonError[];
+}
 ```
 
-The parser contains state and so to re-use it, it must be reset by inputting (new) tokens to reset it
-```typescript
-parser.input = lex_result.tokens;
-```
+The parser's errors are found via `parse_result.errors` and again can be checked to see if the parse was successful by checking the length of this list.
 
 ## Generating your regex
 Assuming no errors were found, now it's time to generate the regular expression
@@ -137,16 +130,58 @@ After choosing one, you must validate the regular expression. This may be skippe
 const validation_errors = parse_result.validate();
 ```
 
-The result is a list of errors which, again, may be converted to a `CommonError` to extract information from it.
+The result is a list of errors which, again, is a `CommonError`. If there are no errors, you can call the `toRegex()` function to create a string representation of the regular expression. You can also call the `toRegExp()` function to create a `RegExp` expression used in Javascript
 
 ```typescript
-validation_errors.map(CommonError.fromParseError).forEach((x) => console.log(x.toString()));
-```
-
-If there are no errors, you can call the `toRegex()` function to create a string representation of the regular expression. You can then convert that to a `RegExp` object for regex matching.
-
-```typescript
-const my_regex = new RegExp(parse_result.toRegex());
+const my_regex_string = parse_result.toRegex(); // type is string
+const my_regex =  parse_result.toRegExp(); // type is RegExp
 ```
 
 This will contain your regular expression.
+
+## Full Example
+```typescript
+import { Human2RegexLexer, Human2RegexLexerOptions,
+         Human2RegexParser, Human2RegexParserOptions,
+         CommonError, RegexDialect } from "human2regex";
+
+const lexer = new Human2RegexLexer(new Human2RegexLexerOptions(true));
+const parser = new Human2RegexParser(new Human2RegexParserOptions(true));
+
+// using JavaScript instead? Use this declaration instead
+// function Human2Regex(input) {
+function Human2Regex(input: string): { regex: string, errors: CommonError[] } {
+    // tokenize
+    const tokenize_result = lexer.tokenize(input);
+    if(tokenize_result.errors.length > 0) {
+        return { regex: "", errors: tokenize_result.errors };
+    }
+
+    // parse
+    const parse_result = parser.parse(tokenize_result.tokens);
+    if(parse_result.errors.length > 0) {
+        return { regex: "", errors: parse_result.errors }
+    }
+
+    // validate
+    const validation_errors = parse_result.validate(RegexDialect.JS);
+    if(validation_errors.length > 0) {
+        return { regex: "", errors: validation_errors }
+    }
+
+    // generate
+    return { regex: parse_result.toRegex(RegexDialect.JS), errors: [] };
+}
+
+const result = Human2Regex('match "Hello World"');
+
+// check for errors
+if(result.errors.length > 0) {
+    for(const error of result.errors) {
+        console.log(error.toString());
+    }
+}
+else {
+    console.log("Your Regex is " + result.regex);
+}
+```

@@ -3,7 +3,8 @@
  * The Lexer for Human2Regex
  * @packageDocumentation
  */
-import { ILexingResult } from "chevrotain";
+import { IToken } from "chevrotain";
+import { CommonError } from "./utilities";
 /**
  * Defines the type of indents the lexer will allow
  */
@@ -27,6 +28,20 @@ export declare class Human2RegexLexerOptions {
      * @param spaces_per_tab Number of spaces per tab
      */
     constructor(skip_validations?: boolean, type?: IndentType, spaces_per_tab?: number);
+}
+/**
+ * Tokenization result
+ */
+export declare class TokenizeResult {
+    tokens: IToken[];
+    errors: CommonError[];
+    /**
+     * Constructor for the TokenizeResult
+     *
+     * @param tokens The token stream
+     * @param errors A list of lexing errors
+     */
+    constructor(tokens: IToken[], errors: CommonError[]);
 }
 /**
  * Human2Regex Lexer
@@ -57,7 +72,8 @@ export declare class Human2RegexLexer {
      * Tokenizes the given text
      *
      * @param text the text to analyze
-     * @returns a lexing result which contains the token stream and error list
+     * @returns a tokenize result which contains the token stream and error list
+     * @public
      */
-    tokenize(text: string): ILexingResult;
+    tokenize(text: string): TokenizeResult;
 }

@@ -7,51 +7,109 @@ import { RegexDialect } from "../src/generator";
 
 describe("Generator functionality", function() {
     const lexer = new Human2RegexLexer(new Human2RegexLexerOptions(true));
-    // eslint-disable-next-line init-declarations
     const parser = new Human2RegexParser(new Human2RegexParserOptions(true));
 
     it("generates an empty regex", function() {
-        parser.input = lexer.tokenize("").tokens;
-        const reg0 = parser.parse();
+        const toks0 = lexer.tokenize("").tokens;
+        const reg0 = parser.parse(toks0);
         expect(reg0.validate(RegexDialect.JS).length).toBe(0);
         expect(reg0.toRegex(RegexDialect.JS)).toBe("//");
 
-        parser.input = lexer.tokenize("\n/*hello world*/\n").tokens;
-        const reg1 = parser.parse();
+        const toks1 = lexer.tokenize("\n/*hello world*/\n").tokens;
+        const reg1 = parser.parse(toks1);
         expect(reg1.validate(RegexDialect.JS).length).toBe(0);
         expect(reg1.toRegex(RegexDialect.JS)).toBe("//");
     });
 
     it("generates a basic regex", function() {
-        parser.input = lexer.tokenize('match "hello" or "world"').tokens;
-        const reg0 = parser.parse();
+        const toks0 = lexer.tokenize('match "hello" or "world"').tokens;
+        const reg0 = parser.parse(toks0);
         expect(reg0.validate(RegexDialect.JS).length).toBe(0);
         expect(reg0.toRegex(RegexDialect.JS)).toBe("/hello|world/");
 
-        parser.input = lexer.tokenize('match "http" then optionally "s"').tokens;
-        const reg1 = parser.parse();
+        const toks1 = lexer.tokenize('match "http" then optionally "s"').tokens;
+        const reg1 = parser.parse(toks1);
         expect(reg1.validate(RegexDialect.JS).length).toBe(0);
         expect(reg1.toRegex(RegexDialect.JS)).toBe("/https?/");
 
-        parser.input = lexer.tokenize("match 1+ words").tokens;
-        const reg2 = parser.parse();
+        const toks2 = lexer.tokenize('match "a" or "b" or "c"').tokens;
+        const reg2 = parser.parse(toks2);
         expect(reg2.validate(RegexDialect.JS).length).toBe(0);
-        expect(reg2.toRegex(RegexDialect.JS)).toBe("/\\w+/"); // used to generate w++. make sure not to regress
+        expect(reg2.toRegex(RegexDialect.JS)).toBe("/[abc]/");
     });
 
     it("validates invalid regexes", function() {
-        parser.input = lexer.tokenize('match unicode "Latin"').tokens;
-        const reg0 = parser.parse();
+        const toks0 = lexer.tokenize('match unicode "NotARealClass"').tokens;
+        const reg0 = parser.parse(toks0);
+        expect(reg0.validate(RegexDialect.JS).length).toBeGreaterThan(0);
+
+        const toks1 = lexer.tokenize("using global and global").tokens;
+        const reg1 = parser.parse(toks1);
+        expect(reg1.validate(RegexDialect.JS).length).toBeGreaterThan(0);
+
+        const toks2 = lexer.tokenize('match "a" to "asdf"').tokens;
+        const reg2 = parser.parse(toks2);
+        expect(reg2.validate(RegexDialect.JS).length).toBeGreaterThan(0);
+
+        const toks3 = lexer.tokenize('match "asdf" to "zsdf"').tokens;
+        const reg3 = parser.parse(toks3);
+        expect(reg3.validate(RegexDialect.JS).length).toBeGreaterThan(0);
+
+    });
+
+    it("handles ranges", function() {
+        const toks0 = lexer.tokenize('match "a" to "z"').tokens;
+        const reg0 = parser.parse(toks0);
+        expect(reg0.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg0.toRegex(RegexDialect.JS)).toBe("/[a-z]/");
+
+        const toks1 = lexer.tokenize('match "\\u0061" to "\\u007A"').tokens;
+        const reg1 = parser.parse(toks1);
+        expect(reg1.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg1.toRegex(RegexDialect.JS)).toBe("/[\\u0061-\\u007A]/");
+    });
+
+    it("handles specifiers", function() {
+        const toks0 = lexer.tokenize("match boundary, word, digit, character, whitespace, number, tab, newline, carriage return").tokens;
+        const reg0 = parser.parse(toks0);
+        expect(reg0.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg0.toRegex(RegexDialect.JS)).toBe("/\\b\\w+\\d\\w\\s\\d+\\t\\n\\r/");
+
+        const toks1 = lexer.tokenize("match not boundary, not word, not digit, not character, not whitespace, not number, not tab, not newline, not carriage return").tokens;
+        const reg1 = parser.parse(toks1);
+        expect(reg1.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg1.toRegex(RegexDialect.JS)).toBe("/\\B\\W+\\D\\W\\S\\D+[^\\t][^\\n][^\\r]/");
+    });
+
+    it("doesn't clobber repetition", function() {
+        const toks0 = lexer.tokenize("match 1+ word").tokens;
+        const reg0 = parser.parse(toks0);
+        expect(reg0.validate(RegexDialect.JS).length).toBe(0);
+
+        // should be \w+ not \w++
+        expect(reg0.toRegex(RegexDialect.JS)).toBe("/\\w+/");
+
+        const toks1 = lexer.tokenize('match 1 ... seven exclusive not "hello"').tokens;
+        const reg1 = parser.parse(toks1);
+        expect(reg1.validate(RegexDialect.JS).length).toBe(0);
+
+        // should be (?!hello) not (?:(?!hello))
+        expect(reg1.toRegex(RegexDialect.JS)).toBe("/(?!hello){1,6}/");
+    });
+
+    it("handles unicode", function() {
+        const toks0 = lexer.tokenize('match unicode class "Latin"').tokens;
+        const reg0 = parser.parse(toks0);
+
+        expect(reg0.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg0.toRegex(RegexDialect.JS)).toBe("/\\p{Latin}/");
+
+        // .NET requires "IsLatin"
         expect(reg0.validate(RegexDialect.DotNet).length).toBeGreaterThan(0);
-
-        parser.input = lexer.tokenize("using global and global").tokens;
-        const reg1 = parser.parse();
-        expect(reg1.validate(RegexDialect.DotNet).length).toBeGreaterThan(0);
-
-        parser.input = lexer.tokenize('match "a" to "asdf"').tokens;
-        const reg2 = parser.parse();
-        expect(reg2.validate(RegexDialect.DotNet).length).toBeGreaterThan(0);
-
+        const toks1 = lexer.tokenize('match unicode class "IsLatin"').tokens;
+        const reg1 = parser.parse(toks1);
+        expect(reg1.validate(RegexDialect.DotNet).length).toBe(0);
+        expect(reg1.toRegex(RegexDialect.DotNet)).toBe("/\\p{IsLatin}/");
     });
 
     it("runs complex scripts", function() {
@@ -88,8 +146,8 @@ create an optional group
     match "#"
     match 0+ any thing
 `;
-    parser.input = lexer.tokenize(str).tokens;
-    const reg = parser.parse();
+    const toks = lexer.tokenize(str).tokens;
+    const reg = parser.parse(toks);
     expect(reg.validate(RegexDialect.JS).length).toBe(0);
     expect(reg.toRegex(RegexDialect.JS)).toBe("/^(?<protocol>https?\\:\\/\\/)?(?<subdomain>(\\w+\\.)*)?(?<domain>(?:\\w+|_|\\-)+\\.\\w+)\\:?\\d*(?<path>(\\/(?:\\w+|_|\\-)*)*)?(\\?(?<query>((?:\\w+|_|\\-)+\=(?:\\w+|_|\\-)+)*))?(#.*)?$/g");
     });

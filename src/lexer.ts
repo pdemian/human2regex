@@ -5,8 +5,8 @@
  * @packageDocumentation
  */
 
-import { Lexer, IToken, createTokenInstance, ILexingResult, ILexingError } from "chevrotain";
-import { last, findLastIndex } from "./utilities";
+import { Lexer, IToken, createTokenInstance, ILexingError } from "chevrotain";
+import { last, findLastIndex, CommonError } from "./utilities";
 import { Indent, Outdent, EndOfLine, AllTokens } from "./tokens";
 
 /**
@@ -31,6 +31,22 @@ export class Human2RegexLexerOptions {
      * @param spaces_per_tab Number of spaces per tab
      */
     constructor(public skip_validations = false, public type: IndentType = IndentType.Both, public spaces_per_tab: number = 4) {
+        /* empty */
+    }
+}
+
+/**
+ * Tokenization result
+ */
+export class TokenizeResult {
+
+    /**
+     * Constructor for the TokenizeResult
+     * 
+     * @param tokens The token stream
+     * @param errors A list of lexing errors
+     */
+    public constructor(public tokens: IToken[], public errors: CommonError[]) {
         /* empty */
     }
 }
@@ -107,13 +123,14 @@ export class Human2RegexLexer {
      * Tokenizes the given text
      * 
      * @param text the text to analyze
-     * @returns a lexing result which contains the token stream and error list
+     * @returns a tokenize result which contains the token stream and error list
+     * @public
      */
-    public tokenize(text: string): ILexingResult {
+    public tokenize(text: string): TokenizeResult {
         const lex_result = this.lexer.tokenize(text);
 
         if (lex_result.tokens.length === 0) {
-            return lex_result;
+            return new TokenizeResult(lex_result.tokens, lex_result.errors.map(CommonError.fromLexError));
         }
 
         const tokens: IToken[] = [];
@@ -220,7 +237,6 @@ export class Human2RegexLexer {
             tokens.push(createTokenInstance(Outdent, "", tok.endOffset ?? NaN, tok.endOffset ?? NaN, tok.startLine ?? NaN, NaN, tok.startColumn ?? NaN, NaN));
         }
 
-        lex_result.tokens = tokens;
-        return lex_result;
+        return new TokenizeResult(tokens, lex_result.errors.map(CommonError.fromLexError));
     }
 }

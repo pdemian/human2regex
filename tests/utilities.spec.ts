@@ -74,7 +74,7 @@ describe("Utility functions", function() {
         expect(findLastIndex([ 3, 1, 2, 3, 3 ], 9)).toBe(-1);
     });
 
-    it("should generate CommonErrors correctly", function() {
+    it("should generate CommonError correctly", function() {
         const lex_error: ILexingError = {
             offset: 123,
             line: 123,
@@ -86,6 +86,7 @@ describe("Utility functions", function() {
         const par_error: IRecognitionException = {
             name: "Recognition Exception",
             message: "Mismatch at 1,1",
+            // eslint-disable-next-line no-magic-numbers
             token: createTokenInstance(Indent, "", 123, 124, 123, 123, 123, 124),
             resyncedTokens: [],
             context: { ruleStack: [], ruleOccurrenceStack: [] }

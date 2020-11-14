@@ -233,21 +233,21 @@ export class MatchSubStatementCST extends H2RCST {
 
         for (const value of this.values) {
             if (value.type === MatchSubStatementType.Between) {
-                let from = value.from as string;
-                let to = value.to as string;
+                let from = removeQuotes(value.from as string);
+                let to = removeQuotes(value.to as string);
 
                 if (!isSingleRegexCharacter(from)) {
                     errors.push(this.error("Between statement must begin with a single character"));
                 }
                 else if (from.startsWith("\\u") || from.startsWith("\\U") || from.startsWith("\\")) {
-                    from = JSON.parse(`"${regexEscape(from)}"`);
+                    from = JSON.parse(`"${from}"`);
                 }
 
                 if (!isSingleRegexCharacter(to)) {
                     errors.push(this.error("Between statement must end with a single character"));
                 }
                 else if (to.startsWith("\\u") || to.startsWith("\\U") || to.startsWith("\\")) {
-                    to = JSON.parse(`"${regexEscape(to)}"`);
+                    to = JSON.parse(`"${to}"`);
                 }
 
                 if (from.charCodeAt(0) >= to.charCodeAt(0)) {
@@ -255,7 +255,7 @@ export class MatchSubStatementCST extends H2RCST {
                 }
             }
             else if (value.type === MatchSubStatementType.Unicode) {
-                let unicode_class = value.from as string;
+                let unicode_class = removeQuotes(value.from as string);
                 // check to see if the given code is supported
                 if (!unicode_property_codes.includes(unicode_class)) {
                     // check to see if the given script is supported
@@ -266,11 +266,10 @@ export class MatchSubStatementCST extends H2RCST {
                             errors.push(this.error("This dialect requires script names to begin with Is, such as IsCyrillic rather than Cyrillic"));
                             continue;
                         }
-                        unicode_class = unicode_class.substr(0, 2);
+                        unicode_class = unicode_class.substr(2);
                     }
 
-                    // attempt with and without "_" characters
-                    if (!unicode_script_codes.includes(unicode_class) && !unicode_script_codes.includes(unicode_class.replace("_", ""))) {
+                    if (!unicode_script_codes.includes(unicode_class)) {
                         errors.push(this.error(`Unknown unicode specifier ${value.from}`));
                     }
                 }
@@ -287,15 +286,20 @@ export class MatchSubStatementCST extends H2RCST {
             switch (value.type) {
                 case MatchSubStatementType.SingleString: {
                     const reg = regexEscape(removeQuotes(value.from as string));
-                    str.push(this.invert ? `(?:(?!${reg}))` : reg);
+                    str.push(this.invert ? `(?!${reg})` : reg);
                     break;
                 }
-                case MatchSubStatementType.Between:
-                    str.push(this.invert ? `[^${value.from}-${value.to}]` : `[${value.from}-${value.to}]`);
+                case MatchSubStatementType.Between: {
+                    const from = removeQuotes(value.from as string);
+                    const to = removeQuotes(value.to as string);
+                    str.push(this.invert ? `[^${from}-${to}]` : `[${from}-${to}]`);
                     break;
-                case MatchSubStatementType.Unicode:
-                    str.push(this.invert ? `\\P{${value.from}}` : `\\p{${value.from}}`);
+                }
+                case MatchSubStatementType.Unicode: {
+                    const unicode = removeQuotes(value.from as string);
+                    str.push(this.invert ? `\\P{${unicode}}` : `\\p{${unicode}}`);
                     break;
+                }
                 case MatchSubStatementType.Boundary:
                     str.push(this.invert ? "\\B" : "\\b");
                     break;
@@ -668,7 +672,7 @@ export class GroupStatementCST extends StatementCST {
 /**
  * Concrete Syntax Tree for a regular expression
  * 
- * @public
+ * @internal
  */
 export class RegularExpressionCST extends H2RCST {
 

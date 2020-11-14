@@ -109,5 +109,4 @@ Test
 
 
 ## Todo
-- Return CommonError rather than requiring the user to convert to a CommonError
 - Add more regex options such as back references, subroutines, lookahead/behind, and more character classes (eg,  `[:alpha:]`)

@@ -4,6 +4,6 @@
  * @packageDocumentation
  */
 export { CommonError } from "./utilities";
-export { IndentType, Human2RegexLexerOptions, Human2RegexLexer } from "./lexer";
-export { Human2RegexParserOptions, Human2RegexParser } from "./parser";
-export { RegexDialect, RegularExpressionCST } from "./generator";
+export { Human2RegexLexerOptions, Human2RegexLexer, IndentType, TokenizeResult } from "./lexer";
+export { Human2RegexParserOptions, Human2RegexParser, ParseResult } from "./parser";
+export { RegexDialect } from "./generator";

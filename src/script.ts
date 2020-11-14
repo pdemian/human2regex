@@ -39,26 +39,17 @@ const code_mirror = cm as CodeMirror;
 document.addEventListener("DOMContentLoaded", function() {
 	code_mirror.defineSimpleMode("human2regex", {
 		start: [
-			{token: "number", regex: /zero/i},
-			{token: "number", regex: /one/i},
-			{token: "number", regex: /two/i},
-			{token: "number", regex: /three/i},
-			{token: "number", regex: /four/i},
-			{token: "number", regex: /five/i},
-			{token: "number", regex: /six/i},
-			{token: "number", regex: /seven/i},
-			{token: "number", regex: /eight/i},
-			{token: "number", regex: /nine/i},
-			{token: "number", regex: /ten/i},
+			{token: "number", regex: /zero|one|two|three|four|five|six|seven|eight|nine|ten/i},
 			{token: "qualifier", regex: /(optional(ly)?|possibl[ye]|maybe)/i},
 			{token: "builtin", regex: /matching/i},
 			{token: "keyword", regex: /match(es)?/i},
 			{token: "operator", regex: /then/i},
+			{token: "operator", regex: /not|anything but|any thing but|everything but|every thing but/i},
 			{token: "builtin", regex: /(any thing|any|anything)(s)?/i},
 			{token: "operator", regex: /or/i},
 			{token: "operator", regex: /and|,/i},
 			{token: "builtin", regex: /unicode( class)?/i},
-			{token: "builtin", regex: /(word )boundary/i},
+			{token: "builtin", regex: /(word )?boundary/i},
 			{token: "builtin", regex: /word(s)?/i},
 			{token: "builtin", regex: /digit(s)?/i},
 			{token: "builtin", regex: /character(s)?/i},
@@ -68,7 +59,6 @@ document.addEventListener("DOMContentLoaded", function() {
 			{token: "builtin", regex: /global/i},
 			{token: "builtin", regex: /(multi line|multiline)/i},
 			{token: "builtin", regex: /exact/i},
-			{token: "operator", regex: /not/i},
 			{token: "keyword", regex: /between/i},
 			{token: "builtin", regex: /tab/i},
 			{token: "builtin", regex: /(line feed|linefeed)/i},
@@ -89,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			{token: "builtin", regex: /case sensitive/i},
 			{token: "operator", regex: /\+|or more/i},
 			{token: "variable", regex: /[a-z]\w*/i},
-			{token: "number", regex: /-?\d+/},
+			{token: "number", regex: /\d+/},
 			{token: "string", regex: /"(?:[^\\"]|\\(?:[bfnrtv"\\/]|u[0-9a-f]{4}|U[0-9a-f]{8}))*"/i},
 			{token: "comment", regex: /(#|\/\/).*/},
 			{token: "comment", regex: /\/\*/, next: "comment"}
@@ -177,16 +167,15 @@ document.addEventListener("DOMContentLoaded", function() {
 		total_errors = [];
 		const result = lexer.tokenize(text);
 
-		result.errors.map(CommonError.fromLexError).forEach((x) => total_errors.push(x));
+		result.errors.forEach((x) => total_errors.push(x));
 
 		if (total_errors.length === 0) {
-			parser.input = result.tokens;
-			const regex = parser.parse();
+			const regex = parser.parse(result.tokens);
 			parser.errors.map(CommonError.fromParseError).forEach((x) => total_errors.push(x));
 			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			if (total_errors.length === 0) {
 				const validate = regex.validate(dialect);
-				validate.map(CommonError.fromSemanticError).forEach((x) => total_errors.push(x));
+				validate.forEach((x) => total_errors.push(x));
 
 				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 				if (total_errors.length === 0) {

@@ -262,7 +262,7 @@ export declare class GroupStatementCST extends StatementCST {
 /**
  * Concrete Syntax Tree for a regular expression
  *
- * @public
+ * @internal
  */
 export declare class RegularExpressionCST extends H2RCST {
     private usings;

@@ -7,8 +7,8 @@
 
 import { EmbeddedActionsParser, IOrAlt, IToken } from "chevrotain";
 import * as T from "./tokens";
-import { CountSubStatementCST, UsingFlags, MatchSubStatementType, MatchSubStatementValue, MatchSubStatementCST, UsingStatementCST, RegularExpressionCST, StatementCST, RepeatStatementCST, MatchStatementValue, MatchStatementCST, GroupStatementCST } from "./generator";
-import { first, usefulConditional, unusedParameter } from "./utilities";
+import { CountSubStatementCST, UsingFlags, MatchSubStatementType, MatchSubStatementValue, MatchSubStatementCST, UsingStatementCST, RegularExpressionCST, StatementCST, RepeatStatementCST, MatchStatementValue, MatchStatementCST, GroupStatementCST, RegexDialect } from "./generator";
+import { first, usefulConditional, unusedParameter, CommonError } from "./utilities";
 
 /**
  * The options for the Parser
@@ -36,6 +36,62 @@ class TokensAndValue<T> {
 }
 
 /**
+ * Tokenization result
+ */
+export class ParseResult {
+    
+    /**
+     * Constructor for the TokenizeResult
+     * 
+     * @param tokens The token stream
+     * @param errors A list of lexing errors
+     */
+    public constructor(private regexp_cst: RegularExpressionCST, public errors: CommonError[]) {
+        /* empty */
+    }
+
+    /**
+     * Validate that this is both valid and can be generated in the specified language
+     * 
+     * @remarks There is no guarantee toRegex or toRegExp will work unless validate returns no errors
+     * 
+     * @param language the regex dialect we're validating
+     * @returns A list of errors
+     * @public
+     */
+    public validate(language: RegexDialect): CommonError[] {
+        return this.regexp_cst.validate(language).map(CommonError.fromSemanticError);
+    }
+
+    /**
+     * Generate a regular expression string based on the parse result
+     * 
+     * @remarks There is no guarantee toRegex will work unless validate returns no errors
+     * 
+     * @param language the regex dialect we're generating
+     * @returns a regular expression string
+     * @public
+     */
+    public toRegex(language: RegexDialect): string {
+        return this.regexp_cst.toRegex(language);
+    }
+
+    /**
+     * Generate a RegExp object based on the parse result
+     * 
+     * @remarks There is no guarantee toRegExp will work unless validate returns no errors
+     * 
+     * @param language the regex dialect we're generating
+     * @returns a RegExp object
+     * @public
+     */
+    public toRegExp(language: RegexDialect): RegExp {
+        return new RegExp(this.regexp_cst.toRegex(language));
+    }
+}
+
+
+/**
  * The Parser class
  * 
  * @remarks Only 1 parser instance allowed due to performance reasons
@@ -43,7 +99,20 @@ class TokensAndValue<T> {
 export class Human2RegexParser extends EmbeddedActionsParser {
     private static already_init = false;
 
-    public parse: (idxInCallingRule?: number, ...args: unknown[]) => RegularExpressionCST;
+    private regexp: (idxInCallingRule?: number, ...args: unknown[]) => RegularExpressionCST;
+
+    /**
+     * Parses the token stream
+     * 
+     * @param tokens Tokens to parse
+     * @returns a parse result which contains the token stream and error list
+     * @public
+     */
+    public parse(tokens: IToken[]): ParseResult {
+        this.input = tokens;
+
+        return new ParseResult(this.regexp(), this.errors.map(CommonError.fromParseError));
+    }
 
     constructor(private options: Human2RegexParserOptions = new Human2RegexParserOptions()) {
         super(T.AllTokens, { recoveryEnabled: false, maxLookahead: 2, skipValidations: options.skip_validations });
@@ -132,20 +201,21 @@ export class Human2RegexParser extends EmbeddedActionsParser {
                             $.CONSUME(T.To); 
                             const val = $.SUBRULE3(NumberSubStatement);
 
+                            let token = val.token;
                             const opt = $.OPTION7(() => {
                                 return $.OR5([
                                     { ALT: () => {
-                                        tokens.push($.CONSUME2(T.Inclusive));
+                                        token = $.CONSUME2(T.Inclusive);
                                         return "inclusive";
                                     }},
                                     { ALT: () => {
-                                        tokens.push($.CONSUME2(T.Exclusive));
+                                        token = $.CONSUME2(T.Exclusive);
                                         return "exclusive";
                                     }}
                                 ]);
                             });
 
-                            return new TokenAndValue(val.token, [ val.value, opt ]);
+                            return new TokenAndValue(token, [ val.value, opt ]);
                         }}
                     ]);
                     tokens.push(to.token);
@@ -491,9 +561,16 @@ export class Human2RegexParser extends EmbeddedActionsParser {
 
         this.performSelfAnalysis();
 
-        this.parse = Regex;
+        this.regexp = Regex;
     }
 
+    /**
+     * Sets the options for this parser
+     * 
+     * @param options options for the parser
+     * @see Human2RegexParserOptions
+     * @public
+     */
     public setOptions(options: Human2RegexParserOptions): void {
         unusedParameter(options, "skip_validations is not valid to change once we've already initialized");
     }

@@ -29,7 +29,7 @@ import { createToken, Lexer } from "chevrotain";
 /** @internal */ export const Digit = createToken({name: "DigitSpecifier", pattern: /digit(s)?/i});
 /** @internal */ export const Character = createToken({name: "CharacterSpecifier", pattern: /(character|letter)s?/i});
 /** @internal */ export const Whitespace = createToken({name: "WhitespaceSpecifier", pattern: /(white space|whitespace)s?/i});
-/** @internal */ export const Boundary = createToken({name: "BoundarySpecifier", pattern: /(word )boundary/i});
+/** @internal */ export const Boundary = createToken({name: "BoundarySpecifier", pattern: /(word )?boundary/i});
 /** @internal */ export const Number = createToken({name: "NumberSpecifier", pattern: /number(s)?/i});
 /** @internal */ export const Unicode = createToken({name: "UnicodeSpecifier", pattern: /unicode( class)?/i});
 /** @internal */ export const Using = createToken({name: "Using", pattern: /using/i});
@@ -37,7 +37,7 @@ import { createToken, Lexer } from "chevrotain";
 /** @internal */ export const Multiline = createToken({name: "Multiline", pattern: /(multi line|multiline)/i});
 /** @internal */ export const Exact = createToken({name: "Exact", pattern: /exact/i});
 /** @internal */ export const Matching = createToken({name: "Matching", pattern: /matching/i});
-/** @internal */ export const Not = createToken({name: "Not", pattern: /not/i});
+/** @internal */ export const Not = createToken({name: "Not", pattern: /not|anything but|any thing but|everything but|every thing but/i});
 /** @internal */ export const Between = createToken({name: "Between", pattern: /between/i});
 /** @internal */ export const Tab = createToken({name: "Tab", pattern: /tab/i});
 /** @internal */ export const Linefeed = createToken({name: "Linefeed", pattern: /(line feed|linefeed)/i});
@@ -85,7 +85,7 @@ export const By = createToken({name: "By", pattern: /by/i});
 /** @internal */ export const MultilineComment = createToken({name: "MultiLineComment", pattern: /\/\*(.*)\*\//, line_breaks: true, group: Lexer.SKIPPED});
 
 /** @internal */ export const Identifier = createToken({name: "Identifier", pattern: /[a-z]\w*/i});
-/** @internal */ export const NumberLiteral = createToken({name: "NumberLiteral", pattern: /-?\d+/});
+/** @internal */ export const NumberLiteral = createToken({name: "NumberLiteral", pattern: /\d+/});
 /** @internal */ export const StringLiteral = createToken({name: "StringLiteral", pattern: /"(?:[^\\"]|\\(?:[bfnrtv"\\/]|u[0-9a-f]{4}|U[0-9a-f]{8}))*"/i});
 
 /** @internal */ export const Indent = createToken({name: "Indent"});
@@ -111,6 +111,7 @@ export const AllTokens = [
     Matching,
     Match,
     Then,
+    Not,
     Anything,
     And,
     Boundary,
@@ -140,7 +141,6 @@ export const AllTokens = [
     Global,
     Multiline,
     Exact,
-    Not,
     Between,
     Tab,
     Linefeed,
