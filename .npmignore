@@ -8,6 +8,7 @@ tests/
 jest.config.ts
 webpack.config.js
 tsconfig.json
+tslintconfig.json
 .gitignore
 .travis.yml
 .eslintrc.json

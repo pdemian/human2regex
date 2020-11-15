@@ -85,16 +85,21 @@ h6 {
 	}
 }
 
+#mainNav .navbar-brand {
+	padding-left: 20px;
+	color: #fff;
+}
+#mainNav .navbar-brand:focus,
+#mainNav .navbar-brand:hover {
+	color: rgba(255, 255, 255, .8);
+}
+
 @media only screen and (min-width:992px) {
 	#mainNav .navbar-brand {
-		padding: 10px 20px;
-		color: #fff;
-	}
-	#mainNav .navbar-brand:focus,
-	#mainNav .navbar-brand:hover {
-		color: rgba(255, 255, 255, .8);
+		padding-top: 10px;
 	}
 }
+
 
 .wrapper {
 	display: flex;

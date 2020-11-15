@@ -395,14 +395,20 @@ export class Human2RegexParser extends EmbeddedActionsParser {
         // optionally match "+" then 1+ words
         const MatchStatement = $.RULE("MatchStatement", () => {
             let optional = false;
+            let completely_optional = false;
             const msv: MatchStatementValue[] = [];
             const tokens: IToken[] = [];
 
             $.OPTION(() => {
                 tokens.push($.CONSUME(T.Optional));
-                optional = true;
+                completely_optional = true;
             });
             tokens.push($.CONSUME(T.Match));
+            $.OPTION4(() => {
+                $.CONSUME3(T.Optional);
+                optional = true;
+            });
+
             msv.push(new MatchStatementValue(optional, $.SUBRULE(MatchSubStatement)));
             $.MANY(() => {
                 $.OR([
@@ -421,7 +427,7 @@ export class Human2RegexParser extends EmbeddedActionsParser {
             });
             tokens.push($.CONSUME(T.EndOfLine));
 
-            return new MatchStatementCST(tokens, msv);
+            return new MatchStatementCST(tokens, completely_optional, msv);
         });
 
         // using global matching

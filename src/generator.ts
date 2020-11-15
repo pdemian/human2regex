@@ -60,8 +60,6 @@ const unicode_script_codes = [
     "Tibetan", "Tifinagh", "Ugaritic", "Vai", "Yi"
 ];
 
-
-
 /**
  * The base concrete syntax tree class
  * 
@@ -75,7 +73,7 @@ export abstract class H2RCST {
      * @internal
      */
     constructor(public tokens: IToken[]) {
-        this.tokens = tokens;
+        /* empty */
     }
 
     /**
@@ -280,57 +278,57 @@ export class MatchSubStatementCST extends H2RCST {
     }
 
     public toRegex(language: RegexDialect): string {
-        const str: string[] = [];
+        const matches: string[] = [];
 
         for (const value of this.values) {
             switch (value.type) {
                 case MatchSubStatementType.SingleString: {
                     const reg = regexEscape(removeQuotes(value.from as string));
-                    str.push(this.invert ? `(?!${reg})` : reg);
+                    matches.push(this.invert ? `(?!${reg})` : reg);
                     break;
                 }
                 case MatchSubStatementType.Between: {
                     const from = removeQuotes(value.from as string);
                     const to = removeQuotes(value.to as string);
-                    str.push(this.invert ? `[^${from}-${to}]` : `[${from}-${to}]`);
+                    matches.push(this.invert ? `[^${from}-${to}]` : `[${from}-${to}]`);
                     break;
                 }
                 case MatchSubStatementType.Unicode: {
                     const unicode = removeQuotes(value.from as string);
-                    str.push(this.invert ? `\\P{${unicode}}` : `\\p{${unicode}}`);
+                    matches.push(this.invert ? `\\P{${unicode}}` : `\\p{${unicode}}`);
                     break;
                 }
                 case MatchSubStatementType.Boundary:
-                    str.push(this.invert ? "\\B" : "\\b");
+                    matches.push(this.invert ? "\\B" : "\\b");
                     break;
                 case MatchSubStatementType.Word:
-                    str.push(this.invert ? "\\W+" : "\\w+");
+                    matches.push(this.invert ? "\\W+" : "\\w+");
                     break;
                 case MatchSubStatementType.Digit:
-                    str.push(this.invert ? "\\D" : "\\d");
+                    matches.push(this.invert ? "\\D" : "\\d");
                     break;
                 case MatchSubStatementType.Character:
-                    str.push(this.invert ? "\\W" : "\\w");
+                    matches.push(this.invert ? "\\W" : "\\w");
                     break;
                 case MatchSubStatementType.Whitespace:
-                    str.push(this.invert ? "\\S" : "\\s");
+                    matches.push(this.invert ? "\\S" : "\\s");
                     break;
                 case MatchSubStatementType.Number:
-                    str.push(this.invert ? "\\D+" : "\\d+");
+                    matches.push(this.invert ? "\\D+" : "\\d+");
                     break;
                 case MatchSubStatementType.Tab:
-                    str.push(this.invert ? "[^\\t]" : "\\t");
+                    matches.push(this.invert ? "[^\\t]" : "\\t");
                     break;
                 case MatchSubStatementType.Newline:
                 case MatchSubStatementType.Linefeed:
-                    str.push(this.invert ? "[^\\n]" : "\\n");
+                    matches.push(this.invert ? "[^\\n]" : "\\n");
                     break;
                 case MatchSubStatementType.CarriageReturn:
-                    str.push(this.invert ? "[^\\r]" : "\\r");
+                    matches.push(this.invert ? "[^\\r]" : "\\r");
                     break;
                 default:
                     // default: anything
-                    str.push(this.invert ? "[^.]" : ".");
+                    matches.push(this.invert ? "[^.]" : ".");
                     break;
             }
         }
@@ -340,20 +338,19 @@ export class MatchSubStatementCST extends H2RCST {
         let require_grouping = false;
         let dont_clobber_plus = false;
 
-        if (str.length === 1) {
-            ret = str[0];
+        if (matches.length === 1) {
+            ret = first(matches);
             if (ret.endsWith("+")) {
                 dont_clobber_plus = true;
             }
         }
-        // we can use regex's [] for single chars, otherwise we need a group
-        else if (str.every(isSingleRegexCharacter)) {
-            ret = "[" + str.join("") + "]";
-        }
         else {
-            //use a no-capture group
-            ret = str.join("|");
-            require_grouping = true;
+            ret = minimizeMatchString(matches);
+
+            if (ret.length > 1 && 
+                (!ret.startsWith("(") || !ret.endsWith("["))) {
+                    require_grouping = true;
+            }
         }
 
         if (this.count) {
@@ -533,7 +530,7 @@ export class MatchStatementCST extends StatementCST {
      * @param tokens Tokens used to calculate where an error occured
      * @param matches 
      */
-    constructor(tokens: IToken[], private matches: MatchStatementValue[]) {
+    constructor(tokens: IToken[], private completely_optional: boolean, private matches: MatchStatementValue[]) {
         super(tokens);
     }
 
@@ -548,7 +545,7 @@ export class MatchStatementCST extends StatementCST {
     }
 
     public toRegex(language: RegexDialect): string {
-        return this.matches.map((x) => {
+        let final_matches = this.matches.map((x) => {
             let match_stmt = x.statement.toRegex(language);
 
             // need to group if optional and ungrouped
@@ -564,6 +561,19 @@ export class MatchStatementCST extends StatementCST {
 
             return match_stmt;
         }).join("");
+        
+        if (this.completely_optional) {
+            if (!isSingleRegexCharacter(final_matches)) {
+                // don't re-group a group
+                if (final_matches[0] !== "(" && final_matches[final_matches.length-1] !== ")") {
+                    final_matches = "(?:" + final_matches + ")";
+                }
+            }
+
+            final_matches += "?";
+        }
+        
+        return final_matches;
     }
 }
 
@@ -601,17 +611,22 @@ export class RepeatStatementCST extends StatementCST {
     }
 
     public toRegex(language: RegexDialect): string {
-        let str = "(" + this.statements.map((x) => x.toRegex(language)).join("") + ")";
+        let str = "(?:" + this.statements.map((x) => x.toRegex(language)).join("") + ")";
 
         if (this.count) {
             str += this.count.toRegex(language);
+
+            // group for optionality because count would be incorrect otherwise
+            if (this.optional) {
+                str = "(?:" + str + ")?";
+            }
         }
         else {
             str += "*";
-        }
 
-        if (this.optional) {
-            str += "?";
+            if (this.optional) {
+                str += "?";
+            }
         }
 
         return str;
@@ -702,5 +717,103 @@ export class RegularExpressionCST extends H2RCST {
         const regex = this.statements.map((x) => x.toRegex(language)).join("");
 
         return modifiers.replace("{regex}", regex);
+    }
+}
+
+
+
+/**
+ * Minimizes the match string by finding duplicates or substrings in the array
+ * 
+ * @param arr the array
+ * @internal
+ */
+export function minimizeMatchString(arr: string[]): string {
+    return minMatchString(arr, 0);
+}
+
+/**
+ * Minimizes the match string by finding duplicates or substrings in the array
+ * 
+ * @param arr the array
+ * @param depth must be 0 for initial call
+ * @internal
+ */
+function minMatchString(arr: string[], depth: number = 0): string {
+    // base case: arr is empty
+    if (arr.length === 0) {
+        return "";
+    }
+
+    // base case: arr has 1 element (must have at least 2, so this means this value is optional)
+    if (arr.length === 1) {
+        return first(arr) + "?";
+    }
+
+    // remove duplicates
+    arr = [ ...new Set(arr) ];
+
+    // base case: arr has 1 element (after duplicate removal means this is required)
+    if (arr.length === 1) {
+        return first(arr);
+    }
+
+    // base case: arr is all single letters
+    if (arr.every(isSingleRegexCharacter)) {
+        return "[" + arr.join("") + "]";
+    }
+
+    // now the real magic begins
+    // You are not expected to understand this
+
+    let longest_begin_substring = first(arr);
+    let longest_end_substring = first(arr);
+
+    for (let i = 1; i < arr.length; i++) {
+        // reduce longest_substring to match everything 
+        for (let j = 0; j < longest_begin_substring.length; j++) {
+            if (arr[i].length < j || longest_begin_substring[j] !== arr[i][j]) {
+                longest_begin_substring = longest_begin_substring.substr(0, j);
+                break;
+            }
+        }
+        for (let j = 0; j < longest_end_substring.length; j++) {
+            if (arr[i].length-j < 0 || longest_end_substring[longest_end_substring.length-j-1] !== arr[i][arr[i].length-j-1]) {
+                longest_end_substring = longest_end_substring.substr(longest_end_substring.length-j, longest_end_substring.length);
+                break;
+            }
+        }
+
+        if (longest_begin_substring.length === 0 && longest_end_substring.length === 0) {
+            break;
+        }
+    }
+
+    // No matches whatsoever
+    // *technically* we can optimize further, but that is a VERY non-trivial problem
+    // For example optimizing: [ "a1x1z", "a2y2z", "a3z3z" ] to: "a[123][xyz][123]z"
+    if (longest_begin_substring.length === 0 && longest_end_substring.length === 0) {
+        if (depth > 0) {
+            return "(?:" + arr.join("|") + ")";
+        }
+        else {
+            return arr.join("|");
+        }
+    }
+    // we have some matches
+    else {
+        // remove begin (if exists) and end (if exists) from each element and remove empty strings
+        const begin_pos = longest_begin_substring.length;
+        const end_pos = longest_end_substring.length;
+
+        const similar_matches: string[] = [];
+        for (const ele of arr) {
+            const match = ele.substring(begin_pos, ele.length-end_pos);
+            if (match.length !== 0) {
+                similar_matches.push(match);
+            }
+        }
+        
+        return longest_begin_substring + minMatchString(similar_matches, depth + 1) + longest_end_substring;
     }
 }

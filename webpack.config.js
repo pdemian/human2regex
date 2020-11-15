@@ -36,9 +36,9 @@ function build_mustache() {
 		mkdirSync(config.dst);
 	}
 
-    read_json_file = (filename) => JSON.parse(readFileSync(filename), "utf8");
+    const read_json_file = (filename) => JSON.parse(readFileSync(filename), "utf8");
     
-    compress_html = (input) =>  config.prod ? minify(input, config.compression_config.html) : input;
+    const compress_html = (input) =>  config.prod ? minify(input, config.compression_config.html) : input;
 
     // get views
     const files = glob.sync(path.join(config.src, "docs", "*.json"));

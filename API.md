@@ -134,7 +134,7 @@ The result is a list of errors which, again, is a `CommonError`. If there are no
 
 ```typescript
 const my_regex_string = parse_result.toRegex(); // type is string
-const my_regex =  parse_result.toRegExp(); // type is RegExp
+const my_regex = parse_result.toRegExp(); // type is RegExp
 ```
 
 This will contain your regular expression.
@@ -148,8 +148,8 @@ import { Human2RegexLexer, Human2RegexLexerOptions,
 const lexer = new Human2RegexLexer(new Human2RegexLexerOptions(true));
 const parser = new Human2RegexParser(new Human2RegexParserOptions(true));
 
-// using JavaScript instead? Use this declaration instead
-// function Human2Regex(input) {
+// using JavaScript? Use this declaration instead:
+// `function Human2Regex(input) {`
 function Human2Regex(input: string): { regex: string, errors: CommonError[] } {
     // tokenize
     const tokenize_result = lexer.tokenize(input);

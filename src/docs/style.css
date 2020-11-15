@@ -1,5 +1,10 @@
 /*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
 
+.align_header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
 .tenpx-margin-bottom {
 	margin-bottom: 10px;
 }
@@ -129,6 +134,7 @@ code {
 	font-size: 16px!important;
 	white-space: pre;
 	background-color: rgb(0 0 0 / .05);
+	overflow: auto;
 }
 
 @media (min-width:576px) {
@@ -161,4 +167,18 @@ td {
 
 pre code {
 	font-size: 87.5%;
+}
+
+.heading-links {
+	color: #fff;
+	padding-right: 10px;
+}
+
+.heading-link {
+	color: #fff;
+}
+
+.heading-link:hover,
+.heading-link:focus {
+	color: rgba(255, 255, 255, .8)
 }

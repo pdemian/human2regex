@@ -11,7 +11,7 @@
 							<select class="form-control" id="dialect">
 								<option value="js" selected>Javascript</option>
 								<option value="dotnet">.NET</option>
-								<option value="java">Java</option>
+								<option value="java">Java 7+</option>
 								<option value="pcre">PCRE</option>
 							</select>
 						</div>
@@ -28,22 +28,16 @@
 					
 					<h4>Human Speak:</h4>
 					<textarea class="form-control" id="human" rows="25">
-// H2R supports // # and /**/ as comments
-// A group is only captured if given a name. 
-// You can use "and", "or", "not" to specify "[]" regex
-// You can use "then" to combine match statements, however I find using multiple "match" statements easier to read
-
-// exact matching means use a ^ and $ to signify the start and end of the string
+/* Make a regex that matches (basic) URLs */
 
 using global and exact matching
 create an optional group called protocol
 	match "http"
-	optionally match "s"
+	possibly match "s"
 	match "://"
 create an optional group called subdomain
 	repeat
-		match a word
-		match "."
+		match a word, then "."
 create a group called domain
 	match 1+ words or "_" or "-"
 	match "."
@@ -89,6 +83,11 @@ create an optional group
 						<p class="font-weight-bold">Grouping</p>
 						<p><code class="cm-s-idea">create a group called mygroup</code> creates a group called "mygroup"</p>
 						<p><code class="cm-s-idea">create an optional group</code> creates an unnamed optional group</p>
+						<p class="font-weight-bold">Using</p>
+						<p><code class="cm-s-idea">using global and case insensitive</code> uses the 'g' and 'i' flags</p>
+						<p class="font-weight-bold">Misc</p>
+						<p><code class="cm-s-idea">// comment</code> is a single line comment</p>
+						<p><code class="cm-s-idea">/* comment */</code> is a multi line comment</p>
 					</div>
 				</div>
 			</div>

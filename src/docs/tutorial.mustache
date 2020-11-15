@@ -120,7 +120,7 @@ match "hello", maybe " ", "world"
 <span class="tutorial-code"><code class="cm-s-idea">
 possibly match "hello", " ", then "world"
 </code></span>
-				will actually make the whole "hello world" an optional match rather than just the first "hello". If you want to make the first match optional but keep the rest required, use multiple <code class="cm-s-idea">match</code> statements.</p>
+				will actually make the whole "hello world" an optional match rather than just the first "hello". If you want to make the first match optional but keep the rest required, place the <code class="cm-s-idea">optional</code> immediately after the <code class="cm-s-idea">match</code>.</p>
 
 				<br>
 				<p class="font-weight-bold" id="tut-negation">5. Negation</p>
@@ -151,52 +151,52 @@ match a word
 					</thead>
 					<tbody>
 						<tr>
-							<td>Anything</td>
+							<td><code class="cm-s-idea">anything</code></td>
 							<td>Matches any character</td>
 							<td>.</td>
 						</tr>
 						<tr>
-							<td>Word(s)</td>
+							<td><code class="cm-s-idea">word(s)</code></td>
 							<td>Matches a word</td>
 							<td>\w+</td>
 						</tr>
 						<tr>
-							<td>Number(s)</td>
+							<td><code class="cm-s-idea">number(s)</code></td>
 							<td>Matches an integer</td>
 							<td>\d+</td>
 						</tr>
 						<tr>
-							<td>Character(s)</td>
+							<td><code class="cm-s-idea">character(s)</code></td>
 							<td>Matches any letter character</td>
 							<td>\w</td>
 						</tr>
 						<tr>
-							<td>Digit(s)</td>
+							<td><code class="cm-s-idea">digit(s)</code></td>
 							<td>Matches any digit character</td>
 							<td>\d</td>
 						</tr>
 						<tr>
-							<td>Whitespace(s)</td>
+							<td><code class="cm-s-idea">whitespace(s)</code></td>
 							<td>Matches any whitespace character</td>
 							<td>\s</td>
 						</tr>
 						<tr>
-							<td>Boundary</td>
+							<td><code class="cm-s-idea">(word )boundary</code></td>
 							<td>Boundary between a word</td>
 							<td>\b</td>
 						</tr>
 						<tr>
-							<td>Line Feed</td>
+							<td><code class="cm-s-idea">line feed</code></td>
 							<td>Matches a newline</td>
 							<td>\n</td>
 						</tr>
 						<tr>
-							<td>Newline</td>
+							<td><code class="cm-s-idea">newline</code></td>
 							<td>Matches a newline</td>
 							<td>\n</td>
 						</tr>
 						<tr>
-							<td>Carriage Return</td>
+							<td><code class="cm-s-idea">carriage return</code></td>
 							<td>Matches a carriage return</td>
 							<td>\r</td>
 						</tr>
@@ -278,12 +278,12 @@ match "World"
 
 				<br>
 				<p class="font-weight-bold" id="tut-grouping">8. Grouping</p>
-				<p>Just like regular expressions, capture and non-capture groups are supported in H2R. Each group is defined using the <code class="cm-s-idea">create a group</code> keyphrase.</p>
+				<p>Just like regular expressions, capture groups are supported in H2R. Each group is defined using the <code class="cm-s-idea">create a group</code> keyphrase.</p>
 <pre class="tutorial-code">
 <code class="cm-s-idea">create a group
 	match "Hello World"
 </code></pre>
-				<p>This will create a non-captured group, equivalent to the regular expression "/(?:Hello World)/". A non-captured group will not show up in your chosen language's matches. If you do wish to capture a group, simply give it a name:<p>
+				<p>This will create a non-named captured group, equivalent to the regular expression "/(Hello World)/". A non-named captured group will show up in your chosen language's matches, however will not be given a name. To access this match, you will need to know the index of the group. Most regular expression engines support named capture groups, and H2R highly recommends using this feature. If you wish to do so, simply give it a name:<p>
 <pre class="tutorial-code">
 <code class="cm-s-idea">create a group called TestGroup
 	match "Hello World"

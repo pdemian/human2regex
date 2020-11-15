@@ -205,6 +205,7 @@ export declare class CountSubStatementCST extends H2RCST {
  * @internal
  */
 export declare class MatchStatementCST extends StatementCST {
+    private completely_optional;
     private matches;
     /**
      * Constructor for MatchStatementCST
@@ -212,7 +213,7 @@ export declare class MatchStatementCST extends StatementCST {
      * @param tokens Tokens used to calculate where an error occured
      * @param matches
      */
-    constructor(tokens: IToken[], matches: MatchStatementValue[]);
+    constructor(tokens: IToken[], completely_optional: boolean, matches: MatchStatementValue[]);
     validate(language: RegexDialect): ISemanticError[];
     toRegex(language: RegexDialect): string;
 }
@@ -279,3 +280,10 @@ export declare class RegularExpressionCST extends H2RCST {
     validate(language: RegexDialect): ISemanticError[];
     toRegex(language: RegexDialect): string;
 }
+/**
+ * Minimizes the match string by finding duplicates or substrings in the array
+ *
+ * @param arr the array
+ * @internal
+ */
+export declare function minimizeMatchString(arr: string[]): string;

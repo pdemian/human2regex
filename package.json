@@ -1,6 +1,6 @@
 {
   "name": "human2regex",
-  "version": "0.9.9",
+  "version": "1.0.0",
   "description": "Humanized Regular Expressions",
   "main": "./lib/index.js",
   "typings": "./lib/index.d.ts",
@@ -34,7 +34,6 @@
     "build": "tsc && webpack --config webpack.config.js",
     "test": "eslint && jest",
     "codecov": "codecov",
-    "prepare": "npm run build",
     "prepublishOnly": "npm t"
   },
   "keywords": [
