@@ -43,7 +43,7 @@ To use the lexer, call tokenize on your input text:
 const lex_result = lexer.tokenize("<your text here>");
 ```
 
-This returns an TokenizeResult which is passed on to the parser.
+This returns a TokenizeResult which is passed on to the parser.
 
 ```typescript
 export declare class TokenizeResult {
@@ -100,11 +100,17 @@ To use it, call the parser with your tokens from the lexer:
 const parse_result = parser.parse(lex_result.tokens);
 ```
 
-This returns an TokenizeResult which is passed on to the parser.
+This returns a ParseResult which can be acted upon.
 ```typescript
 export declare class ParseResult {
     // errors found
     errors: CommonError[];
+    //Validate that this is both valid and can be generated in the specified language
+    validate(language: RegexDialect): CommonError[];
+    //Generate a regular expression string based on the parse result
+    toRegex(language: RegexDialect): string;
+    // Generate a RegExp object based on the parse result
+    toRegExp(language: RegexDialect): RegExp;
 }
 ```
 
@@ -120,7 +126,8 @@ export enum RegexDialect {
     JS,
     PCRE,
     DotNet,
-    Java
+    Java,
+    Python
 }
 ```
 

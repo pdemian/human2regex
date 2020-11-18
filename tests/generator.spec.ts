@@ -153,6 +153,17 @@ describe("Generator functionality", function() {
         expect(reg4.toRegex(RegexDialect.JS)).toBe("/a(?:1x1|2x2|3x3)z/");
     });
 
+    it("generate dialect specific regex", function() {
+        const toks0 = lexer.tokenize('create a group called x\n\tmatch "x"').tokens;
+        const reg0 = parser.parse(toks0);
+        expect(reg0.validate(RegexDialect.JS).length).toBe(0);
+
+        //PCRE and python adds "P" after "?"
+        expect(reg0.toRegex(RegexDialect.JS)).toBe("/(?<x>x)/");
+        expect(reg0.toRegex(RegexDialect.Python)).toBe("/(?P<x>x)/");
+        expect(reg0.toRegex(RegexDialect.PCRE)).toBe("/(?P<x>x)/");
+    });
+
     it("handles unicode", function() {
         const toks0 = lexer.tokenize('match unicode class "Latin"').tokens;
         const reg0 = parser.parse(toks0);

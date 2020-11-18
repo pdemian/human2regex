@@ -53,6 +53,9 @@ document.addEventListener("DOMContentLoaded", function() {
 			{token: "builtin", regex: /word(s)?/i},
 			{token: "builtin", regex: /digit(s)?/i},
 			{token: "builtin", regex: /character(s)?/i},
+			{token: "builtin", regex: /letter(s)?/i},
+			{token: "builtin", regex: /decimal(s)?/i},
+			{token: "builtin", regex: /integer(s)?/i},
 			{token: "builtin", regex: /(white space|whitespace)(s)?/i},
 			{token: "builtin", regex: /number(s)?/i},
 			{token: "keyword", regex: /using/i},
@@ -144,6 +147,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				return RegexDialect.Java;
 			case "pcre":
 				return RegexDialect.PCRE;
+			case "python":
+				return RegexDialect.Python;
 			default:
 				return RegexDialect.JS;
 		}
@@ -193,11 +198,28 @@ document.addEventListener("DOMContentLoaded", function() {
 		}
 	}
 
+
+
+	const editor = code_mirror.fromTextArea($human, {
+		mode: "human2regex",
+		lineNumbers: false,
+		indentUnit: 4,
+		viewportMargin: Infinity,
+		theme: "idea",
+		lint: true
+	});
+
+	editor.on("change", () => {
+		runH2R(editor.getValue());
+	});
+
 	$dialect.addEventListener("change", () => {
 		const index = $dialect.selectedIndex;
 		const value = $dialect.options[index].value;
 
 		dialect = mapDialect(value);
+
+		runH2R(editor.getValue());
 	});
 
 	$clip.addEventListener("click", () => {
@@ -212,19 +234,6 @@ document.addEventListener("DOMContentLoaded", function() {
 		else {
 			document.execCommand("copy");
 		}
-	});
-
-	const editor = code_mirror.fromTextArea($human, {
-		mode: "human2regex",
-		lineNumbers: false,
-		indentUnit: 4,
-		viewportMargin: Infinity,
-		theme: "idea",
-		lint: true
-	});
-
-	editor.on("change", () => {
-		runH2R(editor.getValue());
 	});
 
 	//run what's currently in the textarea to initialize

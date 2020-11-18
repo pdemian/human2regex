@@ -7,7 +7,8 @@ export declare enum RegexDialect {
     JS = 0,
     PCRE = 1,
     DotNet = 2,
-    Java = 3
+    Java = 3,
+    Python = 4
 }
 /**
  * Interface for all semantic errors
@@ -95,7 +96,10 @@ export declare enum MatchSubStatementType {
     Newline = 10,
     CarriageReturn = 11,
     Boundary = 12,
-    Unicode = 13
+    Unicode = 13,
+    Letter = 14,
+    Decimal = 15,
+    Integer = 16
 }
 /**
  * Container for match statements

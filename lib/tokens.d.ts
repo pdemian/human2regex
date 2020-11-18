@@ -19,6 +19,9 @@
 /** @internal */ export declare const Word: import("chevrotain").TokenType;
 /** @internal */ export declare const Digit: import("chevrotain").TokenType;
 /** @internal */ export declare const Character: import("chevrotain").TokenType;
+/** @internal */ export declare const Letter: import("chevrotain").TokenType;
+/** @internal */ export declare const Decimal: import("chevrotain").TokenType;
+/** @internal */ export declare const Integer: import("chevrotain").TokenType;
 /** @internal */ export declare const Whitespace: import("chevrotain").TokenType;
 /** @internal */ export declare const Boundary: import("chevrotain").TokenType;
 /** @internal */ export declare const Number: import("chevrotain").TokenType;

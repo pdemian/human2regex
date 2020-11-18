@@ -50,6 +50,10 @@ describe("Lexer capabilities", function() {
         // missing " at end
         expect(() => lexer.tokenize('optionally create a group\n\toptionally match "- or "$/()" then "^[]')).not.toThrow();
         expect(lexer.tokenize('optionally create a group\n\toptionally match "- or "$/()" then "^[]').errors.length).toBeGreaterThan(0);
+
+        // used to crash
+        expect(() => lexer.tokenize("create a group called mygroup\n\t")).not.toThrow();
+        expect(lexer.tokenize("create a group called mygroup\n\t").errors.length).toBe(0);
     });
 
     it("handles switching between tabs and spaces", function() {

@@ -15,7 +15,8 @@ export enum RegexDialect {
     JS,
     PCRE,
     DotNet,
-    Java
+    Java,
+    Python
 }
 
 /**
@@ -139,6 +140,7 @@ export enum UsingFlags {
  * @remarks Word, Digit, Character, Whitespace, Number, Tab, Linefeed, Newline, and Carriage return are \w+, \d, \w, \s, \d+, \t, \n, \n, \r respectively
  * @internal
  */
+
 export enum MatchSubStatementType {
     SingleString,
     Between,
@@ -153,7 +155,10 @@ export enum MatchSubStatementType {
     Newline,
     CarriageReturn,
     Boundary,
-    Unicode
+    Unicode,
+    Letter,
+    Decimal,
+    Integer
 }
 
 /**
@@ -303,6 +308,21 @@ export class MatchSubStatementCST extends H2RCST {
                     break;
                 case MatchSubStatementType.Word:
                     matches.push(this.invert ? "\\W+" : "\\w+");
+                    break;
+                case MatchSubStatementType.Letter: {
+                    if (language === RegexDialect.PCRE) {
+                        matches.push(this.invert ? "[^[:alpha:]]" : "[[:alpha:]]");
+                    }
+                    else {
+                        matches.push(this.invert ? "[^a-zA-Z]" : "[a-zA-Z]");
+                    }
+                    break;
+                }
+                case MatchSubStatementType.Integer:
+                    matches.push(this.invert ? "(?![+-]?\\d+)" : "[+-]?\\d+");
+                    break;
+                case MatchSubStatementType.Decimal:
+                    matches.push(this.invert ? "(?![+-]?(?:(?:\\d+[,.]?\\d*)|(?:[,.]\\d+)))" : "[+-]?(?:(?:\\d+[,.]?\\d*)|(?:[,.]\\d+))");
                     break;
                 case MatchSubStatementType.Digit:
                     matches.push(this.invert ? "\\D" : "\\d");
@@ -673,7 +693,14 @@ export class GroupStatementCST extends StatementCST {
 
         // named group
         if (this.name !== null) {
-            str += `?<${this.name}>`;
+            str += "?";
+
+            // python and PCRE use "?P" while everything else is just "?"
+            if (language === RegexDialect.Python || language === RegexDialect.PCRE) {
+                str += "P";
+            }
+
+            str += `<${this.name}>`;
         }
 
         str += this.statements.map((x) => x.toRegex(language)).join("");

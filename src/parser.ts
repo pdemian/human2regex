@@ -347,6 +347,24 @@ export class Human2RegexParser extends EmbeddedActionsParser {
                             return { tokens: [ token ], statement: new MatchSubStatementValue(type) };
                         }},
                         { ALT: () => { 
+                            const token = $.CONSUME(T.Letter); 
+                            type = MatchSubStatementType.Letter;
+
+                            return { tokens: [ token ], statement: new MatchSubStatementValue(type) };
+                        }},
+                        { ALT: () => { 
+                            const token = $.CONSUME(T.Decimal); 
+                            type = MatchSubStatementType.Decimal;
+
+                            return { tokens: [ token ], statement: new MatchSubStatementValue(type) };
+                        }},
+                        { ALT: () => { 
+                            const token = $.CONSUME(T.Integer); 
+                            type = MatchSubStatementType.Integer;
+
+                            return { tokens: [ token ], statement: new MatchSubStatementValue(type) };
+                        }},
+                        { ALT: () => { 
                             const token = $.CONSUME(T.Whitespace); 
                             type = MatchSubStatementType.Whitespace;
 

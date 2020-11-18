@@ -49,27 +49,27 @@ using case insensitive
 					</thead>
 					<tbody>
 						<tr>
-							<td>Multiline</td>
+							<td><code class="cm-s-idea">multiline</code></td>
 							<td>Matches can cross line breaks</td>
 							<td>/&lt;your regex&gt;/m</td>
 						</tr>
 						<tr>
-							<td>Global</td>
+							<td><code class="cm-s-idea">global</code></td>
 							<td>Multiple matches are allowed</td>
 							<td>/&lt;your regex&gt;/g</td>
 						</tr>
 						<tr>
-							<td>Case Sensitive</td>
+							<td><code class="cm-s-idea">case sensitive</code></td>
 							<td>Match must be exact case</td>
 							<td><span class="font-italic">none</span></td>
 						</tr>
 						<tr>
-							<td>Case Insensitive</td>
+							<td><code class="cm-s-idea">case insensitive</code></td>
 							<td>Match may be any case</td>
 							<td>/&lt;your regex&gt;/i</td>
 						</tr>
 						<tr>
-							<td>Exact</td>
+							<td><code class="cm-s-idea">exact</code></td>
 							<td>An exact statement matches a whole line exactly, nothing before, nothing after</td>
 							<td>/^&lt;your regex&gt;$/</td>
 						</tr>
@@ -147,6 +147,7 @@ match a word
 							<th scope="col">Specifier</th>
 							<th scope="col">Description</th>
 							<th scope="col">Regex alternative</th>
+							<th scope="col">Note</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -154,51 +155,71 @@ match a word
 							<td><code class="cm-s-idea">anything</code></td>
 							<td>Matches any character</td>
 							<td>.</td>
+							<td>&nbsp;</td>
 						</tr>
 						<tr>
 							<td><code class="cm-s-idea">word(s)</code></td>
-							<td>Matches a word</td>
+							<td>Matches many a-z, A-Z, _, or digit characters</td>
 							<td>\w+</td>
+							<td>For a-z only, use <code class="cm-s-idea">letter(s)</code></td>
+						</tr>
+						<tr>
+							<td><code class="cm-s-idea">letter(s)</code></td>
+							<td>Matches any letter character</td>
+							<td>[a-zA-Z]</td>
+							<td>&nbsp;</td>
 						</tr>
 						<tr>
 							<td><code class="cm-s-idea">number(s)</code></td>
-							<td>Matches an integer</td>
+							<td>Matches a string of digit characters</td>
 							<td>\d+</td>
-						</tr>
-						<tr>
-							<td><code class="cm-s-idea">character(s)</code></td>
-							<td>Matches any letter character</td>
-							<td>\w</td>
+							<td>&nbsp;</td>
 						</tr>
 						<tr>
 							<td><code class="cm-s-idea">digit(s)</code></td>
 							<td>Matches any digit character</td>
 							<td>\d</td>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td><code class="cm-s-idea">integer(s)</code></td>
+							<td>Matches an integer</td>
+							<td>[+-]?\d+</td>
+							<td>&nbsp;</td>
+						<tr>
+							<td><code class="cm-s-idea">decimal(s)</code></td>
+							<td>Matches digits, an optional decimal point and more digits</td>
+							<td>[+-]?((\d+[,.]?\d*)|([,.]\d+))</td>
+							<td>Supports both "," and "." decimal points</td>
+						<tr>
+							<td><code class="cm-s-idea">character(s)</code></td>
+							<td>Matches a-z, A-Z, _, or digits</td>
+							<td>\w</td>
+							<td>For a-z only, use <code class="cm-s-idea">letter(s)</code></td>
 						</tr>
 						<tr>
 							<td><code class="cm-s-idea">whitespace(s)</code></td>
 							<td>Matches any whitespace character</td>
 							<td>\s</td>
+							<td>&nbsp;</td>
 						</tr>
 						<tr>
 							<td><code class="cm-s-idea">(word )boundary</code></td>
 							<td>Boundary between a word</td>
 							<td>\b</td>
+							<td>&nbsp;</td>
 						</tr>
 						<tr>
-							<td><code class="cm-s-idea">line feed</code></td>
+							<td><code class="cm-s-idea">line feed</code>/<code class="cm-s-idea">newline</code></td>
 							<td>Matches a newline</td>
 							<td>\n</td>
-						</tr>
-						<tr>
-							<td><code class="cm-s-idea">newline</code></td>
-							<td>Matches a newline</td>
-							<td>\n</td>
+							<td>&nbsp;</td>
 						</tr>
 						<tr>
 							<td><code class="cm-s-idea">carriage return</code></td>
 							<td>Matches a carriage return</td>
 							<td>\r</td>
+							<td>&nbsp;</td>
 						</tr>
 					</tbody>
 				</table>

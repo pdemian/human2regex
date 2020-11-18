@@ -162,7 +162,7 @@ export class Human2RegexLexer {
                 let length = lex_result.tokens[i].image.length;
 
                 // grab all the indents (and their length)
-                while (lex_result.tokens.length > i && lex_result.tokens[i+1].tokenType === Indent) {
+                while (lex_result.tokens.length > i+1 && lex_result.tokens[i+1].tokenType === Indent) {
                     curr_indent_level++;
                     i++;
                     length += lex_result.tokens[i].image.length;
@@ -174,7 +174,7 @@ export class Human2RegexLexer {
                 //start_token.endLine = lex_result.tokens[i].endLine;
 
                 // are we an empty line? 
-                if (lex_result.tokens.length > i && lex_result.tokens[i+1].tokenType === EndOfLine) {
+                if (lex_result.tokens.length > i+1 && lex_result.tokens[i+1].tokenType === EndOfLine) {
                     // Ignore all indents AND newline
                     // continue;
                 }

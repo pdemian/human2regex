@@ -27,7 +27,10 @@ import { createToken, Lexer } from "chevrotain";
 /** @internal */ export const And = createToken({name: "And", pattern: /and|,/i});
 /** @internal */ export const Word = createToken({name: "WordSpecifier", pattern: /word(s)?/i});
 /** @internal */ export const Digit = createToken({name: "DigitSpecifier", pattern: /digit(s)?/i});
-/** @internal */ export const Character = createToken({name: "CharacterSpecifier", pattern: /(character|letter)s?/i});
+/** @internal */ export const Character = createToken({name: "CharacterSpecifier", pattern: /character(s)?/i});
+/** @internal */ export const Letter = createToken({name: "LetterSpecifier", pattern: /letter(s)?/i });
+/** @internal */ export const Decimal = createToken({name: "DecimalSpecifier", pattern: /decimal(s)?/i });
+/** @internal */ export const Integer = createToken({name: "IntegerSpecifier", pattern: /integer(s)?/i });
 /** @internal */ export const Whitespace = createToken({name: "WhitespaceSpecifier", pattern: /(white space|whitespace)s?/i});
 /** @internal */ export const Boundary = createToken({name: "BoundarySpecifier", pattern: /(word )?boundary/i});
 /** @internal */ export const Number = createToken({name: "NumberSpecifier", pattern: /number(s)?/i});
@@ -117,6 +120,9 @@ export const AllTokens = [
     Boundary,
     Word,
     Digit,
+    Letter,
+    Decimal,
+    Integer,
     Character,
     Whitespace,
     Number,
