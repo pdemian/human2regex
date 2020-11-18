@@ -8,7 +8,8 @@ export declare enum RegexDialect {
     PCRE = 1,
     DotNet = 2,
     Java = 3,
-    Python = 4
+    Python = 4,
+    Boost = 5
 }
 /**
  * Interface for all semantic errors
@@ -287,7 +288,7 @@ export declare class RegularExpressionCST extends H2RCST {
 /**
  * Minimizes the match string by finding duplicates or substrings in the array
  *
- * @param arr the array
+ * @param arr the array of matches
  * @internal
  */
 export declare function minimizeMatchString(arr: string[]): string;

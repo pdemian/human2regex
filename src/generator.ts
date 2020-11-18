@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 
-import { regexEscape, removeQuotes, hasFlag, combineFlags, isSingleRegexCharacter, first, last, unusedParameter, makeFlag } from "./utilities";
+import { regexEscape, removeQuotes, hasFlag, combineFlags, isSingleRegexCharacter, first, last, unusedParameter, makeFlag, append } from "./utilities";
 import { IToken } from "chevrotain";
 
 /** 
@@ -16,7 +16,8 @@ export enum RegexDialect {
     PCRE,
     DotNet,
     Java,
-    Python
+    Python,
+    Boost
 }
 
 /**
@@ -140,7 +141,6 @@ export enum UsingFlags {
  * @remarks Word, Digit, Character, Whitespace, Number, Tab, Linefeed, Newline, and Carriage return are \w+, \d, \w, \s, \d+, \t, \n, \n, \r respectively
  * @internal
  */
-
 export enum MatchSubStatementType {
     SingleString,
     Between,
@@ -228,10 +228,10 @@ export class MatchSubStatementCST extends H2RCST {
     }
     
     public validate(language: RegexDialect): ISemanticError[] {
-        let errors: ISemanticError[] = [];
+        const errors: ISemanticError[] = [];
 
         if (this.count) {
-            errors = errors.concat(this.count.validate(language));
+            append(errors, this.count.validate(language));
         }
 
         for (const value of this.values) {
@@ -555,10 +555,10 @@ export class MatchStatementCST extends StatementCST {
     }
 
     public validate(language: RegexDialect): ISemanticError[] {
-        let errors: ISemanticError[] = [];
+        const errors: ISemanticError[] = [];
 
         for (const match of this.matches) {
-            errors = errors.concat(match.statement.validate(language));
+            append(errors, match.statement.validate(language));
         }
 
         return errors;
@@ -617,14 +617,14 @@ export class RepeatStatementCST extends StatementCST {
     }
 
     public validate(language: RegexDialect): ISemanticError[] {
-        let errors: ISemanticError[] = [];
+        const errors: ISemanticError[] = [];
 
         if (this.count !== null) {
-            errors = errors.concat(this.count.validate(language));
+            append(errors, this.count.validate(language));
         }
 
         for (const statement of this.statements) {
-            errors = errors.concat(statement.validate(language));
+            append(errors, statement.validate(language));
         }
 
         return errors;
@@ -674,7 +674,7 @@ export class GroupStatementCST extends StatementCST {
     }
 
     public validate(language: RegexDialect): ISemanticError[] {
-        let errors : ISemanticError[] = [];
+        const errors : ISemanticError[] = [];
         
         // All languages currently support named groups
         //if (false) {
@@ -682,7 +682,7 @@ export class GroupStatementCST extends StatementCST {
         //}
 
         for (const statement of this.statements) {
-            errors = errors.concat(statement.validate(language));
+            append(errors, statement.validate(language));
         }
 
         return errors;
@@ -731,10 +731,10 @@ export class RegularExpressionCST extends H2RCST {
     }
 
     public validate(language: RegexDialect): ISemanticError[] {
-        let errors: ISemanticError[] = this.usings.validate(language);
+        const errors: ISemanticError[] = this.usings.validate(language);
 
         for (const statement of this.statements) {
-            errors = errors.concat(statement.validate(language));
+            append(errors, statement.validate(language));
         }
 
         return errors;
@@ -747,12 +747,10 @@ export class RegularExpressionCST extends H2RCST {
     }
 }
 
-
-
 /**
  * Minimizes the match string by finding duplicates or substrings in the array
  * 
- * @param arr the array
+ * @param arr the array of matches
  * @internal
  */
 export function minimizeMatchString(arr: string[]): string {

@@ -127,7 +127,8 @@ export enum RegexDialect {
     PCRE,
     DotNet,
     Java,
-    Python
+    Python,
+    Boost
 }
 ```
 

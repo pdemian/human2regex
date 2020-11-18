@@ -1,7 +1,7 @@
 /*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
 
 import "../src/utilities";
-import { isSingleRegexCharacter, findLastIndex, removeQuotes, regexEscape, hasFlag, combineFlags, makeFlag, first, last, CommonError } from "../src/utilities";
+import { isSingleRegexCharacter, findLastIndex, removeQuotes, regexEscape, hasFlag, combineFlags, makeFlag, first, last, CommonError, append } from "../src/utilities";
 import { UsingFlags, ISemanticError } from "../src/generator";
 import { IRecognitionException, ILexingError, createTokenInstance } from "chevrotain";
 import { Indent } from "../src/tokens";
@@ -24,6 +24,17 @@ describe("Utility functions", function() {
         expect(hasFlag(combineFlags(UsingFlags.Global, UsingFlags.Exact), UsingFlags.Exact)).toBe(true);
         expect(hasFlag(combineFlags(UsingFlags.Global, UsingFlags.Exact), UsingFlags.Global)).toBe(true);
         expect(hasFlag(combineFlags(UsingFlags.Global, UsingFlags.Exact), UsingFlags.Multiline)).toBe(false);
+    });
+
+    it("appends correctly", function() {
+        const my_array = [ 1, 2, 3 ];
+        append(my_array, [ 4, 5, 6 ]);
+
+        expect(my_array).toEqual([ 1, 2, 3, 4, 5, 6 ]);
+
+        append(my_array, [ 7, 8 ], [ 9 ]);
+
+        expect(my_array).toEqual([ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]);
     });
 
     it("should return correct array elements", function() {

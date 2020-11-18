@@ -149,6 +149,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				return RegexDialect.PCRE;
 			case "python":
 				return RegexDialect.Python;
+			case "boost":
+				return RegexDialect.Boost;
 			default:
 				return RegexDialect.JS;
 		}

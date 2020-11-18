@@ -91,6 +91,12 @@ describe("Generator functionality", function() {
         const reg1 = parser.parse(toks1);
         expect(reg1.validate(RegexDialect.JS).length).toBe(0);
         expect(reg1.toRegex(RegexDialect.JS)).toBe("/\\B\\W+\\D\\W\\S\\D+[^\\t][^\\n][^\\r]/");
+
+        const toks2 = lexer.tokenize("match letter, integer, decimal").tokens;
+        const reg2 = parser.parse(toks2);
+        expect(reg2.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg2.toRegex(RegexDialect.JS)).toBe("/[a-zA-Z][+-]?\\d+[+-]?(?:(?:\\d+[,.]?\\d*)|(?:[,.]\\d+))/");
+        expect(reg2.toRegex(RegexDialect.PCRE)).toBe("/[[:alpha:]][+-]?\\d+[+-]?(?:(?:\\d+[,.]?\\d*)|(?:[,.]\\d+))/");
     });
 
     it("doesn't clobber repetition", function() {

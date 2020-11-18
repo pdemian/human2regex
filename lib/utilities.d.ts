@@ -108,6 +108,14 @@ export declare function removeQuotes(input: string): string;
  */
 export declare function regexEscape(input: string): string;
 /**
+ * Append a list of arrays to an array
+ *
+ * @param array the array to append to
+ * @param arrays the list of arrays that you want to add to array
+ * @internal
+ */
+export declare function append<T>(array: T[], ...arrays: T[][]): void;
+/**
  * Common Error class that encapsulates information from the lexer, parser, and generator
  */
 export declare class CommonError {
