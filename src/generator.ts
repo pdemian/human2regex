@@ -536,10 +536,7 @@ export class CountSubStatementCST extends H2RCST {
 
         const errors: ISemanticError[] = [];
 
-        if (this.from < 0) {
-            errors.push(this.error("Value cannot be negative"));
-        }
-        else if (this.to !== null && ((this.opt === "exclusive" && (this.to-1) <= this.from) || this.to <= this.from)) {
+        if (this.to !== null && ((this.opt === "exclusive" && (this.to-1) <= this.from) || this.to <= this.from)) {
             errors.push(this.error("Values must be in range of eachother"));
         }
 
@@ -785,7 +782,7 @@ export class BackrefStatementCST extends StatementCST {
         const errors: ISemanticError[] = [];
 
         if (!context.hasGroup(this.name)) {
-            errors.push(this.error(`Cannot call group with name "${this.name}" as it was never defined`));
+            errors.push(this.error(`Cannot call group with name "${this.name}" as it was never previously defined`));
         }
 
         if (this.count !== null) {

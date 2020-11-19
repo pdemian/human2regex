@@ -563,23 +563,23 @@ export class Human2RegexParser extends EmbeddedActionsParser {
             let optional = false;
             let count: CountSubStatementCST | null = null;
 
-            $.OPTION4(() => {
+            $.OPTION5(() => {
                 tokens.push($.CONSUME(T.Optional));
                 optional = true;
             });
             tokens.push($.CONSUME(T.Call));
 
-            $.OPTION5(() => count = $.SUBRULE(CountSubStatement));
+            $.OPTION6(() => count = $.SUBRULE(CountSubStatement));
 
-            $.OPTION6(() => {
+            $.OPTION7(() => {
                 $.OPTION(() => $.CONSUME(T.The));
                 $.CONSUME(T.Group);
                 $.OPTION2(() => $.CONSUME(T.Called));
             });
-            
-            const name_token = $.CONSUME(T.Identifier);
-            tokens.push(name_token);          
-            const name = name_token.image;
+                   
+            const name = $.CONSUME(T.Identifier).image;
+
+            tokens.push($.CONSUME4(T.EndOfLine));
 
             return new BackrefStatementCST(tokens, optional, count, name);
         });

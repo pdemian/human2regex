@@ -53,15 +53,16 @@ import { createToken, Lexer } from "chevrotain";
 /** @internal */ export const From = createToken({name: "From", pattern: /from/i});
 /** @internal */ export const To = createToken({name: "To", pattern: /(to|through|thru|\-|\.\.\.?)/i});
 /** @internal */ export const Create = createToken({name: "Create", pattern: /create(s)?/i});
-/** @internal */ export const Called = createToken({name: "Called", pattern: /name(d)?|call(ed)?/i});
+/** @internal */ export const Called = createToken({name: "Called", pattern: /named|called/i});
 /** @internal */ export const Repeat = createToken({name: "Repeat", pattern: /repeat(s|ing)?/i});
 /** @internal */ export const Newline = createToken({name: "Newline", pattern: /(new line|newline)/i});
 /** @internal */ export const CarriageReturn = createToken({name: "CarriageReturn", pattern: /carriage return/i});
 /** @internal */ export const CaseInsensitive = createToken({name: "CaseInsensitive", pattern: /case insensitive/i});
 /** @internal */ export const CaseSensitive = createToken({name: "CaseSensitive", pattern: /case sensitive/i});
 /** @internal */ export const OrMore = createToken({name: "OrMore", pattern: /\+|or more/i});
-/** @internal */ export const Call = createToken({name: "Call", pattern: /call|invoke|execute|run|do|perform/i});
+/** @internal */ export const Call = createToken({name: "Call", pattern: /call|invoke|execute|(re ?)?run/i });
 /** @internal */ export const The = createToken({name: "The", pattern: /the/i });
+
 /*
 //Not being used currently
 export const Of = createToken({name: "Of", pattern: /of/i});

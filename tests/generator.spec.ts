@@ -68,9 +68,13 @@ describe("Generator functionality", function() {
         const reg5 = parser.parse(toks5);
         expect(reg5.validate(RegexDialect.JS).length).toBeGreaterThan(0);
 
-        const toks6 = lexer.tokenize("create a group called thing\ncreate a group called thing").tokens;
+        const toks6 = lexer.tokenize('create a group called thing\n\tmatch "hi"\ncreate a group called thing\n\tmatch "hi"\n').tokens;
         const reg6 = parser.parse(toks6);
         expect(reg6.validate(RegexDialect.JS).length).toBeGreaterThan(0);
+
+        const toks7 = lexer.tokenize("invoke thing").tokens;
+        const reg7 = parser.parse(toks7);
+        expect(reg7.validate(RegexDialect.JS).length).toBeGreaterThan(0);
     });
 
     it("handles ranges", function() {
@@ -101,6 +105,12 @@ describe("Generator functionality", function() {
         expect(reg2.validate(RegexDialect.JS).length).toBe(0);
         expect(reg2.toRegex(RegexDialect.JS)).toBe("/[a-zA-Z][+-]?\\d+[+-]?(?:(?:\\d+[,.]?\\d*)|(?:[,.]\\d+))/");
         expect(reg2.toRegex(RegexDialect.PCRE)).toBe("/[[:alpha:]][+-]?\\d+[+-]?(?:(?:\\d+[,.]?\\d*)|(?:[,.]\\d+))/");
+
+        const toks3 = lexer.tokenize("match not letter, not integer, not decimal").tokens;
+        const reg3 = parser.parse(toks3);
+        expect(reg3.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg3.toRegex(RegexDialect.JS)).toBe("/[^a-zA-Z](?![+-]?\\d+)(?![+-]?(?:(?:\\d+[,.]?\\d*)|(?:[,.]\\d+)))/");
+        expect(reg3.toRegex(RegexDialect.PCRE)).toBe("/[^[:alpha:]](?![+-]?\\d+)(?![+-]?(?:(?:\\d+[,.]?\\d*)|(?:[,.]\\d+)))/");
     });
 
     it("doesn't clobber repetition", function() {
@@ -164,14 +174,14 @@ describe("Generator functionality", function() {
     });
 
     it("can generate backreferences", function() {
-        const toks0 = lexer.tokenize('create a group called thing\n\tmatch "Hello World\ncall thing\noptionally call 3 times the group called thing').tokens;
+        const toks0 = lexer.tokenize('create a group called thing\n\tmatch "Hello World"\ninvoke thing\noptionally call 3 times the group called thing').tokens;
         const reg0 = parser.parse(toks0);
         expect(reg0.validate(RegexDialect.JS).length).toBe(0);
 
-        expect(reg0.toRegex(RegexDialect.JS)).toBe("/[ab]/");
-        expect(reg0.toRegex(RegexDialect.PCRE)).toBe("/[ab]/");
-        expect(reg0.toRegex(RegexDialect.Python)).toBe("/[ab]/");
-        expect(reg0.toRegex(RegexDialect.DotNet)).toBe("/[ab]/");
+        expect(reg0.toRegex(RegexDialect.JS)).toBe("/(?<thing>Hello World)\\g<thing>(?:\\g<thing>{3})?/");
+        expect(reg0.toRegex(RegexDialect.PCRE)).toBe("/(?P<thing>Hello World)\\g<thing>(?:\\g<thing>{3})?/");
+        expect(reg0.toRegex(RegexDialect.Python)).toBe("/(?P<thing>Hello World)(?P=thing)(?:(?P=thing){3})?/");
+        expect(reg0.toRegex(RegexDialect.DotNet)).toBe("/(?<thing>Hello World)\\k<thing>(?:\\k<thing>{3})?/");
     });
 
     it("generate dialect specific regex", function() {
