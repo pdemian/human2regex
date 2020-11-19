@@ -63,6 +63,44 @@ const unicode_script_codes = [
 ];
 
 /**
+ * Context for validation
+ * 
+ * Currently only used to validate groups
+ * 
+ * @internal
+ */
+export class GeneratorContext {
+    public groups: { [ key: string ]: { startLine: number, startColumn: number, length: number } } = {};
+
+    /**
+     * Checks to see if we already have a group defined
+     * 
+     * @param identifier the group name 
+     * @returns true if the group name already exists
+     */
+    public hasGroup(identifier: string): boolean {
+        return Object.prototype.hasOwnProperty.call(this.groups, identifier);
+    }
+
+    /**
+     * Adds the identifier to the group list
+     * 
+     * @param identifier the group name
+     */
+    public addGroup(identifier: string, tokens: IToken[]): void {
+        const f = first(tokens);
+        const l = last(tokens);
+
+        this.groups[identifier] = {
+            startLine: f.startLine ?? NaN,
+            startColumn: f.startColumn ?? NaN,
+            length: (l.endOffset ?? l.startOffset) - f.startOffset,
+        };
+
+    }
+}
+
+/**
  * The base concrete syntax tree class
  * 
  * @internal
@@ -84,10 +122,11 @@ export abstract class H2RCST {
      * @remarks There is no guarantee toRegex will work unless validate returns no errors
      * 
      * @param language the regex dialect we're validating
+     * @param context the generator context
      * @returns A list of errors
      * @public
      */
-    public abstract validate(language: RegexDialect): ISemanticError[];
+    public abstract validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
 
     /**
      * Generate a regular expression fragment based on this syntax tree
@@ -227,11 +266,11 @@ export class MatchSubStatementCST extends H2RCST {
         super(tokens);
     }
     
-    public validate(language: RegexDialect): ISemanticError[] {
+    public validate(language: RegexDialect, context: GeneratorContext): ISemanticError[] {
         const errors: ISemanticError[] = [];
 
         if (this.count) {
-            append(errors, this.count.validate(language));
+            append(errors, this.count.validate(language, context));
         }
 
         for (const value of this.values) {
@@ -427,8 +466,9 @@ export class UsingStatementCST extends H2RCST {
         super(tokens);
     }
 
-    public validate(language: RegexDialect): ISemanticError[] {
-        unusedParameter(language, "Using Statement does not change based on language");
+    public validate(language: RegexDialect, context: GeneratorContext): ISemanticError[] {
+        unusedParameter(language, "Count does not need checking");
+        unusedParameter(context, "Context is not needed");
 
         const errors: ISemanticError[] = [];
         let flag = this.flags[0];
@@ -490,8 +530,9 @@ export class CountSubStatementCST extends H2RCST {
         super(tokens);
     }
 
-    public validate(language: RegexDialect): ISemanticError[] {
+    public validate(language: RegexDialect, context: GeneratorContext): ISemanticError[] {
         unusedParameter(language, "Count does not need checking");
+        unusedParameter(context, "Context is not needed");
 
         const errors: ISemanticError[] = [];
 
@@ -554,11 +595,11 @@ export class MatchStatementCST extends StatementCST {
         super(tokens);
     }
 
-    public validate(language: RegexDialect): ISemanticError[] {
+    public validate(language: RegexDialect, context: GeneratorContext): ISemanticError[] {
         const errors: ISemanticError[] = [];
 
         for (const match of this.matches) {
-            append(errors, match.statement.validate(language));
+            append(errors, match.statement.validate(language, context));
         }
 
         return errors;
@@ -616,15 +657,15 @@ export class RepeatStatementCST extends StatementCST {
         super(tokens);
     }
 
-    public validate(language: RegexDialect): ISemanticError[] {
+    public validate(language: RegexDialect, context: GeneratorContext): ISemanticError[] {
         const errors: ISemanticError[] = [];
 
         if (this.count !== null) {
-            append(errors, this.count.validate(language));
+            append(errors, this.count.validate(language, context));
         }
 
         for (const statement of this.statements) {
-            append(errors, statement.validate(language));
+            append(errors, statement.validate(language, context));
         }
 
         return errors;
@@ -673,7 +714,7 @@ export class GroupStatementCST extends StatementCST {
         super(tokens);
     }
 
-    public validate(language: RegexDialect): ISemanticError[] {
+    public validate(language: RegexDialect, context: GeneratorContext): ISemanticError[] {
         const errors : ISemanticError[] = [];
         
         // All languages currently support named groups
@@ -681,8 +722,18 @@ export class GroupStatementCST extends StatementCST {
         //    errors.push(this.error("This language does not support named groups"));
         //}
 
+        if (this.name !== null) {
+            if (context.hasGroup(this.name)) {
+                const past_group = context.groups[this.name];
+                errors.push(this.error(`Group with name "${this.name}" was already defined here: ${past_group.startLine}:${past_group.startLine}-${past_group.startLine}:${past_group.startLine+past_group.length}`));
+            }
+            else {
+                context.addGroup(this.name, this.tokens);
+            }
+        }
+
         for (const statement of this.statements) {
-            append(errors, statement.validate(language));
+            append(errors, statement.validate(language, context));
         }
 
         return errors;
@@ -712,6 +763,73 @@ export class GroupStatementCST extends StatementCST {
 }
 
 /**
+ * Concrete Syntax Tree for a Backreference statement
+ * 
+ * @internal
+ */
+export class BackrefStatementCST extends StatementCST {
+
+    /**
+     * Constructor for BackrefStatementCST
+     * 
+     * @param tokens Tokens used to calculate where an error occured
+     * @param optional is this backref optional
+     * @param count optional number of times to repeat
+     * @param name the group name to call
+     */
+    constructor(tokens: IToken[], private optional: boolean, private count: CountSubStatementCST | null, private name: string) {
+        super(tokens);
+    }
+
+    public validate(language: RegexDialect, context: GeneratorContext): ISemanticError[] {
+        const errors: ISemanticError[] = [];
+
+        if (!context.hasGroup(this.name)) {
+            errors.push(this.error(`Cannot call group with name "${this.name}" as it was never defined`));
+        }
+
+        if (this.count !== null) {
+            append(errors, this.count.validate(language, context));
+        }
+
+        return errors;
+    }
+
+    public toRegex(language: RegexDialect): string {
+        let str = "";
+
+        switch (language) {
+            case RegexDialect.Python:
+                str = `(?P=${this.name})`;
+                break;
+
+            case RegexDialect.DotNet:
+            case RegexDialect.Java:
+                str = `\\k<${this.name}>`;
+                break;
+
+            default:
+                str = `\\g<${this.name}>`;
+                break;
+        }
+
+        if (this.count) {
+            str += this.count.toRegex(language);
+
+            // group for optionality because count would be incorrect otherwise
+            if (this.optional) {
+                str = "(?:" + str + ")?";
+            }
+        }
+        else if (this.optional) {
+            str = "?";
+        }
+
+        return str;
+    }
+}
+
+/**
  * Concrete Syntax Tree for a regular expression
  * 
  * @internal
@@ -730,11 +848,11 @@ export class RegularExpressionCST extends H2RCST {
         super(tokens);
     }
 
-    public validate(language: RegexDialect): ISemanticError[] {
-        const errors: ISemanticError[] = this.usings.validate(language);
+    public validate(language: RegexDialect, context: GeneratorContext): ISemanticError[] {
+        const errors: ISemanticError[] = this.usings.validate(language, context);
 
         for (const statement of this.statements) {
-            append(errors, statement.validate(language));
+            append(errors, statement.validate(language, context));
         }
 
         return errors;

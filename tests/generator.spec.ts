@@ -67,6 +67,10 @@ describe("Generator functionality", function() {
         const toks5 = lexer.tokenize('match between 2 and 2 exclusive "hello"').tokens;
         const reg5 = parser.parse(toks5);
         expect(reg5.validate(RegexDialect.JS).length).toBeGreaterThan(0);
+
+        const toks6 = lexer.tokenize("create a group called thing\ncreate a group called thing").tokens;
+        const reg6 = parser.parse(toks6);
+        expect(reg6.validate(RegexDialect.JS).length).toBeGreaterThan(0);
     });
 
     it("handles ranges", function() {
@@ -157,6 +161,17 @@ describe("Generator functionality", function() {
         const reg4 = parser.parse(toks4);
         expect(reg4.validate(RegexDialect.JS).length).toBe(0);
         expect(reg4.toRegex(RegexDialect.JS)).toBe("/a(?:1x1|2x2|3x3)z/");
+    });
+
+    it("can generate backreferences", function() {
+        const toks0 = lexer.tokenize('create a group called thing\n\tmatch "Hello World\ncall thing\noptionally call 3 times the group called thing').tokens;
+        const reg0 = parser.parse(toks0);
+        expect(reg0.validate(RegexDialect.JS).length).toBe(0);
+
+        expect(reg0.toRegex(RegexDialect.JS)).toBe("/[ab]/");
+        expect(reg0.toRegex(RegexDialect.PCRE)).toBe("/[ab]/");
+        expect(reg0.toRegex(RegexDialect.Python)).toBe("/[ab]/");
+        expect(reg0.toRegex(RegexDialect.DotNet)).toBe("/[ab]/");
     });
 
     it("generate dialect specific regex", function() {

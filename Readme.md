@@ -81,6 +81,6 @@ The API reference is available [here](API.md)
 
 
 ## Todo
-- Add more regex options such as back references, subroutines, lookahead/behind, and more character classes (eg,  `[:alpha:]`)
+- Add more regex options such as back references, subroutines, conditions, and lookahead/behind
 - Fix error messages (They sometimes point to the wrong location, off by 1 errors, etc)
 - Use a different/better static site generation method

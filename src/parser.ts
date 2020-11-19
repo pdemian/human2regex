@@ -7,7 +7,7 @@
 
 import { EmbeddedActionsParser, IOrAlt, IToken } from "chevrotain";
 import * as T from "./tokens";
-import { CountSubStatementCST, UsingFlags, MatchSubStatementType, MatchSubStatementValue, MatchSubStatementCST, UsingStatementCST, RegularExpressionCST, StatementCST, RepeatStatementCST, MatchStatementValue, MatchStatementCST, GroupStatementCST, RegexDialect } from "./generator";
+import { CountSubStatementCST, UsingFlags, MatchSubStatementType, MatchSubStatementValue, MatchSubStatementCST, UsingStatementCST, RegularExpressionCST, StatementCST, RepeatStatementCST, MatchStatementValue, MatchStatementCST, GroupStatementCST, RegexDialect, BackrefStatementCST, GeneratorContext } from "./generator";
 import { first, usefulConditional, unusedParameter, CommonError } from "./utilities";
 
 /**
@@ -60,7 +60,7 @@ export class ParseResult {
      * @public
      */
     public validate(language: RegexDialect): CommonError[] {
-        return this.regexp_cst.validate(language).map(CommonError.fromSemanticError);
+        return this.regexp_cst.validate(language, new GeneratorContext()).map(CommonError.fromSemanticError);
     }
 
     /**
@@ -558,12 +558,39 @@ export class Human2RegexParser extends EmbeddedActionsParser {
             return new RepeatStatementCST(tokens, optional, count, statements);
         });
 
+        const BackrefStatement = $.RULE("BackrefStatement", () => {
+            const tokens: IToken[] = [];
+            let optional = false;
+            let count: CountSubStatementCST | null = null;
+
+            $.OPTION4(() => {
+                tokens.push($.CONSUME(T.Optional));
+                optional = true;
+            });
+            tokens.push($.CONSUME(T.Call));
+
+            $.OPTION5(() => count = $.SUBRULE(CountSubStatement));
+
+            $.OPTION6(() => {
+                $.OPTION(() => $.CONSUME(T.The));
+                $.CONSUME(T.Group);
+                $.OPTION2(() => $.CONSUME(T.Called));
+            });
+            
+            const name_token = $.CONSUME(T.Identifier);
+            tokens.push(name_token);          
+            const name = name_token.image;
+
+            return new BackrefStatementCST(tokens, optional, count, name);
+        });
+
         // statement super class
         const Statement = $.RULE("Statement", () => {
             return $.OR([
                 { ALT: () => $.SUBRULE(MatchStatement) },
                 { ALT: () => $.SUBRULE(GroupStatement) },
-                { ALT: () => $.SUBRULE(RepeatStatement) }
+                { ALT: () => $.SUBRULE(RepeatStatement) },
+                { ALT: () => $.SUBRULE(BackrefStatement) }
             ]);
         });
 

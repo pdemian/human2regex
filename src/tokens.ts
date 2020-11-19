@@ -60,7 +60,8 @@ import { createToken, Lexer } from "chevrotain";
 /** @internal */ export const CaseInsensitive = createToken({name: "CaseInsensitive", pattern: /case insensitive/i});
 /** @internal */ export const CaseSensitive = createToken({name: "CaseSensitive", pattern: /case sensitive/i});
 /** @internal */ export const OrMore = createToken({name: "OrMore", pattern: /\+|or more/i});
-
+/** @internal */ export const Call = createToken({name: "Call", pattern: /call|invoke|execute|run|do|perform/i});
+/** @internal */ export const The = createToken({name: "The", pattern: /the/i });
 /*
 //Not being used currently
 export const Of = createToken({name: "Of", pattern: /of/i});
@@ -77,7 +78,7 @@ export const LBracket = createToken({name: "Left Bracket", pattern: /\(/ });
 export const RBracket = createToken({name: "Right Bracket", pattern: /\)/ });
 export const None = createToken({name: "None", pattern: /none/i});
 export const Neither = createToken({name: "Neither", pattern: /neither/i});
-export const The = createToken({name: "The", pattern: /the/i }); //, longer_alt: Then});
+
 export const By = createToken({name: "By", pattern: /by/i});
 */
 
@@ -127,22 +128,9 @@ export const AllTokens = [
     Whitespace,
     Number,
     Unicode,
-    /*
-    Of,
-    As,
-    If,
-    Start,
-    Ends,
-    Else,
-    Unless,
-    While,
-    More,
-    Nothing,
-    By,
+    Called,
+    Call,
     The,
-    None,
-    Neither,
-    */
     Using,
     Global,
     Multiline,
@@ -158,7 +146,6 @@ export const AllTokens = [
     Exclusive,
     From,
     Create,
-    Called,
     Repeat,
     Newline,
     CarriageReturn,
