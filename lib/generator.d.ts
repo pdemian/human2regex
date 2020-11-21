@@ -23,8 +23,7 @@ export interface ISemanticError {
 /**
  * Context for validation
  *
- * Currently only used to validate groups
- *
+ * @remarks Currently only used to validate groups
  * @internal
  */
 export declare class GeneratorContext {

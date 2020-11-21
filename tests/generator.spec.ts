@@ -222,7 +222,7 @@ describe("Generator functionality", function() {
 
     it("runs complex scripts", function() {
         const str = `
-using global and multiline and exact matching
+using global and multiline and exact matching and case insensitive matching
 create an optional group called protocol
     match "http"
     optionally match "s"
@@ -257,6 +257,6 @@ create an optional group
     const toks = lexer.tokenize(str).tokens;
     const reg = parser.parse(toks);
     expect(reg.validate(RegexDialect.JS).length).toBe(0);
-    expect(reg.toRegex(RegexDialect.JS)).toBe("/^(?<protocol>https?\\:\\/\\/)?(?<subdomain>(?:\\w+\\.)*)?(?<domain>(?:\\w+|_|\\-)+\\.\\w+)(?:\\:\\d*)?(?<path>(?:\\/(?:\\w+|_|\\-)*)*)?(\\?(?<query>(?:(?:\\w+|_|\\-)+=(?:\\w+|_|\\-)+)*))?(#.*)?$/gm");
+    expect(reg.toRegex(RegexDialect.JS)).toBe("/^(?<protocol>https?\\:\\/\\/)?(?<subdomain>(?:\\w+\\.)*)?(?<domain>(?:\\w+|_|\\-)+\\.\\w+)(?:\\:\\d*)?(?<path>(?:\\/(?:\\w+|_|\\-)*)*)?(\\?(?<query>(?:(?:\\w+|_|\\-)+=(?:\\w+|_|\\-)+)*))?(#.*)?$/gmi");
     });
 });

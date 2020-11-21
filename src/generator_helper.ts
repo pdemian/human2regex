@@ -14,6 +14,11 @@ import { first, isSingleRegexCharacter } from "./utilities";
  * @internal
  */
 export function minimizeMatchString(arr: string[]): string {
+    // don't process an array of length 1, otherwise you'll get the wrong result
+    if (arr.length === 1) {
+        return first(arr);
+    }
+
     return minMatchString(arr, 0);
 }
 
@@ -128,6 +133,10 @@ export function groupIfRequired(fragment: string): string {
             }
             else if (fragment[i] === ")") {
                 bracket_count--;
+
+                if (bracket_count === -1) {
+                    break;
+                }
             }
         }
 
@@ -140,11 +149,16 @@ export function groupIfRequired(fragment: string): string {
             if (fragment[i] === "\\") {
                 i++;
             }
-            else if (fragment[i] === "[") {
-                bracket_count++;
-            }
+            //you'll never have a raw [ inside a []
+            //else if (fragment[i] === "[") {
+            //    bracket_count++;
+            //}
             else if (fragment[i] === "]") {
                 bracket_count--;
+
+                if (bracket_count === -1) {
+                    break;
+                }
             }
         }
 
@@ -153,4 +167,58 @@ export function groupIfRequired(fragment: string): string {
     else {
         return "(?:" + fragment + ")";
     }
+}
+
+/**
+ * Checks to see if fragment has a + or * at the end and has a repetition statement
+ * 
+ * @param fragment fragment of regular expression
+ * @param repetition repetition that may clobber the fragment
+ */
+export function dontClobberRepetition(fragment: string, repetition: string): string {
+    // + can be ignored as well as a count as long as that count is > 0
+
+    if (fragment.endsWith("+")) {
+        switch (repetition) {
+            case "*":
+                // ignore: + is greater than *
+                break;
+            case "?":
+                // non-greedy qualifier
+                fragment += repetition;
+                break;
+            case "+":
+                // ignore: already +
+                break;
+            default:
+                if (repetition.startsWith("{0")) {
+                    fragment = "(?:" + fragment + ")" + repetition;
+                }
+                else {
+                    // remove + and replace with count
+                    fragment = fragment.substring(0, fragment.length - 1) + repetition;
+                }
+                break;
+        }
+    }
+    else if (fragment.endsWith("*")) {
+        switch (repetition) {
+            case "*":
+                // ignore: already +
+                break;
+            case "?":
+                // non-greedy qualifier
+                fragment += repetition;
+                break;
+            default:
+                // remove * and replace with count
+                fragment = fragment.substring(0, fragment.length - 1) + repetition;
+                break;
+        }
+    }
+    else {
+        fragment += repetition;
+    }
+
+    return fragment;
 }

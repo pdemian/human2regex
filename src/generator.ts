@@ -7,7 +7,7 @@
 
 import { regexEscape, removeQuotes, hasFlag, combineFlags, isSingleRegexCharacter, first, last, unusedParameter, makeFlag, append } from "./utilities";
 import { IToken } from "chevrotain";
-import { minimizeMatchString, groupIfRequired } from "./generator_helper";
+import { minimizeMatchString, groupIfRequired, dontClobberRepetition } from "./generator_helper";
 
 /** 
  * List of regular expression dialects we support
@@ -66,8 +66,7 @@ const unicode_script_codes = [
 /**
  * Context for validation
  * 
- * Currently only used to validate groups
- * 
+ * @remarks Currently only used to validate groups
  * @internal
  */
 export class GeneratorContext {
@@ -125,7 +124,6 @@ interface Generates {
      */
     toRegex(language: RegexDialect): string;
 }
-
 
 /**
  * The base concrete syntax tree class
@@ -414,56 +412,16 @@ export class MatchSubStatementCST extends H2RCST {
             }
         }
 
-        let ret = "";
-
-        let require_grouping = false;
-        let dont_clobber_plus = false;
-
-        if (matches.length === 1) {
-            ret = first(matches);
-            if (ret.endsWith("+")) {
-                dont_clobber_plus = true;
-            }
-        }
-        else {
-            ret = minimizeMatchString(matches);
-
-            if (ret.length > 1 && 
-                (!ret.startsWith("(") || !ret.startsWith("["))) {
-                    require_grouping = true;
-            }
-        }
+        let ret = minimizeMatchString(matches);
 
         if (this.count) {
-            if (dont_clobber_plus) {
-                const clobber = this.count.toRegex(language);
-
-                // + can be ignored as well as a count as long as that count is > 0
-                switch (clobber) {
-                    case "*":
-                    case "?":
-                        ret = "(?:" + ret + ")" + clobber;
-                        break;
-                    case "+":
-                        // ignore
-                        break;
-                    default:
-                        if (clobber.startsWith("{0")) {
-                            ret = "(?:" + ret + ")" + clobber;
-                        }
-                        else {
-                            // remove + and replace with count
-                            ret.substring(0, ret.length - 1) + clobber;
-                        }
-                        break;
-                }
+            if (matches.length === 1) {
+                // we don't group if there's only 1 element
+                // but we need to make sure we don't add an additional + or * 
+                ret = dontClobberRepetition(ret, this.count.toRegex(language));
             }
             else {
-                if (require_grouping) {
-                    ret = "(?:" + ret + ")";
-                }
-
-                ret += this.count.toRegex(language);
+                ret = groupIfRequired(ret) + this.count.toRegex(language);
             }
         }
 
@@ -880,7 +838,6 @@ export class IfPatternStatementCST extends StatementCST {
         }
     }
 }
-
 
 /**
  * Concrete Syntax Tree for an If group Ident statement

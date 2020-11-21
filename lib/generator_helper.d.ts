@@ -14,3 +14,10 @@ export declare function minimizeMatchString(arr: string[]): string;
  * @internal
  */
 export declare function groupIfRequired(fragment: string): string;
+/**
+ * Checks to see if fragment has a + or * at the end and has a repetition statement
+ *
+ * @param fragment fragment of regular expression
+ * @param repetition repetition that may clobber the fragment
+ */
+export declare function dontClobberRepetition(fragment: string, repetition: string): string;
