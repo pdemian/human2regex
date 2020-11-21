@@ -62,27 +62,8 @@ import { createToken, Lexer } from "chevrotain";
 /** @internal */ export const OrMore = createToken({name: "OrMore", pattern: /\+|or more/i});
 /** @internal */ export const Call = createToken({name: "Call", pattern: /call|invoke|execute|(re ?)?run/i });
 /** @internal */ export const The = createToken({name: "The", pattern: /the/i });
-
-/*
-//Not being used currently
-export const Of = createToken({name: "Of", pattern: /of/i});
-export const Nothing = createToken({name: "Nothing", pattern: /nothing/i});
-export const As = createToken({name: "As", pattern: /as/i});
-export const If = createToken({name: "If", pattern: /if/i});
-export const Start = createToken({name: "Start", pattern: /start(s) with?/i});
-export const Ends = createToken({name: "Ends", pattern: /end(s)? with/i});
-export const Else = createToken({name: "Else", pattern: /(other wise|otherwise|else)/i});
-export const Unless = createToken({name: "Unless", pattern: /unless/i});
-export const While = createToken({name: "While", pattern: /while/i});
-export const More = createToken({name: "More", pattern: /more/i});
-export const LBracket = createToken({name: "Left Bracket", pattern: /\(/ });
-export const RBracket = createToken({name: "Right Bracket", pattern: /\)/ });
-export const None = createToken({name: "None", pattern: /none/i});
-export const Neither = createToken({name: "Neither", pattern: /neither/i});
-
-export const By = createToken({name: "By", pattern: /by/i});
-*/
-
+/** @internal */ export const If = createToken({name: "If", pattern: /if/i });
+/** @internal */ export const Else = createToken({name: "Else", pattern: /else|otherwise/i });
 
 /** @internal */ export const EndOfLine = createToken({name: "EOL", pattern: /\n/});
 /** @internal */ export const WS = createToken({name: "Whitespace", pattern: /[^\S\n]+/, start_chars_hint: [ " ", "\r" ], group: Lexer.SKIPPED});
@@ -131,6 +112,8 @@ export const AllTokens = [
     Unicode,
     Called,
     Call,
+    If,
+    Else,
     The,
     Using,
     Global,

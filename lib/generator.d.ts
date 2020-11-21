@@ -49,20 +49,7 @@ export declare class GeneratorContext {
      */
     addGroup(identifier: string, tokens: IToken[]): void;
 }
-/**
- * The base concrete syntax tree class
- *
- * @internal
- */
-export declare abstract class H2RCST {
-    tokens: IToken[];
-    /**
-     * Constructor for H2RCST
-     *
-     * @param tokens Tokens used to calculate where an error occured
-     * @internal
-     */
-    constructor(tokens: IToken[]);
+interface Generates {
     /**
      * Validate that this is both valid and can be generated in the specified language
      *
@@ -73,7 +60,7 @@ export declare abstract class H2RCST {
      * @returns A list of errors
      * @public
      */
-    abstract validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
+    validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
     /**
      * Generate a regular expression fragment based on this syntax tree
      *
@@ -83,6 +70,23 @@ export declare abstract class H2RCST {
      * @returns a regular expression fragment
      * @public
      */
+    toRegex(language: RegexDialect): string;
+}
+/**
+ * The base concrete syntax tree class
+ *
+ * @internal
+ */
+export declare abstract class H2RCST implements Generates {
+    tokens: IToken[];
+    /**
+     * Constructor for H2RCST
+     *
+     * @param tokens Tokens used to calculate where an error occured
+     * @internal
+     */
+    constructor(tokens: IToken[]);
+    abstract validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
     abstract toRegex(language: RegexDialect): string;
     /**
      * Creates an ISemanticError with a given message and the tokens provided from the constructor
@@ -156,7 +160,7 @@ export declare class MatchSubStatementValue {
  *
  * @internal
  */
-export declare class MatchStatementValue {
+export declare class MatchStatementValue implements Generates {
     optional: boolean;
     statement: MatchSubStatementCST;
     /**
@@ -167,6 +171,8 @@ export declare class MatchStatementValue {
      * @internal
      */
     constructor(optional: boolean, statement: MatchSubStatementCST);
+    validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
+    toRegex(language: RegexDialect): string;
 }
 /**
  * The base class for all statement concrete syntax trees
@@ -246,7 +252,7 @@ export declare class MatchStatementCST extends StatementCST {
      * Constructor for MatchStatementCST
      *
      * @param tokens Tokens used to calculate where an error occured
-     * @param matches
+     * @param matches the list of matches
      */
     constructor(tokens: IToken[], completely_optional: boolean, matches: MatchStatementValue[]);
     validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
@@ -317,6 +323,48 @@ export declare class BackrefStatementCST extends StatementCST {
     toRegex(language: RegexDialect): string;
 }
 /**
+ * Concrete Syntax Tree for an If Pattern statement
+ *
+ * @internal
+ */
+export declare class IfPatternStatementCST extends StatementCST {
+    private matches;
+    private true_statements;
+    private false_statements;
+    /**
+     * Constructor for IfPatternStatementCST
+     *
+     * @param tokens Tokens used to calculate where an error occured
+     * @param matches list of matches to test against
+     * @param true_statements true path
+     * @param false_statements false path
+     */
+    constructor(tokens: IToken[], matches: MatchStatementValue[], true_statements: StatementCST[], false_statements: StatementCST[]);
+    validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
+    toRegex(language: RegexDialect): string;
+}
+/**
+ * Concrete Syntax Tree for an If group Ident statement
+ *
+ * @internal
+ */
+export declare class IfIdentStatementCST extends StatementCST {
+    private identifier;
+    private true_statements;
+    private false_statements;
+    /**
+     * Constructor for IfIdentStatementCST
+     *
+     * @param tokens Tokens used to calculate where an error occured
+     * @param identifier the group identifier to check
+     * @param true_statements true path
+     * @param false_statements false path
+     */
+    constructor(tokens: IToken[], identifier: string, true_statements: StatementCST[], false_statements: StatementCST[]);
+    validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
+    toRegex(language: RegexDialect): string;
+}
+/**
  * Concrete Syntax Tree for a regular expression
  *
  * @internal
@@ -336,10 +384,4 @@ export declare class RegularExpressionCST extends H2RCST {
     validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
     toRegex(language: RegexDialect): string;
 }
-/**
- * Minimizes the match string by finding duplicates or substrings in the array
- *
- * @param arr the array of matches
- * @internal
- */
-export declare function minimizeMatchString(arr: string[]): string;
+export {};

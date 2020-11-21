@@ -53,6 +53,8 @@
 /** @internal */ export declare const OrMore: import("chevrotain").TokenType;
 /** @internal */ export declare const Call: import("chevrotain").TokenType;
 /** @internal */ export declare const The: import("chevrotain").TokenType;
+/** @internal */ export declare const If: import("chevrotain").TokenType;
+/** @internal */ export declare const Else: import("chevrotain").TokenType;
 /** @internal */ export declare const EndOfLine: import("chevrotain").TokenType;
 /** @internal */ export declare const WS: import("chevrotain").TokenType;
 /** @internal */ export declare const SingleLineComment: import("chevrotain").TokenType;

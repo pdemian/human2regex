@@ -7,6 +7,7 @@
 
 import { regexEscape, removeQuotes, hasFlag, combineFlags, isSingleRegexCharacter, first, last, unusedParameter, makeFlag, append } from "./utilities";
 import { IToken } from "chevrotain";
+import { minimizeMatchString, groupIfRequired } from "./generator_helper";
 
 /** 
  * List of regular expression dialects we support
@@ -100,22 +101,7 @@ export class GeneratorContext {
     }
 }
 
-/**
- * The base concrete syntax tree class
- * 
- * @internal
- */
-export abstract class H2RCST {
-    /**
-     * Constructor for H2RCST
-     * 
-     * @param tokens Tokens used to calculate where an error occured
-     * @internal
-     */
-    constructor(public tokens: IToken[]) {
-        /* empty */
-    }
-
+interface Generates {
     /**
      * Validate that this is both valid and can be generated in the specified language
      * 
@@ -126,7 +112,7 @@ export abstract class H2RCST {
      * @returns A list of errors
      * @public
      */
-    public abstract validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
+    validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
 
     /**
      * Generate a regular expression fragment based on this syntax tree
@@ -137,6 +123,27 @@ export abstract class H2RCST {
      * @returns a regular expression fragment
      * @public
      */
+    toRegex(language: RegexDialect): string;
+}
+
+
+/**
+ * The base concrete syntax tree class
+ * 
+ * @internal
+ */
+export abstract class H2RCST implements Generates {
+    /**
+     * Constructor for H2RCST
+     * 
+     * @param tokens Tokens used to calculate where an error occured
+     * @internal
+     */
+    constructor(public tokens: IToken[]) {
+        /* empty */
+    }
+
+    public abstract validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
     public abstract toRegex(language: RegexDialect): string;
 
     /**
@@ -225,7 +232,7 @@ export class MatchSubStatementValue {
  * 
  * @internal
  */
-export class MatchStatementValue {
+export class MatchStatementValue implements Generates {
 
     /**
      * Constructor for MatchStatementValue
@@ -236,6 +243,21 @@ export class MatchStatementValue {
      */
     constructor(public optional: boolean, public statement: MatchSubStatementCST) {
         /* empty */
+    }
+
+    public validate(language: RegexDialect, context: GeneratorContext): ISemanticError[] {
+        return this.statement.validate(language, context);
+    }
+
+    public toRegex(language: RegexDialect): string {
+        let match_stmt = this.statement.toRegex(language);
+
+        // need to group if optional and ungrouped
+        if (this.optional) {
+            match_stmt = groupIfRequired(match_stmt) + "?";
+        }
+
+        return match_stmt;
     }
 }
 
@@ -407,7 +429,7 @@ export class MatchSubStatementCST extends H2RCST {
             ret = minimizeMatchString(matches);
 
             if (ret.length > 1 && 
-                (!ret.startsWith("(") || !ret.endsWith("["))) {
+                (!ret.startsWith("(") || !ret.startsWith("["))) {
                     require_grouping = true;
             }
         }
@@ -586,7 +608,7 @@ export class MatchStatementCST extends StatementCST {
      * Constructor for MatchStatementCST
      * 
      * @param tokens Tokens used to calculate where an error occured
-     * @param matches 
+     * @param matches the list of matches
      */
     constructor(tokens: IToken[], private completely_optional: boolean, private matches: MatchStatementValue[]) {
         super(tokens);
@@ -603,32 +625,10 @@ export class MatchStatementCST extends StatementCST {
     }
 
     public toRegex(language: RegexDialect): string {
-        let final_matches = this.matches.map((x) => {
-            let match_stmt = x.statement.toRegex(language);
-
-            // need to group if optional and ungrouped
-            if (x.optional) {
-                if (!isSingleRegexCharacter(match_stmt)) {
-                    // don't re-group a group
-                    if (match_stmt[0] !== "(" && match_stmt[match_stmt.length-1] !== ")") {
-                        match_stmt = "(?:" + match_stmt + ")";
-                    }
-                }
-                match_stmt += "?";
-            }
-
-            return match_stmt;
-        }).join("");
+        let final_matches = this.matches.map((x) => x.toRegex(language)).join("");
         
         if (this.completely_optional) {
-            if (!isSingleRegexCharacter(final_matches)) {
-                // don't re-group a group
-                if (final_matches[0] !== "(" && final_matches[final_matches.length-1] !== ")") {
-                    final_matches = "(?:" + final_matches + ")";
-                }
-            }
-
-            final_matches += "?";
+            final_matches = groupIfRequired(final_matches) + "?";
         }
         
         return final_matches;
@@ -669,7 +669,7 @@ export class RepeatStatementCST extends StatementCST {
     }
 
     public toRegex(language: RegexDialect): string {
-        let str = "(?:" + this.statements.map((x) => x.toRegex(language)).join("") + ")";
+        let str = groupIfRequired(this.statements.map((x) => x.toRegex(language)).join(""));
 
         if (this.count) {
             str += this.count.toRegex(language);
@@ -697,7 +697,7 @@ export class RepeatStatementCST extends StatementCST {
  * @internal
  */
 export class GroupStatementCST extends StatementCST {
-    
+
     /**
      * Constructor for GroupStatementCST
      * 
@@ -714,11 +714,6 @@ export class GroupStatementCST extends StatementCST {
     public validate(language: RegexDialect, context: GeneratorContext): ISemanticError[] {
         const errors : ISemanticError[] = [];
         
-        // All languages currently support named groups
-        //if (false) {
-        //    errors.push(this.error("This language does not support named groups"));
-        //}
-
         if (this.name !== null) {
             if (context.hasGroup(this.name)) {
                 const past_group = context.groups[this.name];
@@ -827,6 +822,129 @@ export class BackrefStatementCST extends StatementCST {
 }
 
 /**
+ * Concrete Syntax Tree for an If Pattern statement
+ * 
+ * @internal
+ */
+export class IfPatternStatementCST extends StatementCST {
+
+    /**
+     * Constructor for IfPatternStatementCST
+     * 
+     * @param tokens Tokens used to calculate where an error occured
+     * @param matches list of matches to test against
+     * @param true_statements true path
+     * @param false_statements false path
+     */
+    constructor(tokens: IToken[], private matches: MatchStatementValue[], private true_statements: StatementCST[], private false_statements: StatementCST[]) {
+        super(tokens);
+    }
+
+    public validate(language: RegexDialect, context: GeneratorContext): ISemanticError[] {
+        const errors: ISemanticError[] = [];
+
+        if (language === RegexDialect.Java || language === RegexDialect.JS) {
+            errors.push(this.error("This language does not support conditionals"));
+        }
+
+        if (language === RegexDialect.Python) {
+            errors.push(this.error("This language does not support pattern conditionals"));
+        }
+
+        for (const match of this.matches) {
+            append(errors, match.validate(language, context));
+        }
+
+        for (const statement of this.true_statements) {
+            append(errors, statement.validate(language, context));
+        }
+
+        for (const statement of this.false_statements) {
+            append(errors, statement.validate(language, context));
+        }
+
+        return errors;
+    }
+
+    public toRegex(language: RegexDialect): string {
+        const if_stmt = this.matches.map((x) => x.toRegex(language)).join("");
+        const true_stmt = groupIfRequired(this.true_statements.map((x) => x.toRegex(language)).join(""));
+
+        if (this.false_statements.length > 0) {
+            const false_stmt = groupIfRequired(this.false_statements.map((x) => x.toRegex(language)).join(""));
+
+            return `(?(${if_stmt})${true_stmt}|${false_stmt})`;
+        }
+        else {
+            return `(?(${if_stmt})${true_stmt})`;
+        }
+    }
+}
+
+
+/**
+ * Concrete Syntax Tree for an If group Ident statement
+ * 
+ * @internal
+ */
+export class IfIdentStatementCST extends StatementCST {
+
+    /**
+     * Constructor for IfIdentStatementCST
+     * 
+     * @param tokens Tokens used to calculate where an error occured
+     * @param identifier the group identifier to check
+     * @param true_statements true path
+     * @param false_statements false path
+     */
+    constructor(tokens: IToken[], private identifier: string, private true_statements: StatementCST[], private false_statements: StatementCST[]) {
+        super(tokens);
+    }
+
+    public validate(language: RegexDialect, context: GeneratorContext): ISemanticError[] {
+        const errors: ISemanticError[] = [];
+
+        if (language === RegexDialect.Java || language === RegexDialect.JS) {
+            errors.push(this.error("This language does not support conditionals"));
+        }
+
+        if (!context.hasGroup(this.identifier)) {
+            errors.push(this.error(`Group with name "${this.identifier}" does not exist`));
+        }
+
+        for (const statement of this.true_statements) {
+            append(errors, statement.validate(language, context));
+        }
+
+        for (const statement of this.false_statements) {
+            append(errors, statement.validate(language, context));
+        }
+
+        return errors;
+    }
+
+    public toRegex(language: RegexDialect): string {
+        let if_stmt = this.identifier;
+
+        // be more clear with languages that support it
+        if (language === RegexDialect.Boost) {
+            if_stmt = "<" + if_stmt + ">";
+        }
+
+        const true_stmt = groupIfRequired(this.true_statements.map((x) => x.toRegex(language)).join(""));
+
+        if (this.false_statements.length > 0) {
+            const false_stmt = groupIfRequired(this.false_statements.map((x) => x.toRegex(language)).join(""));
+
+            return `(?(${if_stmt})${true_stmt}|${false_stmt})`;
+        }
+        else {
+            return `(?(${if_stmt})${true_stmt})`;
+        }
+    }
+}
+
+/**
  * Concrete Syntax Tree for a regular expression
  * 
  * @internal
@@ -854,106 +972,11 @@ export class RegularExpressionCST extends H2RCST {
 
         return errors;
     }
+
     public toRegex(language: RegexDialect): string {
         const modifiers = this.usings.toRegex(language);
         const regex = this.statements.map((x) => x.toRegex(language)).join("");
 
         return modifiers.replace("{regex}", regex);
-    }
-}
-
-/**
- * Minimizes the match string by finding duplicates or substrings in the array
- * 
- * @param arr the array of matches
- * @internal
- */
-export function minimizeMatchString(arr: string[]): string {
-    return minMatchString(arr, 0);
-}
-
-/**
- * Minimizes the match string by finding duplicates or substrings in the array
- * 
- * @param arr the array
- * @param depth must be 0 for initial call
- * @internal
- */
-function minMatchString(arr: string[], depth: number = 0): string {
-    // base case: arr is empty
-    if (arr.length === 0) {
-        return "";
-    }
-
-    // base case: arr has 1 element (must have at least 2, so this means this value is optional)
-    if (arr.length === 1) {
-        return first(arr) + "?";
-    }
-
-    // remove duplicates
-    arr = [ ...new Set(arr) ];
-
-    // base case: arr has 1 element (after duplicate removal means this is required)
-    if (arr.length === 1) {
-        return first(arr);
-    }
-
-    // base case: arr is all single letters
-    if (arr.every(isSingleRegexCharacter)) {
-        return "[" + arr.join("") + "]";
-    }
-
-    // now the real magic begins
-    // You are not expected to understand this
-
-    let longest_begin_substring = first(arr);
-    let longest_end_substring = first(arr);
-
-    for (let i = 1; i < arr.length; i++) {
-        // reduce longest_substring to match everything 
-        for (let j = 0; j < longest_begin_substring.length; j++) {
-            if (arr[i].length < j || longest_begin_substring[j] !== arr[i][j]) {
-                longest_begin_substring = longest_begin_substring.substr(0, j);
-                break;
-            }
-        }
-        for (let j = 0; j < longest_end_substring.length; j++) {
-            if (arr[i].length-j < 0 || longest_end_substring[longest_end_substring.length-j-1] !== arr[i][arr[i].length-j-1]) {
-                longest_end_substring = longest_end_substring.substr(longest_end_substring.length-j, longest_end_substring.length);
-                break;
-            }
-        }
-
-        if (longest_begin_substring.length === 0 && longest_end_substring.length === 0) {
-            break;
-        }
-    }
-
-    // No matches whatsoever
-    // *technically* we can optimize further, but that is a VERY non-trivial problem
-    // For example optimizing: [ "a1x1z", "a2y2z", "a3z3z" ] to: "a[123][xyz][123]z"
-    if (longest_begin_substring.length === 0 && longest_end_substring.length === 0) {
-        if (depth > 0) {
-            return "(?:" + arr.join("|") + ")";
-        }
-        else {
-            return arr.join("|");
-        }
-    }
-    // we have some matches
-    else {
-        // remove begin (if exists) and end (if exists) from each element and remove empty strings
-        const begin_pos = longest_begin_substring.length;
-        const end_pos = longest_end_substring.length;
-
-        const similar_matches: string[] = [];
-        for (const ele of arr) {
-            const match = ele.substring(begin_pos, ele.length-end_pos);
-            if (match.length !== 0) {
-                similar_matches.push(match);
-            }
-        }
-        
-        return longest_begin_substring + minMatchString(similar_matches, depth + 1) + longest_end_substring;
     }
 }
