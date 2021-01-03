@@ -186,6 +186,7 @@ export class CommonError {
      * 
      * @param error The lexing error
      * @returns a new CommonError
+     * @internal
      */
     public static fromLexError(error: ILexingError): CommonError {
         // not really fond of --> and <--
@@ -199,6 +200,7 @@ export class CommonError {
      * 
      * @param error The parsing error
      * @returns a new CommonError
+     * @internal
      */
     public static fromParseError(error: IRecognitionException): CommonError {
         // not really fond of --> and <--
@@ -212,6 +214,7 @@ export class CommonError {
      * 
      * @param error The semantic error
      * @returns a new CommonError
+     * @internal
      */
     public static fromSemanticError(error: ISemanticError): CommonError {
         return new CommonError("Semantic Error", error.startLine, error.startColumn, error.length, error.message);

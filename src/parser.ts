@@ -7,7 +7,7 @@
 
 import { EmbeddedActionsParser, IOrAlt, IToken } from "chevrotain";
 import * as T from "./tokens";
-import { CountSubStatementCST, UsingFlags, MatchSubStatementType, MatchSubStatementValue, MatchSubStatementCST, UsingStatementCST, RegularExpressionCST, StatementCST, RepeatStatementCST, MatchStatementValue, MatchStatementCST, GroupStatementCST, RegexDialect } from "./generator";
+import { CountSubStatementCST, UsingFlags, MatchSubStatementType, MatchSubStatementValue, MatchSubStatementCST, UsingStatementCST, RegularExpressionCST, StatementCST, RepeatStatementCST, MatchStatementValue, MatchStatementCST, GroupStatementCST, RegexDialect, BackrefStatementCST, GeneratorContext, IfPatternStatementCST, IfIdentStatementCST } from "./generator";
 import { first, usefulConditional, unusedParameter, CommonError } from "./utilities";
 
 /**
@@ -60,7 +60,7 @@ export class ParseResult {
      * @public
      */
     public validate(language: RegexDialect): CommonError[] {
-        return this.regexp_cst.validate(language).map(CommonError.fromSemanticError);
+        return this.regexp_cst.validate(language, new GeneratorContext()).map(CommonError.fromSemanticError);
     }
 
     /**
@@ -558,12 +558,107 @@ export class Human2RegexParser extends EmbeddedActionsParser {
             return new RepeatStatementCST(tokens, optional, count, statements);
         });
 
+        const BackrefStatement = $.RULE("BackrefStatement", () => {
+            const tokens: IToken[] = [];
+            let optional = false;
+            let count: CountSubStatementCST | null = null;
+
+            $.OPTION5(() => {
+                tokens.push($.CONSUME(T.Optional));
+                optional = true;
+            });
+            tokens.push($.CONSUME(T.Call));
+
+            $.OPTION6(() => count = $.SUBRULE(CountSubStatement));
+
+            $.OPTION7(() => {
+                $.OPTION(() => $.CONSUME(T.The));
+                $.CONSUME(T.Group);
+                $.OPTION2(() => $.CONSUME(T.Called));
+            });
+                   
+            const name = $.CONSUME(T.Identifier).image;
+
+            tokens.push($.CONSUME4(T.EndOfLine));
+
+            return new BackrefStatementCST(tokens, optional, count, name);
+        });
+
+        const IfStatement = $.RULE("IfStatement", () => {
+            const tokens: IToken[] = [];
+            const msv: MatchStatementValue[] = [];
+            let optional = false;
+            const true_statements: StatementCST[] = [];
+            const false_statements: StatementCST[] = [];
+            let name: string = "";
+
+            tokens.push($.CONSUME(T.If));
+
+            $.OR2([
+                {ALT: () => {
+                    name = $.CONSUME(T.Identifier).image;
+                }},
+                {ALT: () => {
+                    $.CONSUME(T.Match);
+
+                    $.OPTION4(() => {
+                        $.CONSUME3(T.Optional);
+                        optional = true;
+                    });
+        
+                    msv.push(new MatchStatementValue(optional, $.SUBRULE(MatchSubStatement)));
+                    $.MANY(() => {
+                        $.OR([
+                            { ALT: () => { 
+                                $.OPTION2(() => $.CONSUME2(T.And)); 
+                                $.CONSUME(T.Then); 
+                            }},
+                            { ALT: () => $.CONSUME(T.And) },
+                        ]);
+                        optional = false;
+                        $.OPTION3(() => {
+                             $.CONSUME2(T.Optional);
+                             optional = true;
+                        });
+                        msv.push(new MatchStatementValue(optional, $.SUBRULE2(MatchSubStatement)));
+                    });
+                }}
+            ]);
+
+            tokens.push($.CONSUME3(T.EndOfLine));
+            
+            $.CONSUME2(T.Indent);
+            $.AT_LEAST_ONE2(() => {
+                true_statements.push($.SUBRULE(Statement));
+            });
+            $.CONSUME2(T.Outdent);
+
+            $.OPTION(() => {
+                $.CONSUME(T.Else);
+                $.CONSUME4(T.EndOfLine);
+                $.CONSUME3(T.Indent);
+                $.AT_LEAST_ONE3(() => {
+                    false_statements.push($.SUBRULE2(Statement));
+                });
+                $.CONSUME3(T.Outdent);
+            });
+
+            if (name === "") {
+                return new IfPatternStatementCST(tokens, msv, true_statements, false_statements);
+            }
+            else {
+                return new IfIdentStatementCST(tokens, name, true_statements, false_statements);
+            }
+        });
+
         // statement super class
         const Statement = $.RULE("Statement", () => {
             return $.OR([
                 { ALT: () => $.SUBRULE(MatchStatement) },
                 { ALT: () => $.SUBRULE(GroupStatement) },
-                { ALT: () => $.SUBRULE(RepeatStatement) }
+                { ALT: () => $.SUBRULE(RepeatStatement) },
+                { ALT: () => $.SUBRULE(BackrefStatement) },
+                { ALT: () => $.SUBRULE(IfStatement) }
             ]);
         });
 

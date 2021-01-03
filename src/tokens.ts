@@ -53,34 +53,17 @@ import { createToken, Lexer } from "chevrotain";
 /** @internal */ export const From = createToken({name: "From", pattern: /from/i});
 /** @internal */ export const To = createToken({name: "To", pattern: /(to|through|thru|\-|\.\.\.?)/i});
 /** @internal */ export const Create = createToken({name: "Create", pattern: /create(s)?/i});
-/** @internal */ export const Called = createToken({name: "Called", pattern: /name(d)?|call(ed)?/i});
+/** @internal */ export const Called = createToken({name: "Called", pattern: /named|called/i});
 /** @internal */ export const Repeat = createToken({name: "Repeat", pattern: /repeat(s|ing)?/i});
 /** @internal */ export const Newline = createToken({name: "Newline", pattern: /(new line|newline)/i});
 /** @internal */ export const CarriageReturn = createToken({name: "CarriageReturn", pattern: /carriage return/i});
 /** @internal */ export const CaseInsensitive = createToken({name: "CaseInsensitive", pattern: /case insensitive/i});
 /** @internal */ export const CaseSensitive = createToken({name: "CaseSensitive", pattern: /case sensitive/i});
 /** @internal */ export const OrMore = createToken({name: "OrMore", pattern: /\+|or more/i});
-
-/*
-//Not being used currently
-export const Of = createToken({name: "Of", pattern: /of/i});
-export const Nothing = createToken({name: "Nothing", pattern: /nothing/i});
-export const As = createToken({name: "As", pattern: /as/i});
-export const If = createToken({name: "If", pattern: /if/i});
-export const Start = createToken({name: "Start", pattern: /start(s) with?/i});
-export const Ends = createToken({name: "Ends", pattern: /end(s)? with/i});
-export const Else = createToken({name: "Else", pattern: /(other wise|otherwise|else)/i});
-export const Unless = createToken({name: "Unless", pattern: /unless/i});
-export const While = createToken({name: "While", pattern: /while/i});
-export const More = createToken({name: "More", pattern: /more/i});
-export const LBracket = createToken({name: "Left Bracket", pattern: /\(/ });
-export const RBracket = createToken({name: "Right Bracket", pattern: /\)/ });
-export const None = createToken({name: "None", pattern: /none/i});
-export const Neither = createToken({name: "Neither", pattern: /neither/i});
-export const The = createToken({name: "The", pattern: /the/i }); //, longer_alt: Then});
-export const By = createToken({name: "By", pattern: /by/i});
-*/
-
+/** @internal */ export const Call = createToken({name: "Call", pattern: /call|invoke|execute|(re ?)?run/i });
+/** @internal */ export const The = createToken({name: "The", pattern: /the/i });
+/** @internal */ export const If = createToken({name: "If", pattern: /if/i });
+/** @internal */ export const Else = createToken({name: "Else", pattern: /else|otherwise/i });
 
 /** @internal */ export const EndOfLine = createToken({name: "EOL", pattern: /\n/});
 /** @internal */ export const WS = createToken({name: "Whitespace", pattern: /[^\S\n]+/, start_chars_hint: [ " ", "\r" ], group: Lexer.SKIPPED});
@@ -127,22 +110,11 @@ export const AllTokens = [
     Whitespace,
     Number,
     Unicode,
-    /*
-    Of,
-    As,
+    Called,
+    Call,
     If,
-    Start,
-    Ends,
     Else,
-    Unless,
-    While,
-    More,
-    Nothing,
-    By,
     The,
-    None,
-    Neither,
-    */
     Using,
     Global,
     Multiline,
@@ -158,7 +130,6 @@ export const AllTokens = [
     Exclusive,
     From,
     Create,
-    Called,
     Repeat,
     Newline,
     CarriageReturn,
