@@ -14,6 +14,7 @@ const WebpackBeforeBuildPlugin = require("before-build-webpack");
 const TerserPlugin = require("terser-webpack-plugin");
 const RemovePlugin = require('remove-files-webpack-plugin');
 
+// Todo: Maybe move these values out to a config file or something
 const config = {
     prod: true,
     dst: "./docs/",

@@ -1,4 +1,4 @@
-/*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
+/*! Copyright (c) 2021 Patrick Demian; Licensed under MIT */
 
 import { Human2RegexLexer, Human2RegexLexerOptions, IndentType } from "../src/lexer";
 import { Indent } from "../src/tokens";

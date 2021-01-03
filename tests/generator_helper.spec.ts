@@ -1,7 +1,6 @@
-/*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
+/*! Copyright (c) 2021 Patrick Demian; Licensed under MIT */
 
 import { minimizeMatchString, groupIfRequired, dontClobberRepetition } from "../src/generator_helper";
-
 
 describe("Generator helper functionality", function() {
     it("can minimize matches", function() {

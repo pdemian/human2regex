@@ -1,4 +1,4 @@
-/*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
+/*! Copyright (c) 2021 Patrick Demian; Licensed under MIT */
 "use strict";
 
 import { Human2RegexLexer, Human2RegexLexerOptions } from "./lexer";

@@ -132,13 +132,13 @@ export enum RegexDialect {
 }
 ```
 
-After choosing one, you must validate the regular expression. This may be skipped if and only if the input has already been validated before as the generator is not guaranteed to work unless there are no errors.
+After choosing one, you should validate the regular expression. This may be skipped if and only if the input has already been validated before. The generator is not guaranteed to work unless there are no validation errors. The generator does no validation itself and may either return garbage output or crash.
 
 ```typescript
 const validation_errors = parse_result.validate();
 ```
 
-The result is a list of errors which, again, is a `CommonError`. If there are no errors, you can call the `toRegex()` function to create a string representation of the regular expression. You can also call the `toRegExp()` function to create a `RegExp` expression used in Javascript
+The result is a list of errors which is a `CommonError`. If there are no errors, you can call the `toRegex()` function to create a string representation of the regular expression. You can also call the `toRegExp()` function to create a `RegExp` expression used in Javascript
 
 ```typescript
 const my_regex_string = parse_result.toRegex(); // type is string
