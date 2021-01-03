@@ -2,7 +2,7 @@
 
 import { Human2RegexParser, Human2RegexParserOptions } from "../src/parser";
 import { Human2RegexLexer, Human2RegexLexerOptions } from "../src/lexer";
-import { RegexDialect, minimizeMatchString } from "../src/generator";
+import { RegexDialect } from "../src/generator";
 
 
 describe("Generator functionality", function() {
@@ -67,6 +67,14 @@ describe("Generator functionality", function() {
         const toks5 = lexer.tokenize('match between 2 and 2 exclusive "hello"').tokens;
         const reg5 = parser.parse(toks5);
         expect(reg5.validate(RegexDialect.JS).length).toBeGreaterThan(0);
+
+        const toks6 = lexer.tokenize('create a group called thing\n\tmatch "hi"\ncreate a group called thing\n\tmatch "hi"\n').tokens;
+        const reg6 = parser.parse(toks6);
+        expect(reg6.validate(RegexDialect.JS).length).toBeGreaterThan(0);
+
+        const toks7 = lexer.tokenize("invoke thing").tokens;
+        const reg7 = parser.parse(toks7);
+        expect(reg7.validate(RegexDialect.JS).length).toBeGreaterThan(0);
     });
 
     it("handles ranges", function() {
@@ -97,6 +105,12 @@ describe("Generator functionality", function() {
         expect(reg2.validate(RegexDialect.JS).length).toBe(0);
         expect(reg2.toRegex(RegexDialect.JS)).toBe("/[a-zA-Z][+-]?\\d+[+-]?(?:(?:\\d+[,.]?\\d*)|(?:[,.]\\d+))/");
         expect(reg2.toRegex(RegexDialect.PCRE)).toBe("/[[:alpha:]][+-]?\\d+[+-]?(?:(?:\\d+[,.]?\\d*)|(?:[,.]\\d+))/");
+
+        const toks3 = lexer.tokenize("match not letter, not integer, not decimal").tokens;
+        const reg3 = parser.parse(toks3);
+        expect(reg3.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg3.toRegex(RegexDialect.JS)).toBe("/[^a-zA-Z](?![+-]?\\d+)(?![+-]?(?:(?:\\d+[,.]?\\d*)|(?:[,.]\\d+)))/");
+        expect(reg3.toRegex(RegexDialect.PCRE)).toBe("/[^[:alpha:]](?![+-]?\\d+)(?![+-]?(?:(?:\\d+[,.]?\\d*)|(?:[,.]\\d+)))/");
     });
 
     it("doesn't clobber repetition", function() {
@@ -113,23 +127,6 @@ describe("Generator functionality", function() {
 
         // should be (?!hello) not (?:(?!hello))
         expect(reg1.toRegex(RegexDialect.JS)).toBe("/(?!hello){1,6}/");
-    });
-
-    it("can minimize matches", function() {
-        const test_cases = [
-            { from: [ "abc", "abc" ], to: "abc" },
-            { from: [ "a", "ab" ], to: "ab?" },
-            { from: [ "a1x1z", "a2y2z", "a3z3z" ], to: "a(?:1x1|2y2|3z3)z" },
-            { from: [ "ab", "cd" ], to: "ab|cd" },
-            { from: [ "abc", "bc" ], to: "a?bc" },
-            { from: [ "abc", "xb" ], to: "abc|xb" }
-        ];
-
-        for (const c of test_cases) {
-            const got = minimizeMatchString(c.from);
-
-            expect(got).toBe(c.to);
-        }
     });
 
     it("optimizes correctly", function() {
@@ -157,6 +154,44 @@ describe("Generator functionality", function() {
         const reg4 = parser.parse(toks4);
         expect(reg4.validate(RegexDialect.JS).length).toBe(0);
         expect(reg4.toRegex(RegexDialect.JS)).toBe("/a(?:1x1|2x2|3x3)z/");
+
+        const toks5 = lexer.tokenize('match "a", maybe "b" or "c"').tokens;
+        const reg5 = parser.parse(toks5);
+        expect(reg5.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg5.toRegex(RegexDialect.JS)).toBe("/a[bc]?/");
+    });
+
+    it("can generate backreferences", function() {
+        const toks0 = lexer.tokenize('create a group called thing\n\tmatch "Hello World"\ninvoke thing\noptionally call 3 times the group called thing').tokens;
+        const reg0 = parser.parse(toks0);
+        expect(reg0.validate(RegexDialect.JS).length).toBe(0);
+
+        expect(reg0.toRegex(RegexDialect.JS)).toBe("/(?<thing>Hello World)\\g<thing>(?:\\g<thing>{3})?/");
+        expect(reg0.toRegex(RegexDialect.PCRE)).toBe("/(?P<thing>Hello World)\\g<thing>(?:\\g<thing>{3})?/");
+        expect(reg0.toRegex(RegexDialect.Python)).toBe("/(?P<thing>Hello World)(?P=thing)(?:(?P=thing){3})?/");
+        expect(reg0.toRegex(RegexDialect.DotNet)).toBe("/(?<thing>Hello World)\\k<thing>(?:\\k<thing>{3})?/");
+    });
+
+    it("can generate if statements", function() {
+        const toks0 = lexer.tokenize('if matches "a"\n\tmatch "b"\n').tokens;
+        const reg0 = parser.parse(toks0);
+        expect(reg0.validate(RegexDialect.JS).length).toBeGreaterThan(0);
+        expect(reg0.validate(RegexDialect.PCRE).length).toBe(0);
+        expect(reg0.toRegex(RegexDialect.PCRE)).toBe("/(?(a)b)/");
+
+        const toks1 = lexer.tokenize('if matches "alpha", maybe "b" or "f"\n\tmatch "c"\nelse\n\tif matches "d"\n\t\tmatch "e"\n\telse\n\t\tmatch "f"').tokens;
+        const reg1 = parser.parse(toks1);
+        expect(reg1.validate(RegexDialect.JS).length).toBeGreaterThan(0);
+        expect(reg1.validate(RegexDialect.Python).length).toBeGreaterThan(0);
+        expect(reg1.validate(RegexDialect.PCRE).length).toBe(0);
+        expect(reg1.toRegex(RegexDialect.PCRE)).toBe("/(?(alpha[bf]?)c|(?(d)e|f))/");
+
+        const toks2 = lexer.tokenize('create a group called thing\n\tmatch "a"\nif thing\n\tmatch "b"\nelse\n\tmatch "c"\n').tokens;
+        const reg2 = parser.parse(toks2);
+        expect(reg2.validate(RegexDialect.JS).length).toBeGreaterThan(0);
+        expect(reg2.validate(RegexDialect.PCRE).length).toBe(0);
+        expect(reg2.toRegex(RegexDialect.PCRE)).toBe("/(?P<thing>a)(?(thing)b|c)/");
+        expect(reg2.toRegex(RegexDialect.Boost)).toBe("/(?<thing>a)(?(<thing>)b|c)/");
     });
 
     it("generate dialect specific regex", function() {
@@ -187,7 +222,7 @@ describe("Generator functionality", function() {
 
     it("runs complex scripts", function() {
         const str = `
-using global and multiline and exact matching
+using global and multiline and exact matching and case insensitive matching
 create an optional group called protocol
     match "http"
     optionally match "s"
@@ -222,6 +257,6 @@ create an optional group
     const toks = lexer.tokenize(str).tokens;
     const reg = parser.parse(toks);
     expect(reg.validate(RegexDialect.JS).length).toBe(0);
-    expect(reg.toRegex(RegexDialect.JS)).toBe("/^(?<protocol>https?\\:\\/\\/)?(?<subdomain>(?:\\w+\\.)*)?(?<domain>(?:\\w+|_|\\-)+\\.\\w+)(?:\\:\\d*)?(?<path>(?:\\/(?:\\w+|_|\\-)*)*)?(\\?(?<query>(?:(?:\\w+|_|\\-)+=(?:\\w+|_|\\-)+)*))?(#.*)?$/gm");
+    expect(reg.toRegex(RegexDialect.JS)).toBe("/^(?<protocol>https?\\:\\/\\/)?(?<subdomain>(?:\\w+\\.)*)?(?<domain>(?:\\w+|_|\\-)+\\.\\w+)(?:\\:\\d*)?(?<path>(?:\\/(?:\\w+|_|\\-)*)*)?(\\?(?<query>(?:(?:\\w+|_|\\-)+=(?:\\w+|_|\\-)+)*))?(#.*)?$/gmi");
     });
 });

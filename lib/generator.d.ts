@@ -21,29 +21,45 @@ export interface ISemanticError {
     message: string;
 }
 /**
- * The base concrete syntax tree class
+ * Context for validation
  *
+ * @remarks Currently only used to validate groups
  * @internal
  */
-export declare abstract class H2RCST {
-    tokens: IToken[];
+export declare class GeneratorContext {
+    groups: {
+        [key: string]: {
+            startLine: number;
+            startColumn: number;
+            length: number;
+        };
+    };
     /**
-     * Constructor for H2RCST
+     * Checks to see if we already have a group defined
      *
-     * @param tokens Tokens used to calculate where an error occured
-     * @internal
+     * @param identifier the group name
+     * @returns true if the group name already exists
      */
-    constructor(tokens: IToken[]);
+    hasGroup(identifier: string): boolean;
+    /**
+     * Adds the identifier to the group list
+     *
+     * @param identifier the group name
+     */
+    addGroup(identifier: string, tokens: IToken[]): void;
+}
+interface Generates {
     /**
      * Validate that this is both valid and can be generated in the specified language
      *
      * @remarks There is no guarantee toRegex will work unless validate returns no errors
      *
      * @param language the regex dialect we're validating
+     * @param context the generator context
      * @returns A list of errors
      * @public
      */
-    abstract validate(language: RegexDialect): ISemanticError[];
+    validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
     /**
      * Generate a regular expression fragment based on this syntax tree
      *
@@ -53,6 +69,23 @@ export declare abstract class H2RCST {
      * @returns a regular expression fragment
      * @public
      */
+    toRegex(language: RegexDialect): string;
+}
+/**
+ * The base concrete syntax tree class
+ *
+ * @internal
+ */
+export declare abstract class H2RCST implements Generates {
+    tokens: IToken[];
+    /**
+     * Constructor for H2RCST
+     *
+     * @param tokens Tokens used to calculate where an error occured
+     * @internal
+     */
+    constructor(tokens: IToken[]);
+    abstract validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
     abstract toRegex(language: RegexDialect): string;
     /**
      * Creates an ISemanticError with a given message and the tokens provided from the constructor
@@ -126,7 +159,7 @@ export declare class MatchSubStatementValue {
  *
  * @internal
  */
-export declare class MatchStatementValue {
+export declare class MatchStatementValue implements Generates {
     optional: boolean;
     statement: MatchSubStatementCST;
     /**
@@ -137,6 +170,8 @@ export declare class MatchStatementValue {
      * @internal
      */
     constructor(optional: boolean, statement: MatchSubStatementCST);
+    validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
+    toRegex(language: RegexDialect): string;
 }
 /**
  * The base class for all statement concrete syntax trees
@@ -163,7 +198,7 @@ export declare class MatchSubStatementCST extends H2RCST {
      * @param values sub statements to match
      */
     constructor(tokens: IToken[], count: CountSubStatementCST | null, invert: boolean, values: MatchSubStatementValue[]);
-    validate(language: RegexDialect): ISemanticError[];
+    validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
     toRegex(language: RegexDialect): string;
 }
 /**
@@ -180,7 +215,7 @@ export declare class UsingStatementCST extends H2RCST {
      * @param flags using flags
      */
     constructor(tokens: IToken[], flags: UsingFlags[]);
-    validate(language: RegexDialect): ISemanticError[];
+    validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
     toRegex(language: RegexDialect): string;
 }
 /**
@@ -201,7 +236,7 @@ export declare class CountSubStatementCST extends H2RCST {
      * @param opt option modifier
      */
     constructor(tokens: IToken[], from: number, to?: number | null, opt?: "inclusive" | "exclusive" | "+" | null);
-    validate(language: RegexDialect): ISemanticError[];
+    validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
     toRegex(language: RegexDialect): string;
 }
 /**
@@ -216,10 +251,10 @@ export declare class MatchStatementCST extends StatementCST {
      * Constructor for MatchStatementCST
      *
      * @param tokens Tokens used to calculate where an error occured
-     * @param matches
+     * @param matches the list of matches
      */
     constructor(tokens: IToken[], completely_optional: boolean, matches: MatchStatementValue[]);
-    validate(language: RegexDialect): ISemanticError[];
+    validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
     toRegex(language: RegexDialect): string;
 }
 /**
@@ -240,7 +275,7 @@ export declare class RepeatStatementCST extends StatementCST {
      * @param statements the statements to repeat
      */
     constructor(tokens: IToken[], optional: boolean, count: CountSubStatementCST | null, statements: StatementCST[]);
-    validate(language: RegexDialect): ISemanticError[];
+    validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
     toRegex(language: RegexDialect): string;
 }
 /**
@@ -262,7 +297,70 @@ export declare class GroupStatementCST extends StatementCST {
      * @internal
      */
     constructor(tokens: IToken[], optional: boolean, name: string | null, statements: StatementCST[]);
-    validate(language: RegexDialect): ISemanticError[];
+    validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
+    toRegex(language: RegexDialect): string;
+}
+/**
+ * Concrete Syntax Tree for a Backreference statement
+ *
+ * @internal
+ */
+export declare class BackrefStatementCST extends StatementCST {
+    private optional;
+    private count;
+    private name;
+    /**
+     * Constructor for BackrefStatementCST
+     *
+     * @param tokens Tokens used to calculate where an error occured
+     * @param optional is this backref optional
+     * @param count optional number of times to repeat
+     * @param name the group name to call
+     */
+    constructor(tokens: IToken[], optional: boolean, count: CountSubStatementCST | null, name: string);
+    validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
+    toRegex(language: RegexDialect): string;
+}
+/**
+ * Concrete Syntax Tree for an If Pattern statement
+ *
+ * @internal
+ */
+export declare class IfPatternStatementCST extends StatementCST {
+    private matches;
+    private true_statements;
+    private false_statements;
+    /**
+     * Constructor for IfPatternStatementCST
+     *
+     * @param tokens Tokens used to calculate where an error occured
+     * @param matches list of matches to test against
+     * @param true_statements true path
+     * @param false_statements false path
+     */
+    constructor(tokens: IToken[], matches: MatchStatementValue[], true_statements: StatementCST[], false_statements: StatementCST[]);
+    validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
+    toRegex(language: RegexDialect): string;
+}
+/**
+ * Concrete Syntax Tree for an If group Ident statement
+ *
+ * @internal
+ */
+export declare class IfIdentStatementCST extends StatementCST {
+    private identifier;
+    private true_statements;
+    private false_statements;
+    /**
+     * Constructor for IfIdentStatementCST
+     *
+     * @param tokens Tokens used to calculate where an error occured
+     * @param identifier the group identifier to check
+     * @param true_statements true path
+     * @param false_statements false path
+     */
+    constructor(tokens: IToken[], identifier: string, true_statements: StatementCST[], false_statements: StatementCST[]);
+    validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
     toRegex(language: RegexDialect): string;
 }
 /**
@@ -282,13 +380,7 @@ export declare class RegularExpressionCST extends H2RCST {
      * @internal
      */
     constructor(tokens: IToken[], usings: UsingStatementCST, statements: StatementCST[]);
-    validate(language: RegexDialect): ISemanticError[];
+    validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
     toRegex(language: RegexDialect): string;
 }
-/**
- * Minimizes the match string by finding duplicates or substrings in the array
- *
- * @param arr the array of matches
- * @internal
- */
-export declare function minimizeMatchString(arr: string[]): string;
+export {};

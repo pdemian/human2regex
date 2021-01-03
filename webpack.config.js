@@ -95,8 +95,7 @@ module.exports = {
 			after: {
 				root: "./lib",
 				include: [
-					"script.d.ts",
-					"script.d.ts.map"
+					"script.d.ts"
 				]
 			}
 		})
