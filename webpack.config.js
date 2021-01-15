@@ -4,10 +4,10 @@
 /* eslint-disable no-undef */
 const path = require("path");
 const { glob } = require("glob");
-const { render } = require("mustache");
 const { readFileSync, writeFileSync, existsSync, mkdirSync } = require("fs");
 const { minify } = require("html-minifier");
 const CopyPlugin = require("copy-webpack-plugin");
+const Handlebars = require("handlebars");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const WebpackBeforeBuildPlugin = require("before-build-webpack");
@@ -32,32 +32,62 @@ const config = {
 };
 
 
-function build_mustache() {
-	if (!existsSync(config.dst)){
+function build_handlebars() {
+    if (!existsSync(config.dst)){
 		mkdirSync(config.dst);
-	}
+    }
 
-    const read_json_file = (filename) => JSON.parse(readFileSync(filename), "utf8");
+    const files = [
+        "404.hbs",
+        "index.hbs",
+        "tutorial.hbs"
+    ];
+
+    const context = {
+        build: {
+            prod: config.prod+"",
+            year: new Date().getFullYear()+""
+        }
+    };
     
-    const compress_html = (input) =>  config.prod ? minify(input, config.compression_config.html) : input;
+    // helper functions
+    const compress_html = (input) => config.prod ? minify(input, config.compression_config.html) : input;
 
-    // get views
-    const files = glob.sync(path.join(config.src, "docs", "*.json"));
+    Handlebars.registerHelper("i-code", function(options) {
+        return new Handlebars.SafeString(`<code class="cm-s-idea">`);
+    });
+
+    Handlebars.registerHelper("s-code", function(options) {
+        return new Handlebars.SafeString(`<span class="tutorial-code"><code class="cm-s-idea">`);
+    });
+
+    Handlebars.registerHelper("p-code", function(options) {
+        return new Handlebars.SafeString(`<pre class="tutorial-code"><code class="cm-s-idea">`);
+    });
+
+    Handlebars.registerHelper("end-i-code", function(options) {
+        return new Handlebars.SafeString('</code>');
+    });
+
+    Handlebars.registerHelper("end-s-code", function(options) {
+        return new Handlebars.SafeString('</code></span>');
+    });
+
+    Handlebars.registerHelper("end-p-code", function(options) {
+        return new Handlebars.SafeString('</code></pre>');
+    });
 
     // get partials
-    const partials = {
-        header: readFileSync(path.join(config.src, "docs", "header.mustache"), "utf8"),
-        footer: readFileSync(path.join(config.src, "docs", "footer.mustache"), "utf8")
-    };
+    Handlebars.registerPartial("header", readFileSync(path.join(config.src, "docs", "header.hbs"), "utf8"));
+    Handlebars.registerPartial("footer", readFileSync(path.join(config.src, "docs", "footer.hbs"), "utf8"));
+    Handlebars.registerPartial("example_code", readFileSync(path.join(config.src, "docs", "example_code.hbs"), "utf8"));
+    
+    // build handlebar files
+    for (const filename of files) {
+        const to = path.join(config.dst, path.basename(filename, ".hbs") + ".html");
+        const template = readFileSync(path.join(config.src, "docs", filename), "utf8");
 
-    // build main mustache files
-    for (const item of files) {
-        const filename = path.basename(item, ".json");
-        const view = read_json_file(item);
-        const to = path.join(config.dst, filename + ".html");
-        const template = readFileSync(path.join(config.src, "docs", filename + ".mustache"), "utf8");
-
-        writeFileSync(to, compress_html(render(template, view, partials)));
+        writeFileSync(to, compress_html(Handlebars.compile(template)(context)));
     }
 }
 
@@ -84,12 +114,12 @@ module.exports = {
     plugins: [
         new CopyPlugin({
             patterns: [
-                { from: config.src + "docs/" + "!(*.css|*.mustache|*.json)", to: "", flatten: true}
+                { from: config.src + "docs/" + "!(*.css|*.hbs)", to: "", flatten: true}
             ]
         }),
         new MiniCssExtractPlugin({ filename: "bundle.min.css" }),
         new WebpackBeforeBuildPlugin(function(_, callback) {
-            build_mustache();
+            build_handlebars();
             callback();
         }),
 		new RemovePlugin({

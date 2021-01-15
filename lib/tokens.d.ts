@@ -1,4 +1,4 @@
-/*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
+/*! Copyright (c) 2021 Patrick Demian; Licensed under MIT */
 /** @internal */ export declare const Zero: import("chevrotain").TokenType;
 /** @internal */ export declare const One: import("chevrotain").TokenType;
 /** @internal */ export declare const Two: import("chevrotain").TokenType;

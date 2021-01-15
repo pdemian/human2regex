@@ -1,6 +1,6 @@
 {{! Copyright (c) 2021 Patrick Demian; Licensed under MIT }}
 
-{{> header}}
+{{> header title="Human2Regex Tutorial" description="Create regular expressions with natural, human language"}}
 		<!-- Main Content -->
 		<div class="container contained-container" id="maincontent" role="main">
             <div id="tutorial">
@@ -12,32 +12,31 @@
 
 				<br>
 				<p class="font-weight-bold" id="tut-first-match">1. Your first Match</p>
-				<p>Every language starts with a "Hello World" program, so let's match the output of those programs. Matching is done using the keyword <code class="cm-s-idea">match</code> followed by what you want to match.
-<span class="tutorial-code"><code class="cm-s-idea">
+				<p>Every language starts with a "Hello World" program, so let's match the output of those programs. Matching is done using the keyword {{i-code}}match{{end-i-code}} followed by what you want to match.
+{{s-code}}
 match "Hello World"
-</code></span>
-				The above statement will generate a regular expression that matches "Hello World", like "/Hello World/". Any invalid characters will automatically be escaped, so you don't need to worry about it. H2R also supports block comments with <code class="cm-s-idea">/**/</code>, or line comments with <code class="cm-s-idea">//</code> or <code class="cm-s-idea">#</code> so you can explain why or what you intend to match.</p>
-<pre class="tutorial-code"><code class="cm-s-idea">/* This is a block comment */
+{{end-s-code}}
+				The above statement will generate a regular expression that matches "Hello World", like "/Hello World/". Any invalid characters will automatically be escaped, so you don't need to worry about it. H2R also supports block comments with {{i-code}}/**/{{end-i-code}}, or line comments with {{i-code}}//{{end-i-code}} or {{i-code}}#{{end-i-code}} so you can explain why or what you intend to match.</p>
+{{p-code}}/* This is a block comment */
 match "Hello World" // matches the output of "Hello World" programs
-</code></pre>
-				<p>Now what if we want to match every case variation of "Hello World" like "hello world" or "hELLO wORLD"? H2R supports the <code class="cm-s-idea">or</code> operator which allows you to specify many possible combinations.
-<span class="tutorial-code"><code class="cm-s-idea">
+{{end-p-code}}
+				<p>Now what if we want to match every case variation of "Hello World" like "hello world" or "hELLO wORLD"? H2R supports the {{i-code}}or{{end-i-code}} operator which allows you to specify many possible combinations.
+{{s-code}}
 match "Hello World" or "hello world" or "hELLO wORLD"
-</code></span>
-				Or, you can use a <code class="cm-s-idea">using</code> statement to specify that you want it to be case insensitive.</p>
+{{end-s-code}}
+				Or, you can use a {{i-code}}using{{end-i-code}} statement to specify that you want it to be case insensitive.</p>
 
 				<br>
 				<p class="font-weight-bold" id="tut-using">2. Using Specifiers</p>
 				<p>Using statements appear at the beginning. You may have one or more using statements which each can contain one or more specifiers. For example:
-<span class="tutorial-code"><code class="cm-s-idea">
+{{s-code}}
 using global and case insensitive matching
-</code></span>
+{{end-s-code}}
 				or</p>
-<pre class="tutorial-code">
-<code class="cm-s-idea">using global
+{{p-code}}using global
 using case insensitive
-</code></pre>
-				<p>The <code class="cm-s-idea">matching</code> keyword is optional. The flags which are available are:</p>
+{{end-p-code}}
+				<p>The {{i-code}}matching{{end-i-code}} keyword is optional. The flags which are available are:</p>
 
 				<table class="table table-sm table-striped table-bordered">
 					<thead>
@@ -49,27 +48,27 @@ using case insensitive
 					</thead>
 					<tbody>
 						<tr>
-							<td><code class="cm-s-idea">multiline</code></td>
+							<td>{{i-code}}multiline{{end-i-code}}</td>
 							<td>Matches can cross line breaks</td>
 							<td>/&lt;your regex&gt;/m</td>
 						</tr>
 						<tr>
-							<td><code class="cm-s-idea">global</code></td>
+							<td>{{i-code}}global{{end-i-code}}</td>
 							<td>Multiple matches are allowed</td>
 							<td>/&lt;your regex&gt;/g</td>
 						</tr>
 						<tr>
-							<td><code class="cm-s-idea">case sensitive</code></td>
+							<td>{{i-code}}case sensitive{{end-i-code}}</td>
 							<td>Match must be exact case</td>
 							<td><span class="font-italic">none</span></td>
 						</tr>
 						<tr>
-							<td><code class="cm-s-idea">case insensitive</code></td>
+							<td>{{i-code}}case insensitive{{end-i-code}}</td>
 							<td>Match may be any case</td>
 							<td>/&lt;your regex&gt;/i</td>
 						</tr>
 						<tr>
-							<td><code class="cm-s-idea">exact</code></td>
+							<td>{{i-code}}exact{{end-i-code}}</td>
 							<td>An exact statement matches a whole line exactly, nothing before, nothing after</td>
 							<td>/^&lt;your regex&gt;$/</td>
 						</tr>
@@ -77,70 +76,69 @@ using case insensitive
 				</table>
 
 				<p>To match any variation of hello world, we would then do the following:</p>
-<pre class="tutorial-code"><code class="cm-s-idea">using case insensitive matching
+<pre class="tutorial-code">{{i-code}}using case insensitive matching
 match "hello world"
-</code></pre>
+{{end-p-code}}
 
 				<br>
 				<p class="font-weight-bold" id="tut-multiple-match">3. Matching multiple items</p>
-				<p>H2R comes with 2 options to match multiple items in a row. The first is to simply write multiple separate <code class="cm-s-idea">match</code> statements like:</p>
-<pre class="tutorial-code">
-<code class="cm-s-idea">match "hello"
+				<p>H2R comes with 2 options to match multiple items in a row. The first is to simply write multiple separate {{i-code}}match{{end-i-code}} statements like:</p>
+{{p-code}}match "hello"
 match " "
 match "world"
-</code></pre>
-				<p>However, you can also use a comma, <code class="cm-s-idea">and</code>, or <code class="cm-s-idea">then</code> for a more concise match. 
-<span class="tutorial-code"><code class="cm-s-idea">
+{{end-p-code}}
+				<p>However, you can also use a comma, {{i-code}}and{{end-i-code}}, or {{i-code}}then{{end-i-code}} for a more concise match. 
+{{s-code}}
 match "hello", " ", "world"
-</code></span>
+{{end-s-code}}
 				or
-<span class="tutorial-code"><code class="cm-s-idea">
+{{s-code}}
 match "hello" and " " and "world"
-</code></span>
+{{end-s-code}}
 				or
-<span class="tutorial-code"><code class="cm-s-idea">
+{{s-code}}
 match "hello" then " " then "world"
-</code></span>
+{{end-s-code}}
 				or any combination like
-<span class="tutorial-code"><code class="cm-s-idea">
+{{s-code}}
 match "hello", " " and then "world"
-</code></span>
+{{end-s-code}}
 
 				<br>
 				<p class="font-weight-bold" id="tut-optionality">4. Optionality</p>
-				<p>Sometimes you wish to match something that may or may not exist. In H2R, this is done via the <code class="cm-s-idea">optional</code>, <code class="cm-s-idea">optionally</code>, <code class="cm-s-idea">possibly</code> or <code class="cm-s-idea">maybe</code> keyword. 
-<span class="tutorial-code"><code class="cm-s-idea">
+				<p>Sometimes you wish to match something that may or may not exist. In H2R, this is done via the {{i-code}}optional{{end-i-code}}, {{i-code}}optionally{{end-i-code}}, {{i-code}}possibly{{end-i-code}} or {{i-code}}maybe{{end-i-code}} keyword. 
+{{s-code}}
 optionally match "hello world"
-</code></span>
-				will match 0 or 1 "hello world"'s. This can be used alongside matching multiple statements in a single <code class="cm-s-idea">match</code> statement.
-<span class="tutorial-code"><code class="cm-s-idea">
+{{end-s-code}}
+				will match 0 or 1 "hello world"'s. This can be used alongside matching multiple statements in a single {{i-code}}match{{end-i-code}} statement.
+{{s-code}}
 match "hello", maybe " ", "world"
-</code></span>
-				will match "hello", an optional space if it exists, and "world". However, the start <code class="cm-s-idea">optional</code> is for the entire match statement. Thus,
-<span class="tutorial-code"><code class="cm-s-idea">
+{{end-s-code}}
+				will match "hello", an optional space if it exists, and "world". However, the start {{i-code}}optional{{end-i-code}} is for the entire match statement. Thus,
+{{s-code}}
 possibly match "hello", " ", then "world"
-</code></span>
-				will actually make the whole "hello world" an optional match rather than just the first "hello". If you want to make the first match optional but keep the rest required, place the <code class="cm-s-idea">optional</code> immediately after the <code class="cm-s-idea">match</code>.</p>
+{{end-s-code}}
+				will actually make the whole "hello world" an optional match rather than just the first "hello". If you want to make the first match optional but keep the rest required, place the {{i-code}}optional{{end-i-code}} immediately after the {{i-code}}match{{end-i-code}}.</p>
 
 				<br>
 				<p class="font-weight-bold" id="tut-negation">5. Negation</p>
-				<p>You can negate a match with the operator <code class="cm-s-idea">not</code>
-<span class="tutorial-code"><code class="cm-s-idea">
+				<p>You can negate a match with the operator {{i-code}}not{{end-i-code}}
+{{s-code}}
 match not "hello world"
-</code></span>
+{{end-s-code}}
 				or
-<span class="tutorial-code"><code class="cm-s-idea">
+{{s-code}}
 match anything but "hello world"
-</code></span>
+{{end-s-code}}
 				will match everything except for "hello world".</p>
 
 				<br>
 				<p class="font-weight-bold" id="tut-other-match">6. Other matching specifiers</p>
 				<p>Many times you don't know exactly what you wish to match. H2R comes with many specifiers that you can use for your matching. For example, you may wish to match any word. You can do that with:
-<span class="tutorial-code"><code class="cm-s-idea">
+{{s-code}}
 match a word
-</code></span>
-				The <code class="cm-s-idea">a</code> or <code class="cm-s-idea">an</code> is optional. The possible specifiers that H2R supports are the following:</p>
+{{end-s-code}}
+				The {{i-code}}a{{end-i-code}} or {{i-code}}an{{end-i-code}} is optional. The possible specifiers that H2R supports are the following:</p>
 				<table class="table table-sm table-striped table-bordered">
 					<thead>
 						<tr>
@@ -152,71 +150,71 @@ match a word
 					</thead>
 					<tbody>
 						<tr>
-							<td><code class="cm-s-idea">anything</code></td>
+							<td>{{i-code}}anything{{end-i-code}}</td>
 							<td>Matches any character</td>
 							<td>.</td>
 							<td>&nbsp;</td>
 						</tr>
 						<tr>
-							<td><code class="cm-s-idea">word(s)</code></td>
+							<td>{{i-code}}word(s){{end-i-code}}</td>
 							<td>Matches many a-z, A-Z, _, or digit characters</td>
 							<td>\w+</td>
-							<td>For a-z only, use <code class="cm-s-idea">letter(s)</code></td>
+							<td>For a-z only, use {{i-code}}letter(s){{end-i-code}}</td>
 						</tr>
 						<tr>
-							<td><code class="cm-s-idea">letter(s)</code></td>
+							<td>{{i-code}}letter(s){{end-i-code}}</td>
 							<td>Matches any letter character</td>
 							<td>[a-zA-Z]</td>
 							<td>&nbsp;</td>
 						</tr>
 						<tr>
-							<td><code class="cm-s-idea">number(s)</code></td>
+							<td>{{i-code}}number(s){{end-i-code}}</td>
 							<td>Matches a string of digit characters</td>
 							<td>\d+</td>
 							<td>&nbsp;</td>
 						</tr>
 						<tr>
-							<td><code class="cm-s-idea">digit(s)</code></td>
+							<td>{{i-code}}digit(s){{end-i-code}}</td>
 							<td>Matches any digit character</td>
 							<td>\d</td>
 							<td>&nbsp;</td>
 						</tr>
 						<tr>
-							<td><code class="cm-s-idea">integer(s)</code></td>
+							<td>{{i-code}}integer(s){{end-i-code}}</td>
 							<td>Matches an integer</td>
 							<td>[+-]?\d+</td>
 							<td>&nbsp;</td>
 						<tr>
-							<td><code class="cm-s-idea">decimal(s)</code></td>
+							<td>{{i-code}}decimal(s){{end-i-code}}</td>
 							<td>Matches digits, an optional decimal point and more digits</td>
 							<td>[+-]?((\d+[,.]?\d*)|([,.]\d+))</td>
 							<td>Supports both "," and "." decimal points</td>
 						<tr>
-							<td><code class="cm-s-idea">character(s)</code></td>
+							<td>{{i-code}}character(s){{end-i-code}}</td>
 							<td>Matches a-z, A-Z, _, or digits</td>
 							<td>\w</td>
-							<td>For a-z only, use <code class="cm-s-idea">letter(s)</code></td>
+							<td>For a-z only, use {{i-code}}letter(s){{end-i-code}}</td>
 						</tr>
 						<tr>
-							<td><code class="cm-s-idea">whitespace(s)</code></td>
+							<td>{{i-code}}whitespace(s){{end-i-code}}</td>
 							<td>Matches any whitespace character</td>
 							<td>\s</td>
 							<td>&nbsp;</td>
 						</tr>
 						<tr>
-							<td><code class="cm-s-idea">(word )boundary</code></td>
+							<td>{{i-code}}(word )boundary{{end-i-code}}</td>
 							<td>Boundary between a word</td>
 							<td>\b</td>
 							<td>&nbsp;</td>
 						</tr>
 						<tr>
-							<td><code class="cm-s-idea">line feed</code>/<code class="cm-s-idea">newline</code></td>
+							<td>{{i-code}}line feed{{end-i-code}}/{{i-code}}newline{{end-i-code}}</td>
 							<td>Matches a newline</td>
 							<td>\n</td>
 							<td>&nbsp;</td>
 						</tr>
 						<tr>
-							<td><code class="cm-s-idea">carriage return</code></td>
+							<td>{{i-code}}carriage return{{end-i-code}}</td>
 							<td>Matches a carriage return</td>
 							<td>\r</td>
 							<td>&nbsp;</td>
@@ -225,111 +223,103 @@ match a word
 				</table>
 
 				<p>You can also create ranges of characters to match. Say for example, you wanted to match any characters between a and z, you could write any of the following:
-<span class="tutorial-code"><code class="cm-s-idea">
+{{s-code}}
 match from "a" to "z" // "from" is optional
-</code></span>
+{{end-s-code}}
 				or
-<span class="tutorial-code"><code class="cm-s-idea">
+{{s-code}}
 match between "a" and "z" // "between" is optional
-</code></span>
+{{end-s-code}}
 				or
-<span class="tutorial-code"><code class="cm-s-idea">
+{{s-code}}
 match "a" ... "z" // can use "..." or ".."
-</code></span>
+{{end-s-code}}
 				or
-<span class="tutorial-code"><code class="cm-s-idea">
+{{s-code}}
 match "a" - "z"
-</code></span>
+{{end-s-code}}
 				or
-<span class="tutorial-code"><code class="cm-s-idea">
+{{s-code}}
 match "a" through "z" // can also use thru
-</code></span>
+{{end-s-code}}
 
 				<br>
 				<p class="font-weight-bold" id="tut-repeition">7. Repetition</p>
-				<p>H2R supports 2 types of repetition: single match repetition, or grouped repetition. When using <code class="cm-s-idea">match</code> you can specify the number of captures you want just before the text to capture. 
-<span class="tutorial-code"><code class="cm-s-idea">
+				<p>H2R supports 2 types of repetition: single match repetition, or grouped repetition. When using {{i-code}}match{{end-i-code}} you can specify the number of captures you want just before the text to capture. 
+{{s-code}}
 match 2 digits
-</code></span>
+{{end-s-code}}
 				or
-<span class="tutorial-code"><code class="cm-s-idea">
+{{s-code}}
 match exactly 2 digits
-</code></span>
+{{end-s-code}}
 				will match any 2 digits in a row. You can also specify a range you wish to capture
-<span class="tutorial-code"><code class="cm-s-idea">
+{{s-code}}
 match 2 ... 5 digits
-</code></span>
+{{end-s-code}}
 				or
-<span class="tutorial-code"><code class="cm-s-idea">
+{{s-code}}
 match 2 to 5 digits
-</code></span>
+{{end-s-code}}
 				or
-<span class="tutorial-code"><code class="cm-s-idea">
+{{s-code}}
 match between 2 to 5 digits
-</code></span>
-				will match 2, 3, 4, or 5 digits. You can specify if the final number is exclusive with the <code class="cm-s-idea">exclusive</code> or <code class="cm-s-idea">inclusive</code> keywords. 
-<span class="tutorial-code"><code class="cm-s-idea">
+{{end-s-code}}
+				will match 2, 3, 4, or 5 digits. You can specify if the final number is exclusive with the {{i-code}}exclusive{{end-i-code}} or {{i-code}}inclusive{{end-i-code}} keywords. 
+{{s-code}}
 match 2 to 5 exclusive digits
-</code></span>
+{{end-s-code}}
 				 will only match up to 4 digits. You can also choose to leave the end unspecified.
-<span class="tutorial-code"><code class="cm-s-idea">
+{{s-code}}
 match 2+ digits
-</code></span>
+{{end-s-code}}
 				or
-<span class="tutorial-code"><code class="cm-s-idea">
+{{s-code}}
 match 2 or more digits
-</code></span>
-				will match 2 or more digits. Repeition can be chained with the <code class="cm-s-idea">and then</code> keywords or the <code class="cm-s-idea">optional</code> keyword. For example:
-<span class="tutorial-code"><code class="cm-s-idea">
+{{end-s-code}}
+				will match 2 or more digits. Repeition can be chained with the {{i-code}}and then{{end-i-code}} keywords or the {{i-code}}optional{{end-i-code}} keyword. For example:
+{{s-code}}
 match 1+ digits then optionally "." then optionally 0...8 digits
-</code></span>
+{{end-s-code}}
 				 
-				Suppose you want to repeat a group of these match statements. You can group a repetition using the <code class="cm-s-idea">repeat</code> keyword. Everything underneath that is tabbed (scoped) will be repeated. By default, this will match 0 or more of the following statements.</p>
-<pre class="tutorial-code">
-<code class="cm-s-idea">repeat
+				Suppose you want to repeat a group of these match statements. You can group a repetition using the {{i-code}}repeat{{end-i-code}} keyword. Everything underneath that is tabbed (scoped) will be repeated. By default, this will match 0 or more of the following statements.</p>
+{{p-code}}repeat
 	match "Hello "
 match "World"
-</code></pre>
-				<p>Will match 0 or more "Hello "s, but only 1 "World". The same qualifiers that exist for <code class="cm-s-idea">match</code> statements also exist for <code class="cm-s-idea">repeat</code> statements.</p>
-<pre class="tutorial-code">
-<code class="cm-s-idea">optionally repeat 3...7 times
+{{end-p-code}}
+				<p>Will match 0 or more "Hello "s, but only 1 "World". The same qualifiers that exist for {{i-code}}match{{end-i-code}} statements also exist for {{i-code}}repeat{{end-i-code}} statements.</p>
+{{p-code}}optionally repeat 3...7 times
 	match "Hello World"
-</code></pre>
-				<p>Will potentially match "Hello World" between 3 and 7 times. H2R also supports the following for numbers: <code class="cm-s-idea">One, Two, Three, Four, Five, Six, Seven, Eight, Nine, and Ten</code></p>
+{{end-p-code}}
+				<p>Will potentially match "Hello World" between 3 and 7 times. H2R also supports the following for numbers: {{i-code}}One, Two, Three, Four, Five, Six, Seven, Eight, Nine, and Ten{{end-i-code}}</p>
 
 				<br>
 				<p class="font-weight-bold" id="tut-grouping">8. Grouping</p>
-				<p>Just like regular expressions, capture groups are supported in H2R. Each group is defined using the <code class="cm-s-idea">create a group</code> keyphrase.</p>
-<pre class="tutorial-code">
-<code class="cm-s-idea">create a group
+				<p>Just like regular expressions, capture groups are supported in H2R. Each group is defined using the {{i-code}}create a group{{end-i-code}} keyphrase.</p>
+{{p-code}}create a group
 	match "Hello World"
-</code></pre>
+{{end-p-code}}
 				<p>This will create a non-named captured group, equivalent to the regular expression "/(Hello World)/". A non-named captured group will show up in your chosen language's matches, however will not be given a name. To access this match, you will need to know the index of the group. Most regular expression engines support named capture groups, and H2R highly recommends using this feature. If you wish to do so, simply give it a name:<p>
-<pre class="tutorial-code">
-<code class="cm-s-idea">create a group called TestGroup
+{{p-code}}create a group called TestGroup
 	match "Hello World"
-</code></pre>
+{{end-p-code}}
 				<p>In most languages, a named group can be accessed through the match result's group list. Take for example, in JavaScript, 
-<pre class="tutorial-code">
-<code class="cm-s-idea">"hello".match(/(?&lt;TestGroup&gt;hello)/).groups</code>
-</pre>
+{{p-code}}"hello".match(/(?&lt;TestGroup&gt;hello)/).groups
+{{end-p-code}}
 
 				<p>Will return an object with {TestGroup: "hello"}. For another example, check out <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/match#Using_named_capturing_groups">MDN web docs</a>. Groups can also be optional.</p>
-<pre class="tutorial-code">
-<code class="cm-s-idea">create an optional group
+{{p-code}}create an optional group
 	match "Hello World"
-</code></pre>
+{{end-p-code}}
 			<p>And groups may be nested</p>
-<pre class="tutorial-code">
-<code class="cm-s-idea">create a group called TestGroup
+{{p-code}}create a group called TestGroup
 	match "Hello"
 	create a group called InnerGroup
 		match "World"
-</code></pre>
+{{end-p-code}}
 				<p>The regular expression returned by this will be "/(?&lt;TestGroup&gt;Hello(?&lt;InnerGroup&gt;World))/". Again, in JavaScript, the following</p>
-<pre class="tutorial-code">
-<code class="cm-s-idea">"HelloWorld".match(/(?&lt;TestGroup&gt;Hello(?&lt;InnerGroup&gt;World))/).groups</code>
-</pre>
+{{p-code}}"HelloWorld".match(/(?&lt;TestGroup&gt;Hello(?&lt;InnerGroup&gt;World))/).groups
+{{end-p-code}}
 				<p>Will return an object with {TestGroup: "HelloWorld", InnerGroup: "World"}.</p>
 
 				<br>
@@ -345,18 +335,18 @@ match "World"
 				<p>TODO</p>
 
 				<p class="font-weight-bold" id="tut-unicode">Unicode character properties</p>
-				<p>You can match specific unicode sequences using <code class="cm-s-idea">"\uXXXX"
-				</code> or <code class="cm-s-idea">"\UXXXXXXXX"</code> where X is a hexadecimal character.
-<span class="tutorial-code"><code class="cm-s-idea">
+				<p>You can match specific unicode sequences using {{i-code}}"\uXXXX"
+				{{end-i-code}} or {{i-code}}"\UXXXXXXXX"{{end-i-code}} where X is a hexadecimal character.
+{{s-code}}
 match "\u0669" // matches arabic digit 9 "&#x0669;"
-</code></span>
-				Unicode character classes/scripts can be matched using the <code class="cm-s-idea">unicode</code> keyword.
-<span class="tutorial-code"><code class="cm-s-idea">
+{{end-s-code}}
+				Unicode character classes/scripts can be matched using the {{i-code}}unicode{{end-i-code}} keyword.
+{{s-code}}
 match unicode "Latin" // matches any latin character
-</code></span>
-<span class="tutorial-code"><code class="cm-s-idea">
+{{end-s-code}}
+{{s-code}}
 match unicode "N" // matches any number character
-</code></span>
+{{end-s-code}}
 				The following Unicode class specifiers are available:</p>
 				<table class="table table-sm table-striped table-bordered">
 					<thead>
