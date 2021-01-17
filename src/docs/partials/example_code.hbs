@@ -1,0 +1,32 @@
+/* Make a regex that matches (basic) URLs */
+
+using global and exact matching
+create an optional group called protocol
+	match "http"
+	possibly match "s"
+	match "://"
+create an optional group called subdomain
+	repeat
+		match a word, then "."
+create a group called domain
+	match 1+ words or "_" or "-"
+	match "."
+	match a word
+# port, but we don't care about it, so ignore it
+optionally match ":" then 0+ digits
+create an optional group called path
+	repeat
+		match "/"
+		match 0+ words or "_" or "-"
+create an optional group
+	# we don't want to capture the '?', so don't name the group until afterwards
+	match "?"
+	create a group called query
+		repeat
+			match 1+ words or "_" or "-"
+			match "="
+			match 1+ words or "_" or "-"
+create an optional group
+	# fragment, again, we don't care, so ignore everything afterwards
+	match "#"
+	match 0+ any thing

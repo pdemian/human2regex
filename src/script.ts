@@ -1,4 +1,4 @@
-/*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
+/*! Copyright (c) 2021 Patrick Demian; Licensed under MIT */
 "use strict";
 
 import { Human2RegexLexer, Human2RegexLexerOptions } from "./lexer";
@@ -10,10 +10,10 @@ import "codemirror/addon/mode/simple";
 import "codemirror/addon/runmode/runmode";
 import "codemirror/addon/lint/lint";
 
-import "./docs/bootstrap.css";
-import "./docs/cleanblog.css";
-import "./docs/codemirror.css";
-import "./docs/style.css";
+import "./docs/assets/bootstrap.css";
+import "./docs/assets/cleanblog.css";
+import "./docs/assets/codemirror.css";
+import "./docs/assets/style.css";
 
 interface CodeMirror {
 	defineSimpleMode: (name: string, value: Record<string, unknown>) => void;
@@ -81,6 +81,10 @@ document.addEventListener("DOMContentLoaded", function() {
 			{token: "builtin", regex: /case insensitive/i},
 			{token: "builtin", regex: /case sensitive/i},
 			{token: "operator", regex: /\+|or more/i},
+			{token: "keyword", regex: /re( |-)?(run|capture)/i },
+			{token: "operator", regex: /the/i },
+			{token: "keyword", regex: /if/i },
+			{token: "keyword", regex: /else|otherwise/i },
 			{token: "variable", regex: /[a-z]\w*/i},
 			{token: "number", regex: /\d+/},
 			{token: "string", regex: /"(?:[^\\"]|\\(?:[bfnrtv"\\/]|u[0-9a-f]{4}|U[0-9a-f]{8}))*"/i},
@@ -199,8 +203,6 @@ document.addEventListener("DOMContentLoaded", function() {
 			$errors.appendChild(document.createTextNode(`${error.toString()}\n`));
 		}
 	}
-
-
 
 	const editor = code_mirror.fromTextArea($human, {
 		mode: "human2regex",

@@ -1,4 +1,4 @@
-/*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
+/*! Copyright (c) 2021 Patrick Demian; Licensed under MIT */
 /**
  * Some utility functions for Human2Regex
  * @packageDocumentation
@@ -130,6 +130,7 @@ export declare class CommonError {
      *
      * @param error The lexing error
      * @returns a new CommonError
+     * @internal
      */
     static fromLexError(error: ILexingError): CommonError;
     /**
@@ -137,6 +138,7 @@ export declare class CommonError {
      *
      * @param error The parsing error
      * @returns a new CommonError
+     * @internal
      */
     static fromParseError(error: IRecognitionException): CommonError;
     /**
@@ -144,6 +146,7 @@ export declare class CommonError {
      *
      * @param error The semantic error
      * @returns a new CommonError
+     * @internal
      */
     static fromSemanticError(error: ISemanticError): CommonError;
     /**

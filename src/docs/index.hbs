@@ -1,0 +1,64 @@
+{{! Copyright (c) 2021 Patrick Demian; Licensed under MIT }}
+
+{{> header title="Human2Regex" description="Create regular expressions with natural, human language"}}
+		<!-- Main Content -->
+		<div class="container" id="maincontent" role="main">
+            <div class="row">
+				<div class="col-lg-8 tenpx-margin-bottom">
+					<div class="form-group row zero-margin-bottom">
+						<label for="dialect" class="col-sm-4 col-form-label">Regex dialect:</label>
+						<div class="col-sm-8">
+							<select class="form-control" id="dialect">
+								<option value="js" selected>Javascript</option>
+								<option value="dotnet">.NET</option>
+								<option value="python">Python</option>
+								<option value="boost">C++ Boost</option>
+								<option value="java">Java 7+</option>
+								<option value="pcre">PCRE</option>
+							</select>
+						</div>
+					</div>
+					<h4>Your Regular Expression:</h4>
+					<div class="row">
+						<div class="col-xl-11 tenpx-margin-bottom">
+							<input readonly type="text" class="form-control" id="regex"></input>
+						</div>
+						<div class="col-xl-1">
+							<button type="button" class="btn btn-secondary float-right" id="clip">Copy</button>
+						</div>
+					</div>
+					
+					<h4>Human Speak:</h4>
+					<textarea class="form-control" id="human" rows="25">{{> example_code}}</textarea>
+					<h4>Errors:</h4>
+					<textarea readonly class="form-control " id="errors" rows="5"></textarea>
+				</div>
+				<br>
+				<div class="col-lg-4 tenpx-margin-bottom">
+					<div class="cheatsheet">
+						<h2>Cheat Sheet:</h2>
+						<p>Full documentation available <a href="/tutorial.html">here</a></p>
+						<p class="font-weight-bold">Matching</p>
+						<p>{{i-code}}match "hello world"{{end-i-code}} matches "hello world" exactly<p>
+						<p>{{i-code}}match "hello" then optionally " world"{{end-i-code}} matches "hello" or "hello world"</p>
+						<p>{{i-code}}match "hello" or "world"{{end-i-code}} matches "hello" or "world</p>
+						<p>{{i-code}}match a word{{end-i-code}} matches any word
+						<p class="font-weight-bold">Repetition</p>
+						<p>{{i-code}}match 0+ "hello"{{end-i-code}} matches 0 or more "hello"s</p>
+						<p>{{i-code}}match 3 "hello"{{end-i-code}} matches exactly "hellohellohello"</p>
+						<p>{{i-code}}match 1 to 5 "hello"{{end-i-code}} matches between 1 to 5 "hello"s</p>
+						<p>{{i-code}}repeat 0 or more{{end-i-code}} repeats the intended text 0 or more times (default)</p>
+						<p>{{i-code}}optionally repeat between 3 to 5{{end-i-code}} optionally repeats the indented text 3 to 5 times</p>
+						<p class="font-weight-bold">Grouping</p>
+						<p>{{i-code}}create a group called mygroup{{end-i-code}} creates a group called "mygroup"</p>
+						<p>{{i-code}}create an optional group{{end-i-code}} creates an unnamed optional group</p>
+						<p class="font-weight-bold">Using</p>
+						<p>{{i-code}}using global and case insensitive{{end-i-code}} uses the 'g' and 'i' flags</p>
+						<p class="font-weight-bold">Misc</p>
+						<p>{{i-code}}// comment{{end-i-code}} is a single line comment</p>
+						<p>{{i-code}}/* comment */{{end-i-code}} is a multi line comment</p>
+					</div>
+				</div>
+			</div>
+         </div>
+{{> footer}}

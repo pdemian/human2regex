@@ -1,4 +1,4 @@
-/*! Copyright (c) 2020 Patrick Demian; Licensed under MIT */
+/*! Copyright (c) 2021 Patrick Demian; Licensed under MIT */
 /** @internal */ export declare const Zero: import("chevrotain").TokenType;
 /** @internal */ export declare const One: import("chevrotain").TokenType;
 /** @internal */ export declare const Two: import("chevrotain").TokenType;
@@ -51,6 +51,10 @@
 /** @internal */ export declare const CaseInsensitive: import("chevrotain").TokenType;
 /** @internal */ export declare const CaseSensitive: import("chevrotain").TokenType;
 /** @internal */ export declare const OrMore: import("chevrotain").TokenType;
+/** @internal */ export declare const Rerun: import("chevrotain").TokenType;
+/** @internal */ export declare const The: import("chevrotain").TokenType;
+/** @internal */ export declare const If: import("chevrotain").TokenType;
+/** @internal */ export declare const Else: import("chevrotain").TokenType;
 /** @internal */ export declare const EndOfLine: import("chevrotain").TokenType;
 /** @internal */ export declare const WS: import("chevrotain").TokenType;
 /** @internal */ export declare const SingleLineComment: import("chevrotain").TokenType;

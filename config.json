@@ -1,0 +1,15 @@
+{
+	"prod": true,
+    "dst": "./docs/",
+    "src": "./src/",
+    "compression_config": {
+        "html": {
+            "collapseWhitespace": true, 
+            "minifyCSS": true, 
+            "minifyJS": true, 
+            "removeComments": true, 
+            "removeEmptyAttributes": true, 
+            "removeRedundantAttributes": true
+        }
+    }
+}
