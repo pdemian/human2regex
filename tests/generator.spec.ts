@@ -72,7 +72,7 @@ describe("Generator functionality", function() {
         const reg6 = parser.parse(toks6);
         expect(reg6.validate(RegexDialect.JS).length).toBeGreaterThan(0);
 
-        const toks7 = lexer.tokenize("invoke thing").tokens;
+        const toks7 = lexer.tokenize("rerun thing").tokens;
         const reg7 = parser.parse(toks7);
         expect(reg7.validate(RegexDialect.JS).length).toBeGreaterThan(0);
     });
@@ -162,7 +162,7 @@ describe("Generator functionality", function() {
     });
 
     it("can generate backreferences", function() {
-        const toks0 = lexer.tokenize('create a group called thing\n\tmatch "Hello World"\ninvoke thing\noptionally call 3 times the group called thing').tokens;
+        const toks0 = lexer.tokenize('create a group called thing\n\tmatch "Hello World"\nrerun thing\noptionally recapture 3 times the group called thing').tokens;
         const reg0 = parser.parse(toks0);
         expect(reg0.validate(RegexDialect.JS).length).toBe(0);
 

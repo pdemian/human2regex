@@ -567,7 +567,7 @@ export class Human2RegexParser extends EmbeddedActionsParser {
                 tokens.push($.CONSUME(T.Optional));
                 optional = true;
             });
-            tokens.push($.CONSUME(T.Call));
+            tokens.push($.CONSUME(T.Rerun));
 
             $.OPTION6(() => count = $.SUBRULE(CountSubStatement));
 

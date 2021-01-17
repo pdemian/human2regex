@@ -60,7 +60,7 @@ import { createToken, Lexer } from "chevrotain";
 /** @internal */ export const CaseInsensitive = createToken({name: "CaseInsensitive", pattern: /case insensitive/i});
 /** @internal */ export const CaseSensitive = createToken({name: "CaseSensitive", pattern: /case sensitive/i});
 /** @internal */ export const OrMore = createToken({name: "OrMore", pattern: /\+|or more/i});
-/** @internal */ export const Call = createToken({name: "Call", pattern: /call|invoke|execute|(re ?)?run/i });
+/** @internal */ export const Rerun = createToken({name: "Rerun", pattern: /re( |-)?(run|capture)/i });
 /** @internal */ export const The = createToken({name: "The", pattern: /the/i });
 /** @internal */ export const If = createToken({name: "If", pattern: /if/i });
 /** @internal */ export const Else = createToken({name: "Else", pattern: /else|otherwise/i });
@@ -111,7 +111,7 @@ export const AllTokens = [
     Number,
     Unicode,
     Called,
-    Call,
+    Rerun,
     If,
     Else,
     The,

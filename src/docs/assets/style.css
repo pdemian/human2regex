@@ -182,3 +182,25 @@ pre code {
 .heading-link:focus {
 	color: rgba(255, 255, 255, .8)
 }
+
+.tut-contents {
+	display: table;
+	padding: 7px;
+	border: 1px solid #a2a9b1;
+	background-color: #f8f9fa;
+	padding: 5px;
+	font-size: 16px!important;
+}
+.tut-title {
+	text-align: center;
+	font-weight: bold;
+}
+.tut-contents li {
+	list-style-type: none;
+}
+.tut-contents>ul {
+	margin-top: 0;
+	padding-left: 0;
+	margin-left: 0.5em;
+	margin-right: 0.5em;
+}

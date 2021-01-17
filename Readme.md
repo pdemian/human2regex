@@ -84,4 +84,4 @@ The API reference is available [here](API.md)
 - Add more regex options such as subroutines~~, conditions, and lookahead/behind~~
 - Fix error messages (They sometimes point to the wrong location, off by 1 errors, etc)
 - Add more useful lex/parse errors (What even is an EarlyExitException?)
-- Use a different/better static site generation method
+- ~~Use a different/better static site generation method~~

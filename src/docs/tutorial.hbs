@@ -4,34 +4,57 @@
 		<!-- Main Content -->
 		<div class="container contained-container" id="maincontent" role="main">
             <div id="tutorial">
-				<h2>Tutorial</h2>
+				<h2 id="tut-begin">Tutorial</h2>
 				<br>
 
 				<p class="font-weight-bold" id="tut-preface">0. Preface</p>
 				<p>Human2Regex (H2R) is a way to spell out a regular expression in an easy to read, easy to modify language. H2R supports multiple languages as well as many (though not all) different regular expression options such as named groups and quantifiers. You may notice multiple keywords specifying the same thing, and that is intended! Just like how in English there are many ways to express yourself, H2R is made to be flexible and easy to understand. With a range, do you prefer "...", "through", or "to"? It's up to you to choose, H2R supports all of those!</p>
 
+				<div class="tut-contents" role="navigation">
+					<div class="tut-title">Contents</div>
+						<ul>
+							<li>
+								<a href="#tut-begin">Tutorial</a>
+								<ul>
+									<li><a href="#tut-first-match">1.1 First match</a></li>
+									<li><a href="#tut-using">1.2 Using Specifiers</a></li>
+									<li><a href="#tut-multiple-match">1.3 Matching multiple items</a></li>
+									<li><a href="#tut-optionality">1.4 Optionality</a></li>
+									<li><a href="#tut-negation">1.5 Negation</a></li>
+									<li><a href="#tut-other-match">1.6 Other matching specifiers</a></li>
+									<li><a href="#tut-repeition">1.7 Repetition</a></li>
+									<li><a href="#tut-grouping">1.8 Grouping</a></li>
+								</ul>
+							</li>
+							<li><a href="#tut-final">Putting it all together</a></li>
+							<li>
+								<a href="#tut-backref">Advanced features</a>
+								<ul>
+									<li><a href="#tut-backref">Backreferences</a></li>
+									<li><a href="#tut-if">If statements</a></li>
+									<li><a href="#tut-unicode">Unicode character properties</a></li>
+								</ul>
+							</li>
+						</ul>
+					</ul>
+				</div>
+
 				<br>
 				<p class="font-weight-bold" id="tut-first-match">1. Your first Match</p>
 				<p>Every language starts with a "Hello World" program, so let's match the output of those programs. Matching is done using the keyword {{i-code}}match{{end-i-code}} followed by what you want to match.
-{{s-code}}
-match "Hello World"
-{{end-s-code}}
+{{s-code}}match "Hello World"{{end-s-code}}
 				The above statement will generate a regular expression that matches "Hello World", like "/Hello World/". Any invalid characters will automatically be escaped, so you don't need to worry about it. H2R also supports block comments with {{i-code}}/**/{{end-i-code}}, or line comments with {{i-code}}//{{end-i-code}} or {{i-code}}#{{end-i-code}} so you can explain why or what you intend to match.</p>
 {{p-code}}/* This is a block comment */
 match "Hello World" // matches the output of "Hello World" programs
 {{end-p-code}}
 				<p>Now what if we want to match every case variation of "Hello World" like "hello world" or "hELLO wORLD"? H2R supports the {{i-code}}or{{end-i-code}} operator which allows you to specify many possible combinations.
-{{s-code}}
-match "Hello World" or "hello world" or "hELLO wORLD"
-{{end-s-code}}
+{{s-code}}match "Hello World" or "hello world" or "hELLO wORLD"{{end-s-code}}
 				Or, you can use a {{i-code}}using{{end-i-code}} statement to specify that you want it to be case insensitive.</p>
 
 				<br>
 				<p class="font-weight-bold" id="tut-using">2. Using Specifiers</p>
 				<p>Using statements appear at the beginning. You may have one or more using statements which each can contain one or more specifiers. For example:
-{{s-code}}
-using global and case insensitive matching
-{{end-s-code}}
+{{s-code}}using global and case insensitive matching{{end-s-code}}
 				or</p>
 {{p-code}}using global
 using case insensitive
@@ -76,7 +99,7 @@ using case insensitive
 				</table>
 
 				<p>To match any variation of hello world, we would then do the following:</p>
-<pre class="tutorial-code">{{i-code}}using case insensitive matching
+{{p-code}}using case insensitive matching
 match "hello world"
 {{end-p-code}}
 
@@ -88,56 +111,36 @@ match " "
 match "world"
 {{end-p-code}}
 				<p>However, you can also use a comma, {{i-code}}and{{end-i-code}}, or {{i-code}}then{{end-i-code}} for a more concise match. 
-{{s-code}}
-match "hello", " ", "world"
-{{end-s-code}}
+{{s-code}}match "hello", " ", "world"{{end-s-code}}
 				or
-{{s-code}}
-match "hello" and " " and "world"
-{{end-s-code}}
+{{s-code}}match "hello" and " " and "world"{{end-s-code}}
 				or
-{{s-code}}
-match "hello" then " " then "world"
-{{end-s-code}}
+{{s-code}}match "hello" then " " then "world"{{end-s-code}}
 				or any combination like
-{{s-code}}
-match "hello", " " and then "world"
-{{end-s-code}}
+{{s-code}}match "hello", " " and then "world"{{end-s-code}}
 
 				<br>
 				<p class="font-weight-bold" id="tut-optionality">4. Optionality</p>
 				<p>Sometimes you wish to match something that may or may not exist. In H2R, this is done via the {{i-code}}optional{{end-i-code}}, {{i-code}}optionally{{end-i-code}}, {{i-code}}possibly{{end-i-code}} or {{i-code}}maybe{{end-i-code}} keyword. 
-{{s-code}}
-optionally match "hello world"
-{{end-s-code}}
+{{s-code}}optionally match "hello world"{{end-s-code}}
 				will match 0 or 1 "hello world"'s. This can be used alongside matching multiple statements in a single {{i-code}}match{{end-i-code}} statement.
-{{s-code}}
-match "hello", maybe " ", "world"
-{{end-s-code}}
+{{s-code}}match "hello", maybe " ", "world"{{end-s-code}}
 				will match "hello", an optional space if it exists, and "world". However, the start {{i-code}}optional{{end-i-code}} is for the entire match statement. Thus,
-{{s-code}}
-possibly match "hello", " ", then "world"
-{{end-s-code}}
+{{s-code}}possibly match "hello", " ", then "world"{{end-s-code}}
 				will actually make the whole "hello world" an optional match rather than just the first "hello". If you want to make the first match optional but keep the rest required, place the {{i-code}}optional{{end-i-code}} immediately after the {{i-code}}match{{end-i-code}}.</p>
 
 				<br>
 				<p class="font-weight-bold" id="tut-negation">5. Negation</p>
 				<p>You can negate a match with the operator {{i-code}}not{{end-i-code}}
-{{s-code}}
-match not "hello world"
-{{end-s-code}}
+{{s-code}}match not "hello world"{{end-s-code}}
 				or
-{{s-code}}
-match anything but "hello world"
-{{end-s-code}}
+{{s-code}}match anything but "hello world"{{end-s-code}}
 				will match everything except for "hello world".</p>
 
 				<br>
 				<p class="font-weight-bold" id="tut-other-match">6. Other matching specifiers</p>
 				<p>Many times you don't know exactly what you wish to match. H2R comes with many specifiers that you can use for your matching. For example, you may wish to match any word. You can do that with:
-{{s-code}}
-match a word
-{{end-s-code}}
+{{s-code}}match a word{{end-s-code}}
 				The {{i-code}}a{{end-i-code}} or {{i-code}}an{{end-i-code}} is optional. The possible specifiers that H2R supports are the following:</p>
 				<table class="table table-sm table-striped table-bordered">
 					<thead>
@@ -223,64 +226,36 @@ match a word
 				</table>
 
 				<p>You can also create ranges of characters to match. Say for example, you wanted to match any characters between a and z, you could write any of the following:
-{{s-code}}
-match from "a" to "z" // "from" is optional
-{{end-s-code}}
+{{s-code}}match from "a" to "z" // "from" is optional{{end-s-code}}
 				or
-{{s-code}}
-match between "a" and "z" // "between" is optional
-{{end-s-code}}
+{{s-code}}match between "a" and "z" // "between" is optional{{end-s-code}}
 				or
-{{s-code}}
-match "a" ... "z" // can use "..." or ".."
-{{end-s-code}}
+{{s-code}}match "a" ... "z" // can use "..." or ".."{{end-s-code}}
 				or
-{{s-code}}
-match "a" - "z"
-{{end-s-code}}
+{{s-code}}match "a" - "z"{{end-s-code}}
 				or
-{{s-code}}
-match "a" through "z" // can also use thru
-{{end-s-code}}
+{{s-code}}match "a" through "z" // can also use thru{{end-s-code}}
 
 				<br>
 				<p class="font-weight-bold" id="tut-repeition">7. Repetition</p>
 				<p>H2R supports 2 types of repetition: single match repetition, or grouped repetition. When using {{i-code}}match{{end-i-code}} you can specify the number of captures you want just before the text to capture. 
-{{s-code}}
-match 2 digits
-{{end-s-code}}
+{{s-code}}match 2 digits{{end-s-code}}
 				or
-{{s-code}}
-match exactly 2 digits
-{{end-s-code}}
+{{s-code}}match exactly 2 digits{{end-s-code}}
 				will match any 2 digits in a row. You can also specify a range you wish to capture
-{{s-code}}
-match 2 ... 5 digits
-{{end-s-code}}
+{{s-code}}match 2 ... 5 digits{{end-s-code}}
 				or
-{{s-code}}
-match 2 to 5 digits
-{{end-s-code}}
+{{s-code}}match 2 to 5 digits{{end-s-code}}
 				or
-{{s-code}}
-match between 2 to 5 digits
-{{end-s-code}}
+{{s-code}}match between 2 to 5 digits{{end-s-code}}
 				will match 2, 3, 4, or 5 digits. You can specify if the final number is exclusive with the {{i-code}}exclusive{{end-i-code}} or {{i-code}}inclusive{{end-i-code}} keywords. 
-{{s-code}}
-match 2 to 5 exclusive digits
-{{end-s-code}}
+{{s-code}}match 2 to 5 exclusive digits{{end-s-code}}
 				 will only match up to 4 digits. You can also choose to leave the end unspecified.
-{{s-code}}
-match 2+ digits
-{{end-s-code}}
+{{s-code}}match 2+ digits{{end-s-code}}
 				or
-{{s-code}}
-match 2 or more digits
-{{end-s-code}}
+{{s-code}}match 2 or more digits{{end-s-code}}
 				will match 2 or more digits. Repeition can be chained with the {{i-code}}and then{{end-i-code}} keywords or the {{i-code}}optional{{end-i-code}} keyword. For example:
-{{s-code}}
-match 1+ digits then optionally "." then optionally 0...8 digits
-{{end-s-code}}
+{{s-code}}match 1+ digits then optionally "." then optionally 0...8 digits{{end-s-code}}
 				 
 				Suppose you want to repeat a group of these match statements. You can group a repetition using the {{i-code}}repeat{{end-i-code}} keyword. Everything underneath that is tabbed (scoped) will be repeated. By default, this will match 0 or more of the following statements.</p>
 {{p-code}}repeat
@@ -299,13 +274,12 @@ match "World"
 {{p-code}}create a group
 	match "Hello World"
 {{end-p-code}}
-				<p>This will create a non-named captured group, equivalent to the regular expression "/(Hello World)/". A non-named captured group will show up in your chosen language's matches, however will not be given a name. To access this match, you will need to know the index of the group. Most regular expression engines support named capture groups, and H2R highly recommends using this feature. If you wish to do so, simply give it a name:<p>
+				<p>This will create a non-named captured group, equivalent to the regular expression "/(Hello World)/". A non-named captured group will show up in your chosen language's matches, however will not be given a name. To access this match, you will need to know the index of the group. Most regular expression engines support named capture groups, and H2R highly recommends using this feature. If you wish to do so, simply give it a name:</p>
 {{p-code}}create a group called TestGroup
 	match "Hello World"
 {{end-p-code}}
-				<p>In most languages, a named group can be accessed through the match result's group list. Take for example, in JavaScript, 
-{{p-code}}"hello".match(/(?&lt;TestGroup&gt;hello)/).groups
-{{end-p-code}}
+				<p>In most languages, a named group can be accessed through the match result's group list. Take for example, in JavaScript,</p>
+{{p-code}}"hello".match(/(?&lt;TestGroup&gt;hello)/).groups{{end-p-code}}
 
 				<p>Will return an object with {TestGroup: "hello"}. For another example, check out <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/match#Using_named_capturing_groups">MDN web docs</a>. Groups can also be optional.</p>
 {{p-code}}create an optional group
@@ -318,8 +292,7 @@ match "World"
 		match "World"
 {{end-p-code}}
 				<p>The regular expression returned by this will be "/(?&lt;TestGroup&gt;Hello(?&lt;InnerGroup&gt;World))/". Again, in JavaScript, the following</p>
-{{p-code}}"HelloWorld".match(/(?&lt;TestGroup&gt;Hello(?&lt;InnerGroup&gt;World))/).groups
-{{end-p-code}}
+{{p-code}}"HelloWorld".match(/(?&lt;TestGroup&gt;Hello(?&lt;InnerGroup&gt;World))/).groups{{end-p-code}}
 				<p>Will return an object with {TestGroup: "HelloWorld", InnerGroup: "World"}.</p>
 
 				<br>
@@ -328,25 +301,55 @@ match "World"
 
 				<h3>Advanced features</h3>
 
-				<p class="font-weight-bold" id="tut-back">Backreferences</p>
-				<p>TODO</p>
-
+				<p class="font-weight-bold" id="tut-backref">Backreferences</p>
+				<p>Sometimes you may wish to match the same text as a previously matched. Take for example matching opening and closing XML tags such as &lt;hello&gt;world&lt;/hello&gt;:</p>
+{{p-code}}match "&lt;"
+create a group called opening_tag
+	match a word or digit or "_" or "-"
+match "&gt;"
+match 0+ not "&lt;"
+match "&lt;/" 
+create a group called closing_tag
+	match a word or digit or "_" or "-"
+match "&gt;"
+{{end-p-code}}
+				<p>To ensure you matched the same opening tag as closing tag, you'll normally need to perform an additional step afterwards by checking the capture groups are equal. However, in most regex engines, this can be performed automatically through backreferences. Backreferences effectively re-capture the same group. Human2Regex allows you to {{i-code}}rerun{{end-i-code}} or {{i-code}}recapture{{end-i-code}} a previous group.</p>
+{{p-code}}match "&lt;"
+create a group called tag
+	match a word or digit or "_" or "-"
+match "&gt;"
+match 0+ not "&lt;"
+match "&lt;/" 
+recapture tag
+match "&gt;"
+{{end-p-code}}
+				<p>The regex will only successfully match if both the tags are the same. One thing to note however, the first group must be captured. For a "function"-like capture see regex subroutines (not yet implemented).</p>
+				<p>To allow for a more natural language, {{i-code}}recapture the group {{end-i-code}} and {{i-code}}recapture the group called{{end-i-code}} are also supported.</p>
 				<p class="font-weight-bold" id="tut-if">If statements</p>
-				<p>TODO</p>
-
+				<p>Certain regex languages support if statements which can be used simplify statements. Human2Regex supports {{i-code}}if{{end-i-code}}, {{i-code}}else if{{end-i-code}}, and {{i-code}}else{{end-i-code}} statements. Inside each {{i-code}}if{{end-i-code}}, you can recapture a group or run a new match. This is done as the following:</p>
+{{p-code}}if match "hello" then optionally "world"
+	match "!"
+else if match "goodbye" then optionally "world"
+	match "!"
+{{end-p-code}}
+				<p>or</p>
+{{p-code}}create a group called tag
+	match "&lt;" then a word or digit or "_" or "-" then "&gt;"
+//do we have another tag? keep matching the same tags
+if rerun tag
+	repeat
+		recapture tag
+//ignore everything else
+else
+	match 0+ any thing
+{{end-p-code}}
 				<p class="font-weight-bold" id="tut-unicode">Unicode character properties</p>
 				<p>You can match specific unicode sequences using {{i-code}}"\uXXXX"
 				{{end-i-code}} or {{i-code}}"\UXXXXXXXX"{{end-i-code}} where X is a hexadecimal character.
-{{s-code}}
-match "\u0669" // matches arabic digit 9 "&#x0669;"
-{{end-s-code}}
+{{s-code}}match "\u0669" // matches arabic digit 9 "&#x0669;"{{end-s-code}}
 				Unicode character classes/scripts can be matched using the {{i-code}}unicode{{end-i-code}} keyword.
-{{s-code}}
-match unicode "Latin" // matches any latin character
-{{end-s-code}}
-{{s-code}}
-match unicode "N" // matches any number character
-{{end-s-code}}
+{{s-code}}match unicode "Latin" // matches any latin character{{end-s-code}}
+{{s-code}}match unicode "N" // matches any number character{{end-s-code}}
 				The following Unicode class specifiers are available:</p>
 				<table class="table table-sm table-striped table-bordered">
 					<thead>

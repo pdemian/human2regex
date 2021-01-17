@@ -51,7 +51,7 @@
 /** @internal */ export declare const CaseInsensitive: import("chevrotain").TokenType;
 /** @internal */ export declare const CaseSensitive: import("chevrotain").TokenType;
 /** @internal */ export declare const OrMore: import("chevrotain").TokenType;
-/** @internal */ export declare const Call: import("chevrotain").TokenType;
+/** @internal */ export declare const Rerun: import("chevrotain").TokenType;
 /** @internal */ export declare const The: import("chevrotain").TokenType;
 /** @internal */ export declare const If: import("chevrotain").TokenType;
 /** @internal */ export declare const Else: import("chevrotain").TokenType;
