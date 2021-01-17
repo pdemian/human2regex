@@ -2,7 +2,7 @@
 
 <div align="center">
 
-  ![H2R logo](./src/docs/favicon-small.png)
+  ![H2R logo](./src/docs/assets/favicon-small.png)
 
   [![Build Status](https://travis-ci.org/pdemian/human2regex.svg?branch=master)](https://travis-ci.org/pdemian/human2regex)
   [![Codecov](https://codecov.io/gh/pdemian/human2regex/branch/master/graphs/badge.svg?branch=master)](https://codecov.io/gh/pdemian/human2regex)
@@ -81,7 +81,7 @@ The API reference is available [here](API.md)
 
 
 ## Todo
-- Add more regex options such as subroutines~~, conditions, and lookahead/behind~~
+- Add more regex options such as subroutines, ~~conditions, and lookahead/behind~~
 - Fix error messages (They sometimes point to the wrong location, off by 1 errors, etc)
 - Add more useful lex/parse errors (What even is an EarlyExitException?)
 - ~~Use a different/better static site generation method~~
