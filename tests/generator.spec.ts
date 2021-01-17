@@ -43,6 +43,14 @@ describe("Generator functionality", function() {
         expect(reg3.toRegex(RegexDialect.JS)).toBe("/(?:(?:hello){3,5})?/");
     });
 
+    it("generates an advanced regex", function() {
+        const toks0 = lexer.tokenize('match "<" then a word or digit or "_" or "-" then ">"').tokens;
+        const reg0 = parser.parse(toks0);
+        expect(reg0.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg0.toRegex(RegexDialect.JS)).toBe("/<(?:\\w+|\\d|_|\\-)>/");
+    });
+
+
     it("validates invalid regexes", function() {
         const toks0 = lexer.tokenize('match unicode "NotARealClass"').tokens;
         const reg0 = parser.parse(toks0);
@@ -159,6 +167,16 @@ describe("Generator functionality", function() {
         const reg5 = parser.parse(toks5);
         expect(reg5.validate(RegexDialect.JS).length).toBe(0);
         expect(reg5.toRegex(RegexDialect.JS)).toBe("/a[bc]?/");
+
+        const toks6 = lexer.tokenize("optionally match 0+ any thing").tokens;
+        const reg6 = parser.parse(toks6);
+        expect(reg6.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg6.toRegex(RegexDialect.JS)).toBe("/.*?/");
+
+        const toks7 = lexer.tokenize('match 0+ not ">"').tokens;
+        const reg7 = parser.parse(toks7);
+        expect(reg7.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg7.toRegex(RegexDialect.JS)).toBe("/[^>]*/");
     });
 
     it("can generate backreferences", function() {
