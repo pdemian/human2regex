@@ -6,6 +6,7 @@ docs/
 src/
 tests/
 jest.config.ts
+config.json
 webpack.config.js
 tsconfig.json
 tslintconfig.json

@@ -425,7 +425,7 @@ export class MatchSubStatementCST extends H2RCST {
         }
 
         let ret = "";
-        if (args !== null && args.has_neighbours === true) {
+        if (args?.has_neighbours) {
             ret = minimizeMatchString(matches, true);
         }
         else {
@@ -436,10 +436,14 @@ export class MatchSubStatementCST extends H2RCST {
             if (matches.length === 1) {
                 // we don't group if there's only 1 element
                 // but we need to make sure we don't add an additional + or * 
-                ret = dontClobberRepetition(ret, this.count.toRegex(language));
+                ret = dontClobberRepetition(ret, this.count.toRegex(language, null));
             }
             else {
-                ret = groupIfRequired(ret) + this.count.toRegex(language);
+                const count_string = this.count.toRegex(language, { "dont_loop_one": true });
+
+                if (count_string !== "") {
+                    ret = groupIfRequired(ret) + count_string;
+                }
             }
         }
 
@@ -541,7 +545,7 @@ export class CountSubStatementCST extends H2RCST {
         return errors;
     }
 
-    public toRegex(language: RegexDialect): string {
+    public toRegex(language: RegexDialect, args: GeneratorArguments | null): string {
         unusedParameter(language, "Count does not change from language");
 
         const from = this.from;
@@ -551,7 +555,12 @@ export class CountSubStatementCST extends H2RCST {
         // if we only have a count of 1, we can ignore adding any extra text
         if (to === null) {
             if (from === 1) {
-                return this.opt === "+" ? "+" : "*";
+                if (args?.dont_loop_one) {
+                    return this.opt === "+" ? "+" : "";
+                }
+                else {
+                    return this.opt === "+" ? "+" : "*";
+                }
             }
             else if (from === 0) {
                 return this.opt === "+" ? "*" : "{0}";
@@ -654,7 +663,7 @@ export class RepeatStatementCST extends StatementCST {
         let str = groupIfRequired(this.statements.map((x) => x.toRegex(language, null)).join(""));
 
         if (this.count) {
-            str += this.count.toRegex(language);
+            str += this.count.toRegex(language, null);
 
             // group for optionality because count would be incorrect otherwise
             if (this.optional) {
@@ -788,7 +797,7 @@ export class BackrefStatementCST extends StatementCST {
         }
 
         if (this.count) {
-            str += this.count.toRegex(language);
+            str += this.count.toRegex(language, null);
 
             // group for optionality because count would be incorrect otherwise
             if (this.optional) {

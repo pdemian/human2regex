@@ -139,6 +139,18 @@ describe("Generator functionality", function() {
 
         // should be (?!hello) not (?:(?!hello))
         expect(reg1.toRegex(RegexDialect.JS)).toBe("/(?!hello){1,6}/");
+
+        const toks2 = lexer.tokenize('match 1 words or "_" or "-"').tokens;
+        const reg2 = parser.parse(toks2);
+        expect(reg2.validate(RegexDialect.JS).length).toBe(0);
+
+        // should be /\w+|_|\-/ not /(?:\w+|_|\-)*/
+        expect(reg2.toRegex(RegexDialect.JS)).toBe("/\\w+|_|\\-/");
+
+        const toks3 = lexer.tokenize('repeat 1\n\tmatch "http"').tokens;
+        const reg3 = parser.parse(toks3);
+        expect(reg3.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg3.toRegex(RegexDialect.JS)).toBe("/(?:http)*/");
     });
 
     it("optimizes correctly", function() {

@@ -244,7 +244,7 @@ export declare class CountSubStatementCST extends H2RCST {
      */
     constructor(tokens: IToken[], from: number, to?: number | null, opt?: "inclusive" | "exclusive" | "+" | null);
     validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
-    toRegex(language: RegexDialect): string;
+    toRegex(language: RegexDialect, args: GeneratorArguments | null): string;
 }
 /**
  * Concrete Syntax Tree for a Match statement
