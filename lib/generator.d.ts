@@ -48,6 +48,12 @@ export declare class GeneratorContext {
      */
     addGroup(identifier: string, tokens: IToken[]): void;
 }
+/**
+ * Argument type: Just a plain object
+ */
+declare type GeneratorArguments = {
+    [key: string]: string | boolean | number;
+};
 interface Generates {
     /**
      * Validate that this is both valid and can be generated in the specified language
@@ -66,10 +72,11 @@ interface Generates {
      * @remarks There is no guarantee toRegex will work unless validate returns no errors
      *
      * @param language the regex dialect we're generating
+     * @param args any additional arguments we may have
      * @returns a regular expression fragment
      * @public
      */
-    toRegex(language: RegexDialect): string;
+    toRegex(language: RegexDialect, args: GeneratorArguments | null): string;
 }
 /**
  * The base concrete syntax tree class
@@ -86,7 +93,7 @@ export declare abstract class H2RCST implements Generates {
      */
     constructor(tokens: IToken[]);
     abstract validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
-    abstract toRegex(language: RegexDialect): string;
+    abstract toRegex(language: RegexDialect, args: GeneratorArguments | null): string;
     /**
      * Creates an ISemanticError with a given message and the tokens provided from the constructor
      *
@@ -171,7 +178,7 @@ export declare class MatchStatementValue implements Generates {
      */
     constructor(optional: boolean, statement: MatchSubStatementCST);
     validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
-    toRegex(language: RegexDialect): string;
+    toRegex(language: RegexDialect, args: GeneratorArguments | null): string;
 }
 /**
  * The base class for all statement concrete syntax trees
@@ -199,7 +206,7 @@ export declare class MatchSubStatementCST extends H2RCST {
      */
     constructor(tokens: IToken[], count: CountSubStatementCST | null, invert: boolean, values: MatchSubStatementValue[]);
     validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
-    toRegex(language: RegexDialect): string;
+    toRegex(language: RegexDialect, args: GeneratorArguments | null): string;
 }
 /**
  * Concrete Syntax Tree for Using statements

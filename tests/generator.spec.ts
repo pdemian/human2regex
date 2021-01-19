@@ -50,7 +50,6 @@ describe("Generator functionality", function() {
         expect(reg0.toRegex(RegexDialect.JS)).toBe("/<(?:\\w+|\\d|_|\\-)>/");
     });
 
-
     it("validates invalid regexes", function() {
         const toks0 = lexer.tokenize('match unicode "NotARealClass"').tokens;
         const reg0 = parser.parse(toks0);

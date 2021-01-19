@@ -100,6 +100,11 @@ export class GeneratorContext {
     }
 }
 
+/**
+ * Argument type: Just a plain object
+ */
+type GeneratorArguments = { [key: string]: string | boolean | number };
+
 interface Generates {
     /**
      * Validate that this is both valid and can be generated in the specified language
@@ -119,10 +124,11 @@ interface Generates {
      * @remarks There is no guarantee toRegex will work unless validate returns no errors
      * 
      * @param language the regex dialect we're generating
+     * @param args any additional arguments we may have
      * @returns a regular expression fragment
      * @public
      */
-    toRegex(language: RegexDialect): string;
+    toRegex(language: RegexDialect, args: GeneratorArguments | null): string;
 }
 
 /**
@@ -142,7 +148,7 @@ export abstract class H2RCST implements Generates {
     }
 
     public abstract validate(language: RegexDialect, context: GeneratorContext): ISemanticError[];
-    public abstract toRegex(language: RegexDialect): string;
+    public abstract toRegex(language: RegexDialect, args: GeneratorArguments | null): string;
 
     /**
      * Creates an ISemanticError with a given message and the tokens provided from the constructor
@@ -247,8 +253,8 @@ export class MatchStatementValue implements Generates {
         return this.statement.validate(language, context);
     }
 
-    public toRegex(language: RegexDialect): string {
-        let match_stmt = this.statement.toRegex(language);
+    public toRegex(language: RegexDialect, args: GeneratorArguments | null): string {
+        let match_stmt = this.statement.toRegex(language, args);
 
         // need to group if optional and ungrouped
         if (this.optional) {
@@ -341,14 +347,20 @@ export class MatchSubStatementCST extends H2RCST {
         return errors;
     }
 
-    public toRegex(language: RegexDialect): string {
+    public toRegex(language: RegexDialect, args: GeneratorArguments | null): string {
         const matches: string[] = [];
 
         for (const value of this.values) {
             switch (value.type) {
                 case MatchSubStatementType.SingleString: {
                     const reg = regexEscape(removeQuotes(value.from as string));
-                    matches.push(this.invert ? `(?!${reg})` : reg);
+
+                    if (isSingleRegexCharacter(reg)) {
+                        matches.push(this.invert ? `[^${reg}]` : reg);
+                    }
+                    else {
+                        matches.push(this.invert ? `(?!${reg})` : reg);
+                    }
                     break;
                 }
                 case MatchSubStatementType.Between: {
@@ -412,7 +424,13 @@ export class MatchSubStatementCST extends H2RCST {
             }
         }
 
-        let ret = minimizeMatchString(matches);
+        let ret = "";
+        if (args !== null && args.has_neighbours === true) {
+            ret = minimizeMatchString(matches, true);
+        }
+        else {
+            ret = minimizeMatchString(matches);
+        }
 
         if (this.count) {
             if (matches.length === 1) {
@@ -583,12 +601,18 @@ export class MatchStatementCST extends StatementCST {
     }
 
     public toRegex(language: RegexDialect): string {
-        let final_matches = this.matches.map((x) => x.toRegex(language)).join("");
+        let final_matches = "";
+        if (this.matches.length === 1) {
+            final_matches = this.matches[0].toRegex(language, null);
+        }
+        else {
+            final_matches = this.matches.map((x) => x.toRegex(language, { "has_neighbours": true })).join("");
+        }
         
         if (this.completely_optional) {
             final_matches = groupIfRequired(final_matches) + "?";
         }
-        
+
         return final_matches;
     }
 }
@@ -627,7 +651,7 @@ export class RepeatStatementCST extends StatementCST {
     }
 
     public toRegex(language: RegexDialect): string {
-        let str = groupIfRequired(this.statements.map((x) => x.toRegex(language)).join(""));
+        let str = groupIfRequired(this.statements.map((x) => x.toRegex(language, null)).join(""));
 
         if (this.count) {
             str += this.count.toRegex(language);
@@ -704,7 +728,7 @@ export class GroupStatementCST extends StatementCST {
             str += `<${this.name}>`;
         }
 
-        str += this.statements.map((x) => x.toRegex(language)).join("");
+        str += this.statements.map((x) => x.toRegex(language, null)).join("");
 
         str += (this.optional ? ")?" : ")");
 
@@ -825,11 +849,11 @@ export class IfPatternStatementCST extends StatementCST {
     }
 
     public toRegex(language: RegexDialect): string {
-        const if_stmt = this.matches.map((x) => x.toRegex(language)).join("");
-        const true_stmt = groupIfRequired(this.true_statements.map((x) => x.toRegex(language)).join(""));
+        const if_stmt = this.matches.map((x) => x.toRegex(language, null)).join("");
+        const true_stmt = groupIfRequired(this.true_statements.map((x) => x.toRegex(language, null)).join(""));
 
         if (this.false_statements.length > 0) {
-            const false_stmt = groupIfRequired(this.false_statements.map((x) => x.toRegex(language)).join(""));
+            const false_stmt = groupIfRequired(this.false_statements.map((x) => x.toRegex(language, null)).join(""));
 
             return `(?(${if_stmt})${true_stmt}|${false_stmt})`;
         }
@@ -888,10 +912,10 @@ export class IfIdentStatementCST extends StatementCST {
             if_stmt = "<" + if_stmt + ">";
         }
 
-        const true_stmt = groupIfRequired(this.true_statements.map((x) => x.toRegex(language)).join(""));
+        const true_stmt = groupIfRequired(this.true_statements.map((x) => x.toRegex(language, null)).join(""));
 
         if (this.false_statements.length > 0) {
-            const false_stmt = groupIfRequired(this.false_statements.map((x) => x.toRegex(language)).join(""));
+            const false_stmt = groupIfRequired(this.false_statements.map((x) => x.toRegex(language, null)).join(""));
 
             return `(?(${if_stmt})${true_stmt}|${false_stmt})`;
         }
@@ -932,7 +956,7 @@ export class RegularExpressionCST extends H2RCST {
 
     public toRegex(language: RegexDialect): string {
         const modifiers = this.usings.toRegex(language);
-        const regex = this.statements.map((x) => x.toRegex(language)).join("");
+        const regex = this.statements.map((x) => x.toRegex(language, null)).join("");
 
         return modifiers.replace("{regex}", regex);
     }
