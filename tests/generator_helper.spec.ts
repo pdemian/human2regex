@@ -30,6 +30,7 @@ describe("Generator helper functionality", function() {
             { from: "(abc)|d", to: "(?:(abc)|d)" },
             { from: "[abc\\]][abc]", to: "(?:[abc\\]][abc])" },
             { from: "(abc(abc)\\))(abc)", to: "(?:(abc(abc)\\))(abc))" },
+            { from: ".*", to: ".*" }
         ];
 
         for (const c of test_cases) {

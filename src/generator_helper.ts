@@ -13,13 +13,13 @@ import { first, isSingleRegexCharacter } from "./utilities";
  * @param arr the array of matches
  * @internal
  */
-export function minimizeMatchString(arr: string[]): string {
+export function minimizeMatchString(arr: string[], has_neighbours: boolean = false): string {
     // don't process an array of length 1, otherwise you'll get the wrong result
     if (arr.length === 1) {
         return first(arr);
     }
 
-    return minMatchString(arr, 0);
+    return minMatchString(arr, has_neighbours ? 1 : 0);
 }
 
 /**
@@ -118,6 +118,10 @@ function minMatchString(arr: string[], depth: number = 0): string {
  */
 export function groupIfRequired(fragment: string): string {
     if (isSingleRegexCharacter(fragment)) {
+        return fragment;
+    }
+    else if ((fragment[fragment.length-1] === "*" || fragment[fragment.length-1] === "+") &&
+        isSingleRegexCharacter(fragment.substring(0, fragment.length-1))) {
         return fragment;
     }
 

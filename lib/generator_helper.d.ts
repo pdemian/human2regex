@@ -5,7 +5,7 @@
  * @param arr the array of matches
  * @internal
  */
-export declare function minimizeMatchString(arr: string[]): string;
+export declare function minimizeMatchString(arr: string[], has_neighbours?: boolean): string;
 /**
  * Groups a regex fragment if it needs to be grouped
  *
