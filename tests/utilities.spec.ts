@@ -73,6 +73,7 @@ describe("Utility functions", function() {
 
     it("should escape regex correctly", function() {
         expect(regexEscape("")).toEqual("");
+        expect(regexEscape('\\"')).toEqual('"');
         expect(regexEscape("\\$")).toEqual("\\\\\\$");
         expect(regexEscape("^(.*)?\\?$")).toEqual("\\^\\(\\.\\*\\)\\?\\\\\\?\\$");
         expect(regexEscape("\\p{Latin}")).toEqual("\\\\p\\{Latin\\}");

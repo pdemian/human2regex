@@ -48,6 +48,11 @@ describe("Generator functionality", function() {
         const reg0 = parser.parse(toks0);
         expect(reg0.validate(RegexDialect.JS).length).toBe(0);
         expect(reg0.toRegex(RegexDialect.JS)).toBe("/<(?:\\w+|\\d|_|\\-)>/");
+
+        const toks1 = lexer.tokenize('match 1+ anything but "\\""').tokens;
+        const reg1 = parser.parse(toks1);
+        expect(reg1.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg1.toRegex(RegexDialect.JS)).toBe('/[^"]+/');
     });
 
     it("validates invalid regexes", function() {
