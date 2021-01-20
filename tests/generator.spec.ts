@@ -99,6 +99,16 @@ describe("Generator functionality", function() {
         const reg1 = parser.parse(toks1);
         expect(reg1.validate(RegexDialect.JS).length).toBe(0);
         expect(reg1.toRegex(RegexDialect.JS)).toBe("/[\\u0061-\\u007A]/");
+
+        const toks2 = lexer.tokenize('match "0"..."9" or "a".."z" or "A".."Z"').tokens;
+        const reg2 = parser.parse(toks2);
+        expect(reg2.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg2.toRegex(RegexDialect.JS)).toBe("/[0-9a-zA-Z]/");
+
+        const toks3 = lexer.tokenize('match "0" or "a".."z" or "A".."Z"').tokens;
+        const reg3 = parser.parse(toks3);
+        expect(reg3.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg3.toRegex(RegexDialect.JS)).toBe("/[0a-zA-Z]/");
     });
 
     it("handles specifiers", function() {
@@ -193,6 +203,16 @@ describe("Generator functionality", function() {
         const reg7 = parser.parse(toks7);
         expect(reg7.validate(RegexDialect.JS).length).toBe(0);
         expect(reg7.toRegex(RegexDialect.JS)).toBe("/[^>]*/");
+
+        const toks8 = lexer.tokenize('match "a" or "a"').tokens;
+        const reg8 = parser.parse(toks8);
+        expect(reg8.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg8.toRegex(RegexDialect.JS)).toBe("/a/");
+
+        const toks9 = lexer.tokenize('match "a".."z" or "a".."z"').tokens;
+        const reg9 = parser.parse(toks9);
+        expect(reg9.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg9.toRegex(RegexDialect.JS)).toBe("/[a-z]/");
     });
 
     it("can generate backreferences", function() {

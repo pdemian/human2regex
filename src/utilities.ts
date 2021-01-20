@@ -96,6 +96,35 @@ export function isSingleRegexCharacter(char: string): boolean {
 }
 
 /**
+ * Checks to see if the character is a range
+ * 
+ * @remarks a range is in the format of [X-Y] where X and Y are valid single regex characters
+ * 
+ * @param str the string to check
+ * @returns if the value is a regex range
+ * @internal
+ */
+export function isRangeRegex(str: string): boolean {
+    if (!str.startsWith("[") && !str.endsWith("]")) {
+        return false;
+    }
+
+    const split = str.substring(1, str.length-1).split("-");
+
+    if (split.length !== 2) {
+        return false;
+    }
+    
+    //hack: check to ensure that we aren't escaped
+    if (split[0].endsWith("\\") && split[0] !== "\\\\") {
+        return false;
+    }
+
+    // ensure the "-" wasn't escaped
+    return isSingleRegexCharacter(split[0]) && isSingleRegexCharacter(split[1]);
+}
+
+/**
  * Gets the first element of an array
  * @remarks does not validate if array has any elements
  * 

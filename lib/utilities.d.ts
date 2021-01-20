@@ -65,6 +65,16 @@ export declare function combineFlags(value: number, flag: number): number;
  */
 export declare function isSingleRegexCharacter(char: string): boolean;
 /**
+ * Checks to see if the character is a range
+ *
+ * @remarks a range is in the format of [X-Y] where X and Y are valid single regex characters
+ *
+ * @param str the string to check
+ * @returns if the value is a regex range
+ * @internal
+ */
+export declare function isRangeRegex(str: string): boolean;
+/**
  * Gets the first element of an array
  * @remarks does not validate if array has any elements
  *

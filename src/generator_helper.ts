@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 
-import { first, isSingleRegexCharacter } from "./utilities";
+import { first, isRangeRegex, isSingleRegexCharacter } from "./utilities";
 
 /**
  * Minimizes the match string by finding duplicates or substrings in the array
@@ -49,9 +49,10 @@ function minMatchString(arr: string[], depth: number = 0): string {
         return first(arr);
     }
 
-    // base case: arr is all single letters
-    if (arr.every(isSingleRegexCharacter)) {
-        return "[" + arr.join("") + "]";
+    // base case: arr is all single letters or ranges
+    if (arr.every((value) => isSingleRegexCharacter(value) || isRangeRegex(value))) {
+        // if range, don't forget to remove '[' and ']'
+        return "[" + arr.map((x) => isSingleRegexCharacter(x) ? x :x.substring(1, x.length-1)).join("") + "]";
     }
 
     // now the real magic begins

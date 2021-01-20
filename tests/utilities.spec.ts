@@ -1,7 +1,7 @@
 /*! Copyright (c) 2021 Patrick Demian; Licensed under MIT */
 
 import "../src/utilities";
-import { isSingleRegexCharacter, findLastIndex, removeQuotes, regexEscape, hasFlag, combineFlags, makeFlag, first, last, CommonError, append } from "../src/utilities";
+import { isSingleRegexCharacter, findLastIndex, removeQuotes, regexEscape, hasFlag, combineFlags, makeFlag, first, last, CommonError, append, isRangeRegex } from "../src/utilities";
 import { UsingFlags, ISemanticError } from "../src/generator";
 import { IRecognitionException, ILexingError, createTokenInstance } from "chevrotain";
 import { Indent } from "../src/tokens";
@@ -63,6 +63,18 @@ describe("Utility functions", function() {
         expect(isSingleRegexCharacter("\\U1")).toBe(false);
         expect(isSingleRegexCharacter("௹")).toBe(true);
         expect(isSingleRegexCharacter("💩")).toBe(false);
+    });
+
+    it("can determine if something is a range", function() {
+        expect(isRangeRegex("")).toBe(false);
+        expect(isRangeRegex("-3")).toBe(false);
+        expect(isRangeRegex("[]")).toBe(false);
+        expect(isRangeRegex("[-3]")).toBe(false);
+        expect(isRangeRegex("[a-z]")).toBe(true);
+        expect(isRangeRegex("[\\u1234-\\u1234]")).toBe(true);
+        expect(isRangeRegex("[௹-௹]")).toBe(true);
+        expect(isRangeRegex("[\\-3]")).toBe(false);
+        expect(isRangeRegex("[\\\\-3]")).toBe(true);
     });
 
     it("should remove quotes correctly", function() {
