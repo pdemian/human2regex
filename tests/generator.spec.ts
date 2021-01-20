@@ -41,6 +41,18 @@ describe("Generator functionality", function() {
         const reg3 = parser.parse(toks3);
         expect(reg3.validate(RegexDialect.JS).length).toBe(0);
         expect(reg3.toRegex(RegexDialect.JS)).toBe("/(?:(?:hello){3,5})?/");
+
+        const toks4 = lexer.tokenize('group test is\n\tmatch "hello"').tokens;
+        const reg4 = parser.parse(toks4);
+        expect(reg4.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg4.toRegex(RegexDialect.JS)).toBe("/(?<test>hello)/");
+
+        const toks5 = lexer.tokenize('optional group test is\n\tmatch "hello"').tokens;
+        const reg5 = parser.parse(toks5);
+        expect(reg5.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg5.toRegex(RegexDialect.JS)).toBe("/(?<test>hello)?/");
+
+        //(?<test>hello)?
     });
 
     it("generates an advanced regex", function() {

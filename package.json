@@ -1,6 +1,6 @@
 {
   "name": "human2regex",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "description": "Humanized Regular Expressions",
   "main": "./lib/index.js",
   "typings": "./lib/index.d.ts",

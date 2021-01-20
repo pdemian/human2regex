@@ -14,7 +14,11 @@ match "World"
 	match "Hello World"
 </code></pre><p>Will potentially match "Hello World" between 3 and 7 times. H2R also supports the following for numbers: <code class="cm-s-idea">One, Two, Three, Four, Five, Six, Seven, Eight, Nine, and Ten</code></p><br><p class="font-weight-bold" id="tut-grouping">8. Grouping</p><p>Just like regular expressions, capture groups are supported in H2R. Each group is defined using the <code class="cm-s-idea">create a group</code> keyphrase.</p><pre class="tutorial-code"><code class="cm-s-idea">create a group
 	match "Hello World"
+</code></pre><p>Or using the simplified syntax</p><pre class="tutorial-code"><code class="cm-s-idea">group
+	match "Hello World"
 </code></pre><p>This will create a non-named captured group, equivalent to the regular expression "/(Hello World)/". A non-named captured group will show up in your chosen language's matches, however will not be given a name. To access this match, you will need to know the index of the group. Most regular expression engines support named capture groups, and H2R highly recommends using this feature. If you wish to do so, simply give it a name:</p><pre class="tutorial-code"><code class="cm-s-idea">create a group called TestGroup
+	match "Hello World"
+</code></pre><p>Or using the simplified syntax</p><pre class="tutorial-code"><code class="cm-s-idea">group TestGroup is
 	match "Hello World"
 </code></pre><p>In most languages, a named group can be accessed through the match result's group list. Take for example, in JavaScript,</p><pre class="tutorial-code"><code class="cm-s-idea">"hello".match(/(?&lt;TestGroup&gt;hello)/).groups</code></pre><p>Will return an object with {TestGroup: "hello"}. For another example, check out <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/match#Using_named_capturing_groups">MDN web docs</a>. Groups can also be optional.</p><pre class="tutorial-code"><code class="cm-s-idea">create an optional group
 	match "Hello World"

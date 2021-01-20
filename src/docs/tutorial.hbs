@@ -274,8 +274,16 @@ match "World"
 {{p-code}}create a group
 	match "Hello World"
 {{end-p-code}}
+				<p>Or using the simplified syntax</p>
+{{p-code}}group
+	match "Hello World"
+{{end-p-code}}
 				<p>This will create a non-named captured group, equivalent to the regular expression "/(Hello World)/". A non-named captured group will show up in your chosen language's matches, however will not be given a name. To access this match, you will need to know the index of the group. Most regular expression engines support named capture groups, and H2R highly recommends using this feature. If you wish to do so, simply give it a name:</p>
 {{p-code}}create a group called TestGroup
+	match "Hello World"
+{{end-p-code}}
+				<p>Or using the simplified syntax</p>
+{{p-code}}group TestGroup is
 	match "Hello World"
 {{end-p-code}}
 				<p>In most languages, a named group can be accessed through the match result's group list. Take for example, in JavaScript,</p>

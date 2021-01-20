@@ -45,7 +45,7 @@ import { createToken, Lexer } from "chevrotain";
 /** @internal */ export const Tab = createToken({name: "Tab", pattern: /tab/i});
 /** @internal */ export const Linefeed = createToken({name: "Linefeed", pattern: /(line feed|linefeed)/i});
 /** @internal */ export const Group = createToken({name: "Group", pattern: /group/i});
-/** @internal */ export const A = createToken({name: "A", pattern: /a(n)?/i });
+/** @internal */ export const A = createToken({name: "A", pattern: /a(n)?\b/i });
 /** @internal */ export const Times = createToken({name: "Times", pattern: /times/i});
 /** @internal */ export const Exactly = createToken({name: "Exactly", pattern: /exact(ly)?/i});
 /** @internal */ export const Inclusive = createToken({name: "Inclusive", pattern: /inclusive(ly)?/i});
@@ -64,6 +64,7 @@ import { createToken, Lexer } from "chevrotain";
 /** @internal */ export const The = createToken({name: "The", pattern: /the/i });
 /** @internal */ export const If = createToken({name: "If", pattern: /if/i });
 /** @internal */ export const Else = createToken({name: "Else", pattern: /else|otherwise/i });
+/** @internal */ export const Is = createToken({name: "Is", pattern: /is|:/i });
 
 /** @internal */ export const EndOfLine = createToken({name: "EOL", pattern: /\n/});
 /** @internal */ export const WS = createToken({name: "Whitespace", pattern: /[^\S\n]+/, start_chars_hint: [ " ", "\r" ], group: Lexer.SKIPPED});
@@ -114,6 +115,7 @@ export const AllTokens = [
     Rerun,
     If,
     Else,
+    Is,
     The,
     Using,
     Global,

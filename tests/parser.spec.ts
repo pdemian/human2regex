@@ -41,6 +41,11 @@ describe("Parser capabilities", function() {
         expect(() => parser.parse(tokens)).not.toThrow();
         expect(parser.parse(tokens)).toBeInstanceOf(ParseResult);
         expect(parser.errors.length).toEqual(0);
+
+        tokens = lexer.tokenize('group test is\n\trepeat 3..five\n\t\toptionally match "-" or "$/()" then "^[]"').tokens;
+        expect(() => parser.parse(tokens)).not.toThrow();
+        expect(parser.parse(tokens)).toBeInstanceOf(ParseResult);
+        expect(parser.errors.length).toEqual(0);
     });
 
     it("fails to parse bad text", function() {
