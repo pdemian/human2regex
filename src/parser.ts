@@ -700,6 +700,7 @@ export class Human2RegexParser extends EmbeddedActionsParser {
         this.regexp = Regex;
     }
 
+    /* istanbul ignore next */
     /**
      * Sets the options for this parser
      * 
