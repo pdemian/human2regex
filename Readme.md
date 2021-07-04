@@ -3,6 +3,7 @@
 <div align="center">
 
   ![H2R logo](./src/docs/assets/favicon-small.png)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpdemian%2Fhuman2regex.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpdemian%2Fhuman2regex?ref=badge_shield)
 
   [![Build Status](https://travis-ci.com/pdemian/human2regex.svg?branch=master)](https://travis-ci.com/pdemian/human2regex)
   [![Codecov](https://codecov.io/gh/pdemian/human2regex/branch/master/graphs/badge.svg?branch=master)](https://codecov.io/gh/pdemian/human2regex)
@@ -17,6 +18,9 @@
 
 </div>
 
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpdemian%2Fhuman2regex.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpdemian%2Fhuman2regex?ref=badge_large)
 
 ## Purpose
 
