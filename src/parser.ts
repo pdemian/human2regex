@@ -8,7 +8,7 @@
 import { EmbeddedActionsParser, IOrAlt, IToken } from "chevrotain";
 import * as T from "./tokens";
 import { CountSubStatementCST, UsingFlags, MatchSubStatementType, MatchSubStatementValue, MatchSubStatementCST, UsingStatementCST, RegularExpressionCST, StatementCST, RepeatStatementCST, MatchStatementValue, MatchStatementCST, GroupStatementCST, RegexDialect, BackrefStatementCST, GeneratorContext, IfPatternStatementCST, IfIdentStatementCST } from "./generator";
-import { first, usefulConditional, unusedParameter, CommonError } from "./utilities";
+import { first, usefulConditional, CommonError } from "./utilities";
 
 /**
  * The options for the Parser
@@ -700,7 +700,6 @@ export class Human2RegexParser extends EmbeddedActionsParser {
         this.regexp = Regex;
     }
 
-    /* istanbul ignore next */
     /**
      * Sets the options for this parser
      * 
@@ -709,6 +708,6 @@ export class Human2RegexParser extends EmbeddedActionsParser {
      * @public
      */
     public setOptions(options: Human2RegexParserOptions): void {
-        unusedParameter(options, "skip_validations is not valid to change once we've already initialized");
+        throw new Error("skip_validations is not valid to change once we've already initialized");
     }
 }

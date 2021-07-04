@@ -13,7 +13,6 @@
 /** @internal */ export declare const Optional: import("chevrotain").TokenType;
 /** @internal */ export declare const Match: import("chevrotain").TokenType;
 /** @internal */ export declare const Then: import("chevrotain").TokenType;
-/** @internal */ export declare const Anything: import("chevrotain").TokenType;
 /** @internal */ export declare const Or: import("chevrotain").TokenType;
 /** @internal */ export declare const And: import("chevrotain").TokenType;
 /** @internal */ export declare const Word: import("chevrotain").TokenType;
@@ -32,6 +31,7 @@
 /** @internal */ export declare const Exact: import("chevrotain").TokenType;
 /** @internal */ export declare const Matching: import("chevrotain").TokenType;
 /** @internal */ export declare const Not: import("chevrotain").TokenType;
+/** @internal */ export declare const Anything: import("chevrotain").TokenType;
 /** @internal */ export declare const Between: import("chevrotain").TokenType;
 /** @internal */ export declare const Tab: import("chevrotain").TokenType;
 /** @internal */ export declare const Linefeed: import("chevrotain").TokenType;

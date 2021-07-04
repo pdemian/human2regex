@@ -222,7 +222,7 @@ export function dontClobberRepetition(fragment: string, repetition: string): str
         }
     }
     else {
-        fragment += repetition;
+        fragment = groupIfRequired(fragment) + repetition;
     }
 
     return fragment;

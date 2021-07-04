@@ -4,7 +4,6 @@ import { Human2RegexParser, Human2RegexParserOptions } from "../src/parser";
 import { Human2RegexLexer, Human2RegexLexerOptions } from "../src/lexer";
 import { RegexDialect } from "../src/generator";
 
-
 describe("Generator functionality", function() {
     const lexer = new Human2RegexLexer(new Human2RegexLexerOptions(true));
     const parser = new Human2RegexParser(new Human2RegexParserOptions(true));
@@ -51,8 +50,21 @@ describe("Generator functionality", function() {
         const reg5 = parser.parse(toks5);
         expect(reg5.validate(RegexDialect.JS).length).toBe(0);
         expect(reg5.toRegex(RegexDialect.JS)).toBe("/(?<test>hello)?/");
-
-        //(?<test>hello)?
+        
+        const toks6 = lexer.tokenize("match not anything").tokens;
+        const reg6 = parser.parse(toks6);
+        expect(reg6.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg6.toRegex(RegexDialect.JS)).toBe("/[^.]/");
+        
+        const toks7 = lexer.tokenize("match 2+ \"hello\"").tokens;
+        const reg7 = parser.parse(toks7);
+        expect(reg7.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg7.toRegex(RegexDialect.JS)).toBe("/(?:hello){2,}/");
+        
+        const toks8 = lexer.tokenize('optionally repeat\n\tmatch "hello"').tokens;
+        const reg8 = parser.parse(toks8);
+        expect(reg8.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg8.toRegex(RegexDialect.JS)).toBe("/(?:hello)*?/");
     });
 
     it("generates an advanced regex", function() {
@@ -99,6 +111,14 @@ describe("Generator functionality", function() {
         const toks7 = lexer.tokenize("rerun thing").tokens;
         const reg7 = parser.parse(toks7);
         expect(reg7.validate(RegexDialect.JS).length).toBeGreaterThan(0);
+        
+        const toks8 = lexer.tokenize("match 0 \"hello\"").tokens;
+        const reg8 = parser.parse(toks8);
+        expect(reg8.validate(RegexDialect.JS).length).toBeGreaterThan(0);
+        
+        const toks9 = lexer.tokenize('/*create a group called thing\n\tmatch "a"\n*/if thing\n\tmatch "b"\nelse\n\tmatch "c"\n').tokens;
+        const reg9 = parser.parse(toks9);
+        expect(reg9.validate(RegexDialect.PCRE).length).toBeGreaterThan(0);
     });
 
     it("handles ranges", function() {
@@ -121,6 +141,11 @@ describe("Generator functionality", function() {
         const reg3 = parser.parse(toks3);
         expect(reg3.validate(RegexDialect.JS).length).toBe(0);
         expect(reg3.toRegex(RegexDialect.JS)).toBe("/[0a-zA-Z]/");
+        
+        const toks4 = lexer.tokenize('match not "a" to "z"').tokens;
+        const reg4 = parser.parse(toks4);
+        expect(reg4.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg4.toRegex(RegexDialect.JS)).toBe("/[^a-z]/");
     });
 
     it("handles specifiers", function() {
@@ -228,14 +253,14 @@ describe("Generator functionality", function() {
     });
 
     it("can generate backreferences", function() {
-        const toks0 = lexer.tokenize('create a group called thing\n\tmatch "Hello World"\nrerun thing\noptionally recapture 3 times the group called thing').tokens;
+        const toks0 = lexer.tokenize('create a group called thing\n\tmatch "Hello World"\nrerun thing\noptionally recapture 3 times the group called thing\noptionally rerun thing').tokens;
         const reg0 = parser.parse(toks0);
         expect(reg0.validate(RegexDialect.JS).length).toBe(0);
 
-        expect(reg0.toRegex(RegexDialect.JS)).toBe("/(?<thing>Hello World)\\g<thing>(?:\\g<thing>{3})?/");
-        expect(reg0.toRegex(RegexDialect.PCRE)).toBe("/(?P<thing>Hello World)\\g<thing>(?:\\g<thing>{3})?/");
-        expect(reg0.toRegex(RegexDialect.Python)).toBe("/(?P<thing>Hello World)(?P=thing)(?:(?P=thing){3})?/");
-        expect(reg0.toRegex(RegexDialect.DotNet)).toBe("/(?<thing>Hello World)\\k<thing>(?:\\k<thing>{3})?/");
+        expect(reg0.toRegex(RegexDialect.JS)).toBe("/(?<thing>Hello World)\\g<thing>(?:\\g<thing>{3})?\\g<thing>?/");
+        expect(reg0.toRegex(RegexDialect.PCRE)).toBe("/(?P<thing>Hello World)\\g<thing>(?:\\g<thing>{3})?\\g<thing>?/");
+        expect(reg0.toRegex(RegexDialect.Python)).toBe("/(?P<thing>Hello World)(?P=thing)(?:(?P=thing){3})?(?P=thing)?/");
+        expect(reg0.toRegex(RegexDialect.DotNet)).toBe("/(?<thing>Hello World)\\k<thing>(?:\\k<thing>{3})?\\k<thing>?/");
     });
 
     it("can generate if statements", function() {
@@ -258,6 +283,13 @@ describe("Generator functionality", function() {
         expect(reg2.validate(RegexDialect.PCRE).length).toBe(0);
         expect(reg2.toRegex(RegexDialect.PCRE)).toBe("/(?P<thing>a)(?(thing)b|c)/");
         expect(reg2.toRegex(RegexDialect.Boost)).toBe("/(?<thing>a)(?(<thing>)b|c)/");
+
+        const toks3 = lexer.tokenize('create a group called thing\n\tmatch "a"\nif thing\n\tmatch "b"').tokens;
+        const reg3 = parser.parse(toks3);
+        expect(reg3.validate(RegexDialect.JS).length).toBeGreaterThan(0);
+        expect(reg3.validate(RegexDialect.PCRE).length).toBe(0);
+        expect(reg3.toRegex(RegexDialect.PCRE)).toBe("/(?P<thing>a)(?(thing)b)/");
+        expect(reg3.toRegex(RegexDialect.Boost)).toBe("/(?<thing>a)(?(<thing>)b)/");
     });
 
     it("generate dialect specific regex", function() {
@@ -284,6 +316,12 @@ describe("Generator functionality", function() {
         const reg1 = parser.parse(toks1);
         expect(reg1.validate(RegexDialect.DotNet).length).toBe(0);
         expect(reg1.toRegex(RegexDialect.DotNet)).toBe("/\\p{IsLatin}/");
+        
+        const toks2 = lexer.tokenize('match not unicode class "Latin"').tokens;
+        const reg2 = parser.parse(toks2);
+
+        expect(reg2.validate(RegexDialect.JS).length).toBe(0);
+        expect(reg2.toRegex(RegexDialect.JS)).toBe("/\\P{Latin}/");
     });
 
     it("runs complex scripts", function() {

@@ -78,7 +78,14 @@ module.exports = {
     },
     optimization: {
 		minimize: config.prod,
-        minimizer: [ new TerserPlugin({cache: true, parallel: true}), new OptimizeCSSAssetsPlugin({}) ]
+        minimizer: [ 
+			new TerserPlugin(
+				{
+					extractComments: false,
+					parallel: true
+				}
+			), 
+			new OptimizeCSSAssetsPlugin({}) ]
     },
     performance: {
         hints: false,

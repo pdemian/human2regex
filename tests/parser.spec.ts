@@ -11,6 +11,7 @@ describe("Parser capabilities", function() {
 
     it("validates", function() {
         expect(() => parser = new Human2RegexParser(new Human2RegexParserOptions(false))).not.toThrow();
+        expect(() => parser.setOptions(new Human2RegexParserOptions(true))).toThrow();
     });
 
     it("parses nothing", function() {

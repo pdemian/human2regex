@@ -4,7 +4,7 @@
 
   ![H2R logo](./src/docs/assets/favicon-small.png)
 
-  [![Build Status](https://travis-ci.org/pdemian/human2regex.svg?branch=master)](https://travis-ci.org/pdemian/human2regex)
+  [![Build Status](https://travis-ci.com/pdemian/human2regex.svg?branch=master)](https://travis-ci.com/pdemian/human2regex)
   [![Codecov](https://codecov.io/gh/pdemian/human2regex/branch/master/graphs/badge.svg?branch=master)](https://codecov.io/gh/pdemian/human2regex)
   [![LGTM Grade](https://img.shields.io/lgtm/grade/javascript/github/pdemian/human2regex)](https://lgtm.com/projects/g/pdemian/human2regex/)
   ![GitHub](https://img.shields.io/github/license/pdemian/human2regex)

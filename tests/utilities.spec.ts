@@ -3,7 +3,7 @@
 import "../src/utilities";
 import { isSingleRegexCharacter, findLastIndex, removeQuotes, regexEscape, hasFlag, combineFlags, makeFlag, first, last, CommonError, append, isRangeRegex } from "../src/utilities";
 import { UsingFlags, ISemanticError } from "../src/generator";
-import { IRecognitionException, ILexingError, createTokenInstance } from "chevrotain";
+import { IRecognitionException, ILexingError, createTokenInstance, IToken } from "chevrotain";
 import { Indent } from "../src/tokens";
 
 describe("Utility functions", function() {
@@ -115,6 +115,15 @@ describe("Utility functions", function() {
             resyncedTokens: [],
             context: { ruleStack: [], ruleOccurrenceStack: [] }
         };
+        
+        const par_error_unknown : IRecognitionException = {
+            name: "Recognition Exception",
+            message: "Mismatch at 0,0",
+            // eslint-disable-next-line no-magic-numbers
+            token: { tokenType: Indent, image: "\t", startOffset: 123, startLine: undefined, startColumn: undefined, endOffset: undefined, tokenTypeIdx: -1 } as IToken,
+            resyncedTokens: [],
+            context: { ruleStack: [], ruleOccurrenceStack: [] }
+        };
 
         const sem_error: ISemanticError = {
             startLine: 123,
@@ -126,6 +135,7 @@ describe("Utility functions", function() {
         expect(CommonError.fromLexError(lex_error)).toBeInstanceOf(CommonError);
         expect(CommonError.fromParseError(par_error)).toBeInstanceOf(CommonError);
         expect(CommonError.fromSemanticError(sem_error)).toBeInstanceOf(CommonError);
+        expect(CommonError.fromParseError(par_error_unknown)).toBeInstanceOf(CommonError);
 
         expect(() => CommonError.fromSemanticError(sem_error).toString()).not.toThrow();
         expect(CommonError.fromSemanticError(sem_error).toString()).not.toBeNull();

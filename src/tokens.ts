@@ -22,7 +22,7 @@ import { createToken, Lexer } from "chevrotain";
 /** @internal */ export const Optional = createToken({name: "Optional", pattern: /(optional(ly)?|possibl[ye]|maybe)/i});
 /** @internal */ export const Match = createToken({name: "Match", pattern: /match(es)?/i});
 /** @internal */ export const Then = createToken({name: "Then", pattern: /then/i});
-/** @internal */ export const Anything = createToken({name: "Anything", pattern: /(any thing|any|anything)(s)?/i});
+
 /** @internal */ export const Or = createToken({name: "Or", pattern: /or/i});
 /** @internal */ export const And = createToken({name: "And", pattern: /and|,/i});
 /** @internal */ export const Word = createToken({name: "WordSpecifier", pattern: /word(s)?/i});
@@ -41,6 +41,7 @@ import { createToken, Lexer } from "chevrotain";
 /** @internal */ export const Exact = createToken({name: "Exact", pattern: /exact/i});
 /** @internal */ export const Matching = createToken({name: "Matching", pattern: /matching/i});
 /** @internal */ export const Not = createToken({name: "Not", pattern: /not|anything but|any thing but|everything but|every thing but/i});
+/** @internal */ export const Anything = createToken({name: "Anything", pattern: /(anything|any thing|any|everything|every thing)(s)?/i, longer_alt: Not});
 /** @internal */ export const Between = createToken({name: "Between", pattern: /between/i});
 /** @internal */ export const Tab = createToken({name: "Tab", pattern: /tab/i});
 /** @internal */ export const Linefeed = createToken({name: "Linefeed", pattern: /(line feed|linefeed)/i});
@@ -69,7 +70,7 @@ import { createToken, Lexer } from "chevrotain";
 /** @internal */ export const EndOfLine = createToken({name: "EOL", pattern: /\n/});
 /** @internal */ export const WS = createToken({name: "Whitespace", pattern: /[^\S\n]+/, start_chars_hint: [ " ", "\r" ], group: Lexer.SKIPPED});
 /** @internal */ export const SingleLineComment = createToken({name: "SingleLineComment", pattern: /(#|\/\/).*/, group: Lexer.SKIPPED});
-/** @internal */ export const MultilineComment = createToken({name: "MultiLineComment", pattern: /\/\*(.*)\*\//, line_breaks: true, group: Lexer.SKIPPED});
+/** @internal */ export const MultilineComment = createToken({name: "MultiLineComment", pattern: /\/\*(.|\n|\r)*\*\//, line_breaks: true, group: Lexer.SKIPPED});
 
 /** @internal */ export const Identifier = createToken({name: "Identifier", pattern: /[a-z]\w*/i});
 /** @internal */ export const NumberLiteral = createToken({name: "NumberLiteral", pattern: /\d+/});
@@ -98,8 +99,8 @@ export const AllTokens = [
     Matching,
     Match,
     Then,
-    Not,
     Anything,
+    Not,
     And,
     Boundary,
     Word,

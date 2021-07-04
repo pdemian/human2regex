@@ -75,6 +75,7 @@
         "no-invalid-this": "error",
         "no-new": "error",
         "no-unmodified-loop-condition": "error",
+        "no-unused-expression": [ true, "allow-fast-null-checks" ],
         "init-declarations": [
             "error", 
             "always"

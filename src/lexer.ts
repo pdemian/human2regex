@@ -191,16 +191,17 @@ export class Human2RegexLexer {
                 else if (curr_indent_level < last(indent_stack)) {
                     const index = findLastIndex(indent_stack, curr_indent_level);
 
-                    if (index < 0) {
-                        lex_result.errors.push(this.lexError(start_token));
-                    }
-                    else {
-                        const number_of_dedents = indent_stack.length - index - 1;
-                    
-                        for (let j = 0; j < number_of_dedents; j++) {
-                            indent_stack.pop();
-                            tokens.push(createTokenInstance(Outdent, "", start_token.startOffset, start_token.startOffset + length, start_token.startLine ?? NaN, start_token.endLine ?? NaN, start_token.startColumn ?? NaN, (start_token.startColumn ?? NaN) + length));
-                        }
+                    // this will never happen since earlier up we exclude when you're too far ahead
+                    // you have to go in order, 1 by 1, thus you can never not be in the indent stack
+                    //if (index < 0) {
+                    //    lex_result.errors.push(this.lexError(start_token));
+                    //    continue;
+                    //}
+                    const number_of_dedents = indent_stack.length - index - 1;
+                
+                    for (let j = 0; j < number_of_dedents; j++) {
+                        indent_stack.pop();
+                        tokens.push(createTokenInstance(Outdent, "", start_token.startOffset, start_token.startOffset + length, start_token.startLine ?? NaN, start_token.endLine ?? NaN, start_token.startColumn ?? NaN, (start_token.startColumn ?? NaN) + length));
                     }
                 }
                 else {

@@ -539,7 +539,10 @@ export class CountSubStatementCST extends H2RCST {
         const errors: ISemanticError[] = [];
 
         if (this.to !== null && ((this.opt === "exclusive" && (this.to-1) <= this.from) || this.to <= this.from)) {
-            errors.push(this.error("Values must be in range of eachother"));
+            errors.push(this.error("Values must be in range of each other"));
+        }
+        else if(this.to === null && this.from === 0 && this.opt === null) {
+            errors.push(this.error("Count cannot be 0. This will match nothing. Use comments if you meant to ignore the next match."));
         }
 
         return errors;
@@ -563,7 +566,9 @@ export class CountSubStatementCST extends H2RCST {
                 }
             }
             else if (from === 0) {
-                return this.opt === "+" ? "*" : "{0}";
+                // This will never return {0} as we validate against it
+                //return this.opt === "+" ? "*" : "{0}";
+                return "*";
             }
         }
 
@@ -805,7 +810,7 @@ export class BackrefStatementCST extends StatementCST {
             }
         }
         else if (this.optional) {
-            str = "?";
+            str += "?";
         }
 
         return str;

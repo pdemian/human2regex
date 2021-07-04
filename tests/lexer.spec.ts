@@ -8,12 +8,17 @@ describe("Lexer capabilities", function() {
 
     it("validates", function() {
         expect(() => lexer.setOptions(new Human2RegexLexerOptions(false, IndentType.Both))).not.toThrow();
+        expect(() => new Human2RegexLexer(new Human2RegexLexerOptions(true))).toThrow();
     });
 
     it("parses nothing", function() {
         expect(() => lexer.tokenize("")).not.toThrow();
         expect(lexer.tokenize("").errors).toHaveLength(0);
         expect(lexer.tokenize("").tokens).toHaveLength(0);
+
+        expect(() => lexer.tokenize("/*create a group called thing\n*/")).not.toThrow();
+        expect(lexer.tokenize("/*create a group called thing\n*/").errors).toHaveLength(0);
+        expect(lexer.tokenize("/*create a group called thing\n*/").tokens).toHaveLength(0);
 
         expect(() => lexer.tokenize("\n/* hello world */\n")).not.toThrow();
         expect(lexer.tokenize("\n/* hello world */\n").errors).toHaveLength(0);
