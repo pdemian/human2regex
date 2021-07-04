@@ -96,7 +96,7 @@ module.exports = {
         new CleanWebpackPlugin({verbose:true, protectWebpackAssets: false}),
         new CopyPlugin({
             patterns: [
-                { from: config.src + "docs/" + "assets/" + "!(*.css|*.hbs)", to: "", flatten: true}
+                { from: config.src + "docs/" + "assets/" + "!(*.css|*.hbs)", to: "[name][ext]" }
             ]
         }),
         new MiniCssExtractPlugin({ filename: "bundle.min.css" }),
